@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+/* 共通ページ背景: 黄色ベース + 白の水玉模様 */
+@utility bg-page-pattern {
+  background-color: #f0f380;
+  background-image: radial-gradient(circle, #fff 2px, transparent 2px);
+  background-size: 20px 20px;
+}
+
+/* トップページ用: SVG背景 + 白の水玉オーバーレイ */
+@utility bg-top-pattern {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 4px),
+    url('/images/bg-pattern.svg');
+  background-size: 16px 16px, cover;
+  background-position: 0 0, center;
+  background-repeat: repeat, no-repeat;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
