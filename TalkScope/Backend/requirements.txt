@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+psycopg2-binary
+sqlalchemy
+sqlalchemy-cockroachdb
+pgvector
+httpx
+sudachipy
+sudachidict-core
+spacy
+ginza
+ja-ginza
