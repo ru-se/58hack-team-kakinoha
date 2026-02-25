@@ -3,9 +3,11 @@ import random
 import time
 import threading
 import asyncio
+import uuid
 import uvicorn
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from collections import deque
 import ble_test
 import subprocess
 from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect, HTTPException
@@ -286,6 +288,68 @@ class PlanRequest(BaseModel):
     date: Optional[str] = None   # 予定日付 "YYYY-MM-DD"
     time: Optional[str] = None   # 予定時刻 "HH:MM"
     task: Optional[str] = None   # 予定名
+
+
+class TestPingRequest(BaseModel):
+    trace_id: str
+    source: str = "discord_bot"
+    discord_user_id: Optional[str] = None
+
+
+test_ping_history = deque(maxlen=100)
+test_ping_lock = threading.Lock()
+
+
+@app.post("/api/test/ping")
+def receive_test_ping(req: TestPingRequest):
+    try:
+        uuid.UUID(req.trace_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="trace_id must be UUID format")
+
+    entry = {
+        "trace_id": req.trace_id,
+        "source": req.source,
+        "discord_user_id": req.discord_user_id,
+        "received_at": datetime.utcnow().isoformat() + "Z",
+    }
+
+    with test_ping_lock:
+        test_ping_history.append(entry)
+
+    print(
+        "🧪 [TEST PING] "
+        f"trace_id={req.trace_id} source={req.source} discord_user_id={req.discord_user_id}"
+    )
+
+    return {"status": "ok", "message": "test ping received", "trace_id": req.trace_id}
+
+
+@app.get("/api/test/ping/latest")
+def latest_test_ping():
+    with test_ping_lock:
+        latest = test_ping_history[-1] if test_ping_history else None
+
+    if not latest:
+        return {"status": "empty", "message": "no test ping received yet"}
+
+    return {"status": "ok", "latest": latest, "count": len(test_ping_history)}
+
+
+@app.get("/api/test/ping/{trace_id}")
+def check_test_ping(trace_id: str):
+    with test_ping_lock:
+        matched = next((row for row in test_ping_history if row["trace_id"] == trace_id), None)
+
+    if not matched:
+        return {"status": "not_found", "trace_id": trace_id, "received": False}
+
+    return {
+        "status": "found",
+        "trace_id": trace_id,
+        "received": True,
+        "entry": matched,
+    }
 
 @app.post("/api/schedules/")
 def create_schedule_from_mentions(req: schemas.ScheduleCreate, db: Session = Depends(get_db)):

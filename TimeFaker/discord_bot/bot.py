@@ -3,6 +3,7 @@ import asyncio
 from discord.ext import commands
 import requests
 import os
+import uuid
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -23,6 +24,35 @@ async def on_ready():
     print(f'✅ Botがログインしました: {bot.user}')
     print(f'接続先API: {API_BASE_URL}/api/plan/')
     print(f"登録コマンド: {', '.join(sorted(c.name for c in bot.commands))}")
+
+
+@bot.command()
+async def test(ctx):
+    """
+    !test
+    BotからAPIサーバー（Docker側）へ疎通確認を行う。
+    """
+    trace_id = str(uuid.uuid4())
+    url = f"{API_BASE_URL}/api/test/ping"
+
+    payload = {
+        "trace_id": trace_id,
+        "discord_user_id": str(ctx.author.id),
+        "source": "discord_bot",
+    }
+
+    try:
+        response = await asyncio.to_thread(requests.post, url, json=payload, timeout=10)
+        if response.status_code == 200:
+            await ctx.send(
+                "✅ Docker側APIへ送信できました。\n"
+                f"trace_id: `{trace_id}`\n"
+                f"確認URL: `{API_BASE_URL}/api/test/ping/{trace_id}`"
+            )
+        else:
+            await ctx.send(f"⚠️ 送信失敗（status={response.status_code}）")
+    except Exception as e:
+        await ctx.send(f"❌ テスト送信エラー: {e}")
 
 # コマンド: !plan @user1 @user2 YYYY-MM-DD HH:MM 予定名
 @bot.command()

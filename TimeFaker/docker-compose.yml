@@ -6,7 +6,8 @@ services:
     env_file:
       - .env
     privileged: true
-    network_mode: "host"
+    ports:
+      - "8000:8000"
     volumes:
       - /var/run/dbus:/var/run/dbus
     restart: always

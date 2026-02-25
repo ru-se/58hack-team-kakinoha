@@ -67,6 +67,40 @@ cd discord_bot
 python bot.py
 ```
 
+### 5. 疎通テスト（`!test`）
+
+DiscordでBotに `!test` を送ると、BotがAPIサーバーへテスト用のpingを送信します。
+
+- Botの返信に `trace_id` が表示されます
+- その `trace_id` を使って Docker 側で受信確認できます
+
+例:
+
+```text
+!test
+→ ✅ Docker側APIへ送信できました。
+   trace_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+   確認URL: http://127.0.0.1:8000/api/test/ping/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+Dockerログ確認:
+
+```bash
+docker compose logs -f engineer-hub
+```
+
+APIで受信確認:
+
+```bash
+curl http://127.0.0.1:8000/api/test/ping/<trace_id>
+```
+
+最新1件の確認:
+
+```bash
+curl http://127.0.0.1:8000/api/test/ping/latest
+```
+
 ## 🔑 .envファイルの設定
 
 ```text
