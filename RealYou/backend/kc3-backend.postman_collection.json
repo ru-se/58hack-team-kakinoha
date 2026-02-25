@@ -1,0 +1,153 @@
+{
+    "info": {
+        "_postman_id": "kc3-backend-api",
+        "name": "KC3 Hack Backend API",
+        "description": "Collection for testing KC3 Hack 2026 Team 6 Backend API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Register User",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "var jsonData = pm.response.json();",
+                            "pm.environment.set(\"user_id\", jsonData.user_id);"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"mbti\": \"INTJ\",\n    \"baseline_answers\": {\n        \"q1_caution\": \"A\",\n        \"q2_calmness\": \"D\",\n        \"q3_logic\": \"B\",\n        \"q4_cooperativeness\": \"C\",\n        \"q5_positivity\": \"A\"\n    }\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/register",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "register"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "2. Submit Game 1 (Tap)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"user_id\": \"{{user_id}}\",\n    \"game_type\": 1,\n    \"data\": {\n        \"score\": 100,\n        \"tap_count\": 50,\n        \"miss_count\": 2\n    }\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/games/submit",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "games",
+                        "submit"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "3. Submit Game 2 (Choice)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"user_id\": \"{{user_id}}\",\n    \"game_type\": 2,\n    \"data\": {\n        \"choice_history\": [\"A\", \"B\", \"A\"],\n        \"reaction_times\": [300, 450, 320]\n    }\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/games/submit",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "games",
+                        "submit"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "4. Get Results",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/results/{{user_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "results",
+                        "{{user_id}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "5. Voice Response",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"message\": \"こんにちは！調子はどうですか？\",\n    \"scenario_type\": \"normal\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/voice/respond",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "voice",
+                        "respond"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3001/api"
+        }
+    ]
+}
