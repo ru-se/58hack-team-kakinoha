@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html class="dark" lang="ja">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Raspberry Pi操作画面</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;family=Noto+Sans+JP:wght@400;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#E30613", // Raspberry Pi Red
+                        "background-dark": "#000000",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "Noto+Sans+JP", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                    },
+                },
+            },
+        };
+    </script>
+    <style type="text/tailwindcss">
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-color: #000000;
+        }
+        .logo-font {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-black min-h-screen flex flex-col items-center justify-center p-6">
+    <div class="w-full max-w-md flex flex-col">
+        <div class="flex justify-center mb-10">
+            <h1 class="text-4xl text-white logo-font italic">Raspberry Pi</h1>
+        </div>
+        <div class="border-2 border-white p-8 rounded-2xl bg-black">
+            <div class="mb-8 text-center">
+                <p class="text-xl font-bold text-white leading-relaxed">
+                    Raspberry Pi をセットアップ
+                </p>
+                <p class="text-sm text-gray-400 mt-2">
+                    デバイス情報を入力してください。
+                </p>
+            </div>
+            <div class="space-y-5">
+                <div class="relative">
+                    <span
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">person</span>
+                    <input id="discord_id"
+                        class="w-full bg-transparent border-2 border-gray-600 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-0 transition-colors"
+                        placeholder="ユーザー名" type="text" />
+                </div>
+                <div class="relative">
+                    <span
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">wifi</span>
+                    <select id="ssid"
+                        class="w-full bg-transparent border-2 border-gray-600 rounded-xl py-4 pl-12 pr-10 text-white focus:outline-none focus:border-primary focus:ring-0 transition-colors">
+                        <option value="">Wi-Fiを読み込み中...</option>
+                    </select>
+                </div>
+                <p id="wifi_error" class="text-xs text-red-400 mt-1 break-all"></p>
+                <div class="relative">
+                    <span
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">lock</span>
+                    <input id="password"
+                        class="w-full bg-transparent border-2 border-gray-600 rounded-xl py-4 pl-12 pr-12 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-0 transition-colors"
+                        placeholder="Wi-Fiパスワード" type="password" />
+                    <span
+                        class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-white transition-colors">visibility_off</span>
+                </div>
+                <div class="relative">
+                    <span
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">smartphone</span>
+                    <input id="mdm_device_id"
+                        class="w-full bg-transparent border-2 border-gray-600 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-0 transition-colors"
+                        placeholder="MDM Device ID（数字のみ）" type="text"
+                        inputmode="numeric" pattern="[0-9]*"
+                        oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+                </div>
+            </div>
+            <button id="send_button"
+                class="w-full bg-primary hover:bg-red-700 text-white font-bold py-4 rounded-xl mt-10 transition-all active:scale-[0.98]">
+                送信
+            </button>
+            <button class="w-full text-center text-gray-400 font-medium mt-6 hover:text-white transition-colors">
+                キャンセル
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function loadWifiSsids() {
+            const ssidSelect = document.getElementById('ssid');
+            const wifiError = document.getElementById('wifi_error');
+            wifiError.textContent = '';
+
+            try {
+                const res = await fetch('/api/wifi/ssids');
+
+                if (!res.ok) {
+                    // エラーボディも表示
+                    const text = await res.text();
+                    throw new Error(`status=${res.status}, body=${text}`);
+                }
+
+                const body = await res.json();
+                const ssids = body.ssids || [];
+
+                ssidSelect.innerHTML = '';
+                if (ssids.length === 0) {
+                    ssidSelect.innerHTML = '<option value="">利用可能なWi-Fiが見つかりません</option>';
+                    wifiError.textContent = 'SSID一覧は取得できましたが、表示対象が0件です。';
+                    return;
+                }
+
+                ssidSelect.innerHTML = '<option value="">Wi-Fiを選択してください</option>';
+                for (const s of ssids) {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    ssidSelect.appendChild(opt);
+                }
+            } catch (e) {
+                console.error('SSID取得エラー:', e);
+                ssidSelect.innerHTML = '<option value="">Wi-Fi取得に失敗しました</option>';
+                wifiError.textContent = `SSID取得エラー: ${e?.message || e}`;
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadWifiSsids);
+
+        document.getElementById('send_button').addEventListener('click', async () => {
+            const discordId = document.getElementById('discord_id').value;
+            const ssid = document.getElementById('ssid').value;
+            const password = document.getElementById('password').value;
+            const mdmDeviceId = document.getElementById('mdm_device_id').value.replace(/\D/g, '');
+
+            if (!ssid) {
+                alert("Wi-Fiを選択してください。");
+                return;
+            }
+
+            if (!mdmDeviceId) {
+                alert("MDM Device ID は数字で入力してください。");
+                return;
+            }
+
+            // Web側の送信イメージ（Webチームへの共有用）
+            const data = {
+                ssid: ssid,
+                password: password,
+                discord_id: discordId,
+                mdm_device_id: mdmDeviceId
+            };
+
+            // JSON文字列にして送信
+            const encoder = new TextEncoder();
+            const encodedData = encoder.encode(JSON.stringify(data));
+
+            console.log("送信データ(JSON):", JSON.stringify(data));
+            console.log("エンコードされたデータ:", encodedData);
+
+            // BLE接続とデータ送信
+            const SERVICE_UUID = "a07498ca-ad5b-474e-940d-16f1fbe7e8cd";
+            const CHAR_UUID = "51ff12bb-3ed8-46e5-b4f9-d64e2fec021b";
+
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ name: "TimeHacker" }],
+                    optionalServices: [SERVICE_UUID]
+                });
+
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService(SERVICE_UUID);
+                const characteristic = await service.getCharacteristic(CHAR_UUID);
+
+                await characteristic.writeValue(encodedData);
+                alert("送信しました！");
+
+                // 切断（必要に応じて）
+                if (device.gatt.connected) {
+                    device.gatt.disconnect();
+                }
+
+            } catch (error) {
+                console.error("Bluetooth Error:", error);
+                alert("送信に失敗しました: " + error);
+            }
+        });
+    </script>
+</body>
+
+</html>
