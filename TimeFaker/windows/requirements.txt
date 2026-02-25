@@ -1,0 +1,4 @@
+websockets
+pywin32
+ntplib
+python-dotenv

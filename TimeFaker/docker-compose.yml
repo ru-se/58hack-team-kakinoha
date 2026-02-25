@@ -1,0 +1,12 @@
+services:
+  # --- 既存のFastAPIサーバー ---
+  engineer-hub:
+    build: .
+    container_name: engineer-hub-server
+    env_file:
+      - .env
+    privileged: true
+    network_mode: "host"
+    volumes:
+      - /var/run/dbus:/var/run/dbus
+    restart: always
