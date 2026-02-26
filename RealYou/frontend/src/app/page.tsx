@@ -102,7 +102,7 @@ export default function TopPage() {
     }
 
     setTimeout(() => {
-      router.push('/games/terms');
+      router.push('/games/group-chat');
     }, 800);
 
     setTimeout(() => {
