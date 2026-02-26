@@ -75,7 +75,7 @@ export default function GroupChatGameFlow() {
         setSubmitStatus('success');
         bgmRef.current?.pause();
         setTimeout(() => {
-          router.push('/result');
+          router.push('/quiz');
         }, 2000);
       } catch {
         setSubmitStatus('error');
