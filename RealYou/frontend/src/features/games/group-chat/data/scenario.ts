@@ -6,28 +6,34 @@
  * このファイルだけ編集すれば、グループチャットゲームの
  * テキスト・選択肢・キャラクター・グループ設定をすべて変更できます。
  *
- * ⚠️ ルール（重要）
- * ---------------------------------------------------------
- * 【選択肢の並び順ルール】
- *   options[0], options[1] = 「協調的」な選択肢
- *     → 多数派に合わせる・場の空気を読む・相手を立てる行動
- *   options[2], options[3] = 「独自性」の選択肢
- *     → 自分の意見を通す・空気を読まない・関わらない行動
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * ⚠️ 編集ルール
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  *
- *   バックエンドの scoreCalculator が
- *   selectedOptionId 1, 2 を「協調」と判定します。
- *   この並び順を変えるとスコアが正しく計算されません！
+ * 【選択肢の数】
+ *   各ステージの options は何個でも追加できます（2〜6つ推奨）。
+ *   UIのグリッド列数は自動で調整されます。
  *
- * 【ステージ数のルール】
- *   STAGES の配列の長さが total ステージ数になります。
- *   stages.ts の TOTAL_STAGES と必ず一致させてください。
+ * 【選択肢の type】
+ *   各選択肢に type: 'cooperative' | 'independent' を指定します。
+ *   'cooperative'  → 多数派・空気を読む行動
+ *   'independent'  → 自分の意見・空気を読まない行動
  *
- * 【typingIndicator のルール】
- *   trackTypingIndicator: true にすると、全メッセージ表示後に
- *   「○○が返信中...」インジケータが表示されます。
- *   typingBotId には BOTS の id を指定してください。
- *   ※ スコア計算に使うタイミング計測はステージ3のみが対象です。
- * ---------------------------------------------------------
+ * 【cooperativeCount】
+ *   バックエンドのスコア計算は「先頭N個が協調」として判定します。
+ *   cooperative な選択肢を必ず先頭にまとめ、
+ *   cooperativeCount にその個数を指定してください。
+ *   例: cooperative×2 + independent×2 の場合 → cooperativeCount: 2
+ *
+ * 【ステージ数】
+ *   SCENARIO_STAGES の配列要素を増減するだけでステージ数が変わります。
+ *   stages.ts の TOTAL_STAGES は自動で更新されます（編集不要）。
+ *
+ * 【typingBotId】
+ *   trackTypingIndicator: true のとき表示するBotを SCENARIO_BOTS の
+ *   id で指定します（false なら null）。
+ *   ※ スコア計算に使う反応時間の計測対象はステージ3のみです。
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  */
 
 import type { BotCharacter, StageDefinition } from './stages';
@@ -45,10 +51,10 @@ export const SCENARIO_GROUP_MEMBER_COUNT = 5;
 // ============================================================
 // 🧑‍🤝‍🧑 ボットキャラクター定義
 // ============================================================
-// id   : stagesのmessages / typingBotId から参照するキー（変更時は下の STAGES も合わせて変更）
-// name : 「○○が返信中」やアバター下に表示される名前
-// avatarLabel : アバター円の中に表示される1〜2文字
-// color       : Tailwind CSS クラス（背景色+テキスト色）
+// id          : messages / typingBotId から参照するキー
+// name        : 「○○が返信中」やアバター下の名前
+// avatarLabel : アバター円に表示する1〜2文字
+// color       : Tailwind CSS クラス（例: 'bg-red-500 text-white'）
 
 export const SCENARIO_BOTS: BotCharacter[] = [
     {
@@ -74,21 +80,11 @@ export const SCENARIO_BOTS: BotCharacter[] = [
 // ============================================================
 // 🎬 ステージ定義
 // ============================================================
-// stageId        : 1〜N の連番（変更しない）
-// theme          : このステージのテーマ名（デバッグ用・画面には表示されない）
-// dayLabel       : ステージ区切りに表示される日付ラベル（例: "DAY 1"）
-// messages       : Botが順番に送るチャットメッセージの配列
-//   - botId      : SCENARIO_BOTS の id を指定
-//   - text       : 表示するメッセージ（絵文字も使用可）
-// options        : ユーザーに提示する選択肢（必ず4つ）
-//   - emoji      : ボタンに表示する絵文字
-//   - label      : ボタンに表示するテキスト（空文字にすると絵文字のみ表示）
-// trackTypingIndicator : true = 全メッセージ後に「返信中...」を表示
-// typingBotId    : trackTypingIndicator が true のとき表示するBot（falseなら null）
 
 export const SCENARIO_STAGES: StageDefinition[] = [
     // ----------------------------------------------------------
     // ステージ1: 沈黙（幹事の募集）
+    // 選択肢4つ: cooperative×2, independent×2
     // ----------------------------------------------------------
     {
         stageId: 1,
@@ -101,17 +97,19 @@ export const SCENARIO_STAGES: StageDefinition[] = [
             },
         ],
         options: [
-            { emoji: '🙋', label: 'やります！' },           // 協調: 場の空気に応えて引き受ける
-            { emoji: '👀', label: '（様子を見る）' },        // 協調: 波風立てず待つ
-            { emoji: '👉', label: '○○さんどう？' },          // 独自: 自分から他者を指名
-            { emoji: '😑', label: '既読スルー' },            // 独自: 関わらない
+            { emoji: '🙋', label: 'やります！', type: 'cooperative' },
+            { emoji: '👀', label: '（様子を見る）', type: 'cooperative' },
+            { emoji: '👉', label: '○○さんどう？', type: 'independent' },
+            { emoji: '😑', label: '既読スルー', type: 'independent' },
         ],
+        cooperativeCount: 2,
         trackTypingIndicator: false,
         typingBotId: null,
     },
 
     // ----------------------------------------------------------
     // ステージ2: 祝賀（スタンプの同調）
+    // 選択肢4つ: cooperative×2, independent×2
     // ----------------------------------------------------------
     {
         stageId: 2,
@@ -123,17 +121,19 @@ export const SCENARIO_STAGES: StageDefinition[] = [
             { botId: 'colleague', text: '🎉' },
         ],
         options: [
-            { emoji: '🎉', label: '' },  // 協調: みんなと同じスタンプ
-            { emoji: '🎊', label: '' },  // 協調: 祝賀の同系統スタンプ
-            { emoji: '👍', label: '' },  // 独自: 雰囲気と違うスタンプ
-            { emoji: '😑', label: '' },  // 独自: 既読スルー
+            { emoji: '🎉', label: '', type: 'cooperative' },
+            { emoji: '🎊', label: '', type: 'cooperative' },
+            { emoji: '👍', label: '', type: 'independent' },
+            { emoji: '😑', label: '', type: 'independent' },
         ],
+        cooperativeCount: 2,
         trackTypingIndicator: false,
         typingBotId: null,
     },
 
     // ----------------------------------------------------------
     // ステージ3: 衝突（方針について意見を求められる）
+    // 選択肢4つ: cooperative×2, independent×2
     // ※ typingIndicator の反応時間がスコア計算に使われる唯一のステージ
     // ----------------------------------------------------------
     {
@@ -144,17 +144,19 @@ export const SCENARIO_STAGES: StageDefinition[] = [
             { botId: 'boss', text: '次のプロジェクトの方針、みんなどう思う？' },
         ],
         options: [
-            { emoji: '🤝', label: '先輩の意見を聞きたいです' },    // 協調: 相手を立てる返信
-            { emoji: '👀', label: '自分もそう思います' },           // 協調: 同調する返信
-            { emoji: '💬', label: '自分はこう思います！' },         // 独自: 自分の意見を主張する返信
-            { emoji: '🤔', label: 'そもそも方針って必要？' },       // 独自: 場の流れに逆らう返信
+            { emoji: '🤝', label: '先輩の意見を聞きたいです', type: 'cooperative' },
+            { emoji: '👀', label: '自分もそう思います', type: 'cooperative' },
+            { emoji: '💬', label: '自分はこう思います！', type: 'independent' },
+            { emoji: '🤔', label: 'そもそも方針って必要？', type: 'independent' },
         ],
+        cooperativeCount: 2,
         trackTypingIndicator: true,
         typingBotId: 'senpai',
     },
 
     // ----------------------------------------------------------
     // ステージ4: 食事（ランチの多数決）
+    // 選択肢4つ: cooperative×2, independent×2
     // ----------------------------------------------------------
     {
         stageId: 4,
@@ -166,17 +168,19 @@ export const SCENARIO_STAGES: StageDefinition[] = [
             { botId: 'boss', text: '俺もカレーで！' },
         ],
         options: [
-            { emoji: '🍛', label: 'カレーで！' },            // 協調: みんなと同じ
-            { emoji: '😊', label: 'なんでもいいです！' },    // 協調: 合わせる姿勢
-            { emoji: '🍜', label: 'ラーメンで！' },          // 独自: 自分の好み
-            { emoji: '🍝', label: 'パスタで！' },            // 独自: 自分の好み
+            { emoji: '🍛', label: 'カレーで！', type: 'cooperative' },
+            { emoji: '😊', label: 'なんでもいいです！', type: 'cooperative' },
+            { emoji: '🍜', label: 'ラーメンで！', type: 'independent' },
+            { emoji: '🍝', label: 'パスタで！', type: 'independent' },
         ],
+        cooperativeCount: 2,
         trackTypingIndicator: false,
         typingBotId: null,
     },
 
     // ----------------------------------------------------------
     // ステージ5: 退室（お疲れ様の挨拶）
+    // 選択肢4つ: cooperative×2, independent×2
     // ----------------------------------------------------------
     {
         stageId: 5,
@@ -187,11 +191,12 @@ export const SCENARIO_STAGES: StageDefinition[] = [
             { botId: 'senpai', text: 'お疲れ様でした！' },
         ],
         options: [
-            { emoji: '👋', label: 'すぐ「お疲れ様」を送る' },          // 協調: 流れに合わせてすぐ返す
-            { emoji: '⏳', label: '少し待ってから送る' },               // 協調: タイミングを見て合わせる
-            { emoji: '🚪', label: '無言で退室する' },                  // 独自: 挨拶なしで抜ける
-            { emoji: '🙄', label: 'スルーして別の話をする' },          // 独自: 空気を読まない
+            { emoji: '👋', label: 'すぐ「お疲れ様」を送る', type: 'cooperative' },
+            { emoji: '⏳', label: '少し待ってから送る', type: 'cooperative' },
+            { emoji: '🚪', label: '無言で退室する', type: 'independent' },
+            { emoji: '🙄', label: 'スルーして別の話をする', type: 'independent' },
         ],
+        cooperativeCount: 2,
         trackTypingIndicator: true,
         typingBotId: 'colleague',
     },

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Game3Data } from '@/features/games/types';
-import { BOTS } from '../data/stages';
+import { BOTS, STAGES } from '../data/stages';
 import { useGroupChatGame } from '../hooks/useGroupChatGame';
 import { submitGame } from '@/lib/api';
 import Spinner from '@/components/ui/Spinner';
@@ -191,9 +191,9 @@ export default function GroupChatGameFlow() {
               場面{currentStageIndex + 1}
             </p>
             <p className="mt-2 text-lg font-bold tracking-widest text-amber-300">
-              {['First', 'Second', 'Third', 'Fourth', 'Final'][
-                currentStageIndex
-              ] ?? 'Unknown'}{' '}
+              {currentStageIndex === STAGES.length - 1
+                ? 'Final'
+                : `${currentStageIndex + 1} / ${STAGES.length}`}{' '}
               Situation!
             </p>
           </div>
@@ -357,7 +357,12 @@ export default function GroupChatGameFlow() {
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-4 gap-3">
+                  <div
+                    className="grid gap-3"
+                    style={{
+                      gridTemplateColumns: `repeat(${Math.min(currentStage.options.length, 5)}, minmax(0, 1fr))`,
+                    }}
+                  >
                     {currentStage.options.map((opt, idx) => (
                       <button
                         key={idx}
