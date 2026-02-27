@@ -7,10 +7,11 @@ import uuid
 import requests
 import uvicorn
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone, time as dt_time
 from collections import deque
 import ble_test
 import subprocess
+from zoneinfo import ZoneInfo
 from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -43,6 +44,7 @@ DEFAULT_REVIEW_NOTIFY_DAYS_AFTER = 1
 DEFAULT_REVIEW_NOTIFY_HOUR_24 = 21
 SETTING_KEY_REVIEW_NOTIFY_DAYS_AFTER = "review_notify_days_after"
 SETTING_KEY_REVIEW_NOTIFY_HOUR_24 = "review_notify_hour_24"
+TOKYO_TZ = ZoneInfo("Asia/Tokyo")
 
 # DBテーブル作成
 models.Base.metadata.create_all(bind=engine)
@@ -244,6 +246,73 @@ async def midnight_attack():
     print("🕛 深夜0時です。タイムリープ（Googleカレンダー連動）を開始します...")
     await attack_users_with_calendar()
 
+
+def normalize_generated_at_to_tokyo(dt: datetime) -> datetime:
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=TOKYO_TZ)
+    return dt.astimezone(TOKYO_TZ)
+
+
+def compute_scheduled_for_utc(generated_at: datetime, days_after: int, hour_24: int) -> datetime:
+    generated_tokyo = normalize_generated_at_to_tokyo(generated_at)
+    target_date = (generated_tokyo + timedelta(days=days_after)).date()
+    scheduled_tokyo = datetime.combine(target_date, dt_time(hour=hour_24, minute=0, second=0), TOKYO_TZ)
+    return scheduled_tokyo.astimezone(timezone.utc).replace(tzinfo=None)
+
+
+def send_discord_message(content: str) -> tuple[str, Optional[str]]:
+    bot_token = os.getenv("DISCORD_BOT_TOKEN")
+    channel_id = os.getenv("DISCORD_CHANNEL_ID")
+
+    if not bot_token or not channel_id:
+        return "failed", "DISCORD_BOT_TOKEN or DISCORD_CHANNEL_ID is not configured"
+
+    try:
+        resp = requests.post(
+            f"https://discord.com/api/v10/channels/{channel_id}/messages",
+            headers={
+                "Authorization": f"Bot {bot_token}",
+                "Content-Type": "application/json",
+            },
+            json={"content": content},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        return "sent", None
+    except Exception as e:
+        return "failed", str(e)
+
+
+def process_due_review_notifications():
+    now = datetime.utcnow()
+    db = SessionLocal()
+    try:
+        rows = (
+            db.query(models.ReviewNotification)
+            .filter(models.ReviewNotification.status == "pending")
+            .filter(models.ReviewNotification.scheduled_for <= now)
+            .order_by(models.ReviewNotification.scheduled_for.asc())
+            .limit(100)
+            .all()
+        )
+
+        for row in rows:
+            lines = [
+                "知識の定着度を自己採点する",
+                f"🔗 {row.source_problem_url}",
+            ]
+            status, error = send_discord_message("\n".join(lines))
+            row.status = status
+            row.sent_at = datetime.utcnow()
+            row.error_message = error
+
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"⚠️ 復習通知ジョブでエラー: {e}")
+    finally:
+        db.close()
+
 # ==========================
 # ライフスパン (起動・終了処理)
 # ==========================
@@ -255,6 +324,7 @@ async def lifespan(app: FastAPI):
     # スケジューラー起動（タイムゾーンを明示指定。Windowsのシステムタイムゾーンが書き換えられても動くように）
     scheduler = AsyncIOScheduler(timezone="Asia/Tokyo")
     scheduler.add_job(midnight_attack, 'cron', minute='*') # テスト用（本番は hour=0, minute=0）
+    scheduler.add_job(process_due_review_notifications, 'cron', minute='*')
     scheduler.start()
     print("⏰ スケジューラーが起動しました")
 
@@ -390,46 +460,44 @@ def update_review_delay_config(req: ReviewDelayConfigRequest, db: Session = Depe
 
 
 @app.post("/api/discord/problem")
-def notify_discord_problem_url(req: ProblemUrlNotifyRequest):
+def notify_discord_problem_url(req: ProblemUrlNotifyRequest, db: Session = Depends(get_db)):
     """
     Webアプリで問題URLが生成された際にDiscordへ通知するための仮エンドポイント。
     DISCORD_BOT_TOKEN と DISCORD_CHANNEL_ID が設定されていればDiscordへ投稿し、
     未設定なら受信のみ行う。
     """
-    bot_token = os.getenv("DISCORD_BOT_TOKEN")
-    channel_id = os.getenv("DISCORD_CHANNEL_ID")
+    generated_at_utc = req.generated_at.astimezone(timezone.utc).replace(tzinfo=None) if req.generated_at.tzinfo else req.generated_at
+    existing = db.query(models.ReviewNotification).filter(
+        models.ReviewNotification.source_problem_url == str(req.problem_url),
+        models.ReviewNotification.generated_at == generated_at_utc,
+    ).first()
 
-    lines = [
-        "知識の定着度を自己採点する",
-        f"🔗 {req.problem_url}",
-    ]
+    if existing:
+        return {
+            "status": "already_scheduled",
+            "scheduled_for": existing.scheduled_for.isoformat() + "Z",
+            "notification_id": existing.id,
+        }
 
-    discord_content = "\n".join(lines)
+    days_after, hour_24 = get_review_delay_config_values(db)
+    scheduled_for = compute_scheduled_for_utc(req.generated_at, days_after, hour_24)
 
-    delivery = "skipped"
-    error_message = None
-    if bot_token and channel_id:
-        try:
-            resp = requests.post(
-                f"https://discord.com/api/v10/channels/{channel_id}/messages",
-                headers={
-                    "Authorization": f"Bot {bot_token}",
-                    "Content-Type": "application/json",
-                },
-                json={"content": discord_content},
-                timeout=10,
-            )
-            resp.raise_for_status()
-            delivery = "sent"
-        except Exception as e:
-            delivery = "failed"
-            error_message = str(e)
+    row = models.ReviewNotification(
+        source_problem_url=str(req.problem_url),
+        generated_at=generated_at_utc,
+        scheduled_for=scheduled_for,
+        status="pending",
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
 
     entry = {
         "problem_url": str(req.problem_url),
         "generated_at": req.generated_at.isoformat(),
-        "discord_delivery": delivery,
-        "error": error_message,
+        "scheduled_for": scheduled_for.isoformat() + "Z",
+        "status": row.status,
+        "notification_id": row.id,
         "received_at": datetime.utcnow().isoformat() + "Z",
     }
 
@@ -437,10 +505,9 @@ def notify_discord_problem_url(req: ProblemUrlNotifyRequest):
         problem_url_history.append(entry)
 
     return {
-        "status": "accepted",
-        "discord_delivery": delivery,
-        "bot_token_configured": bool(bot_token),
-        "channel_configured": bool(channel_id),
+        "status": "scheduled",
+        "days_after": days_after,
+        "hour_24": hour_24,
         "latest": entry,
     }
 
