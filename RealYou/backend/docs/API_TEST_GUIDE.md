@@ -220,7 +220,47 @@ curl -X POST http://localhost:3001/api/voice/respond \
 
 ---
 
-## 5. ヘルスチェック (`GET /health`)
+## 5. クイズ解答送信 (`POST /api/quizzes/:quiz_id/submit`)
+
+```bash
+curl -s -X POST http://localhost:3001/api/quizzes/final-quiz/submit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "'$USER_ID'",
+    "self_evaluation_level": 4,
+    "answers": {
+      "q_1": 2,
+      "q_2": 3
+    }
+  }'
+```
+
+**期待されるレスポンス:**
+```json
+{
+  "actual_score": 50,
+  "gap": -30,
+  "feedback_message": "分かっているつもりになっているかも！復習のチャンス！",
+  "chimera_parameters": {
+    "lucky": 80,
+    "happy": 80,
+    "nice": 50,
+    "cute": 100,
+    "cool": 12
+  },
+  "rival_parameters": {
+    "lucky": 38,
+    "happy": 91,
+    "nice": 5,
+    "cute": 42,
+    "cool": 67
+  }
+}
+```
+
+---
+
+## 6. ヘルスチェック (`GET /health`)
 
 ```bash
 curl -X GET http://localhost:3001/health

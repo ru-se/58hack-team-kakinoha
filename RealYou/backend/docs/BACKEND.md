@@ -78,6 +78,7 @@ src/
 | `POST` | `/api/games/submit` | ゲームプレイデータ送信 |
 | `GET` | `/api/results/:user_id` | 診断結果取得 |
 | `POST` | `/api/voice/respond` | AI返答生成 (Gemini) |
+| `POST` | `/api/quizzes/:quiz_id/submit` | クイズ解答送信 + キメラパラメータ生成 |
 | `GET` | `/health` | ヘルスチェック |
 
 ### リクエスト/レスポンス例
@@ -138,6 +139,43 @@ src/
   "response": "パスワードリセットは設定画面から行えます！（多分）",
   "emotion": "confused",
   "confidence": 0.6
+}
+```
+</details>
+
+<details>
+<summary>POST /api/quizzes/:quiz_id/submit</summary>
+
+```json
+// Request
+{
+  "user_id": "uuid-xxxx",
+  "self_evaluation_level": 4,
+  "answers": {
+    "q_1": 2,
+    "q_2": 3
+  }
+}
+
+// Response (200)
+{
+  "actual_score": 50,
+  "gap": -30,
+  "feedback_message": "分かっているつもりになっているかも！復習のチャンス！",
+  "chimera_parameters": {
+    "lucky": 80,
+    "happy": 80,
+    "nice": 50,
+    "cute": 100,
+    "cool": 12
+  },
+  "rival_parameters": {
+    "lucky": 38,
+    "happy": 91,
+    "nice": 5,
+    "cute": 42,
+    "cool": 67
+  }
 }
 ```
 </details>

@@ -7,12 +7,13 @@ import registerRouter from './routes/register';
 import gamesRouter from './routes/games';
 import resultsRouter from './routes/results';
 import voiceRouter from './routes/voice';
+import quizzesRouter from './routes/quizzes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const allowedOrigins = process.env.FRONTEND_URL 
-    ? process.env.FRONTEND_URL.split(',') 
+const allowedOrigins = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(',')
     : ['http://localhost:3000'];
 
 // Middleware
@@ -32,6 +33,7 @@ app.use('/api/register', registerRouter);
 app.use('/api/games', gamesRouter);
 app.use('/api/results', resultsRouter);
 app.use('/api/voice', voiceRouter);
+app.use('/api/quizzes', quizzesRouter);
 
 // Health check
 app.get('/health', async (req, res) => {
