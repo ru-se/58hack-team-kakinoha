@@ -102,7 +102,7 @@ export default function TopPage() {
     }
 
     setTimeout(() => {
-      router.push('/games/group-chat');
+      router.push('/quiz');
     }, 800);
 
     setTimeout(() => {
