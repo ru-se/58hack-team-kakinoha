@@ -6,6 +6,58 @@ import { QuizSubmitRequestSchema } from '../schemas/quizSchema';
 
 const router = Router();
 
+// =========================================================
+// モックAPI: 問題生成 (POST /generate)
+// フロントのローディングUIテスト用に3秒遅延させる
+// =========================================================
+router.post('/generate', async (req: Request, res: Response) => {
+    await new Promise(r => setTimeout(r, 3000));
+    res.status(200).json({
+        quiz_id: "dummy-quiz-1234-5678",
+        max_points: 50,
+        genres: { web: 1, ai: 0, security: 0, infrastructure: 0, design: 0, game: 0 },
+        message: "モック: 問題の生成が完了しました"
+    });
+});
+
+// =========================================================
+// モックAPI: 問題一覧取得 (GET /:quiz_id/questions)
+// =========================================================
+router.get('/:quiz_id/questions', (req: Request, res: Response) => {
+    const quiz_id = req.params.quiz_id;
+    res.status(200).json({
+        questions: [
+            {
+                id: "dummy-q-1",
+                quiz_id,
+                order_num: 1,
+                question_text: "（ダミー1）このハッカソンで一番大事なことは？",
+                options: ["睡眠", "気合い", "フロントを止めないこと", "おやつ"],
+                correct_index: 2
+            },
+            {
+                id: "dummy-q-2",
+                quiz_id,
+                order_num: 2,
+                question_text: "（ダミー2）最強のデバッグ方法は？",
+                options: ["console.log", "祈る", "再起動", "先輩に聞く"],
+                correct_index: 0
+            },
+            {
+                id: "dummy-q-3",
+                quiz_id,
+                order_num: 3,
+                question_text: "（ダミー3）締め切り前夜にすべきことは？",
+                options: ["徹夜", "早寝", "現実逃避", "スコープ削減"],
+                correct_index: 3
+            }
+        ]
+    });
+});
+
+// =========================================================
+// 採点・結果送信 (POST /:quiz_id/submit) ※既存処理を保持しモック値を追記
+// =========================================================
 router.post('/:quiz_id/submit', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const quizId = req.params.quiz_id;
@@ -16,8 +68,12 @@ router.post('/:quiz_id/submit', async (req: Request, res: Response, next: NextFu
         // 2. Execute Service (quiz_idも渡す仕様に拡張可能ですが今回はそのまま)
         const responseDto = await quizService.submitQuiz(parsedRequest);
 
-        // 3. Send Response
-        res.status(200).json(responseDto);
+        // 3. Send Response（モック値を追記）
+        res.status(200).json({
+            ...responseDto,
+            earned_points: 40,
+            total_exp: { web: 150, ai: 200, security: 50, infrastructure: 80, design: 120, game: 90 }
+        });
     } catch (error) {
         if (error instanceof z.ZodError) {
             res.status(400).json({
