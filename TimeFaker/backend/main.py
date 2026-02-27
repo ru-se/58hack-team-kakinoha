@@ -298,6 +298,7 @@ class TestPingRequest(BaseModel):
 
 class ProblemUrlNotifyRequest(BaseModel):
     problem_url: HttpUrl
+    generated_at: datetime
 
 
 test_ping_history = deque(maxlen=100)
@@ -312,7 +313,8 @@ def get_problem_url_payload_sample():
     Webアプリが送るべきJSONフォーマットのサンプルを返す。
     """
     return {
-        "problem_url": "https://example.com/problems/abc123"
+        "problem_url": "https://example.com/self-check",
+        "generated_at": "2026-02-26T10:30:00+09:00"
     }
 
 
@@ -354,6 +356,7 @@ def notify_discord_problem_url(req: ProblemUrlNotifyRequest):
 
     entry = {
         "problem_url": str(req.problem_url),
+        "generated_at": req.generated_at.isoformat(),
         "discord_delivery": delivery,
         "error": error_message,
         "received_at": datetime.utcnow().isoformat() + "Z",
