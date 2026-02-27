@@ -17,11 +17,13 @@ const PAL = {
   locked:    { fill: "#374151", hi: "#6b7280", lo: "#1f2937", rim: "#111827", glow: "#374151" },
 };
 const CAT: Record<string, string> = {
+  none:     "#e8b849",
   web:      "#60a5fa",
   ai:       "#fbbf24",
   security: "#f87171",
   infra:    "#34d399",
   design:   "#c084fc",
+  game:     "#fb923c",
 };
 
 /* ---- particle ---- */
