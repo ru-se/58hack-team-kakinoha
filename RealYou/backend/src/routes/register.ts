@@ -1,6 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { registerService } from '../services/registerService';
-import { registerChimeraUser } from '../services/registerService';
+import { registerService, registerChimeraUser } from '../services/registerService';
 import { RegisterRequest, RegisterResponse } from '../types';
 import { ChimeraRegisterSchema } from '../schemas/authSchema';
 
