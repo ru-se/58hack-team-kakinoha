@@ -15,7 +15,7 @@ router.post('/generate', async (req: Request, res: Response) => {
     res.status(200).json({
         quiz_id: "dummy-quiz-1234-5678",
         max_points: 50,
-        genres: { web: 0.2, ai: 0.3, security: 0.1, infrastructure: 0.1, design: 0.2, game: 0.1 },
+        genres: { web: 1, ai: 0, security: 0, infrastructure: 0, design: 0, game: 0 },
         message: "モック: 問題の生成が完了しました"
     });
 });
