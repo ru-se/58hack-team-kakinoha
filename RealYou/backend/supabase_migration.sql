@@ -1,13 +1,16 @@
--- Users テーブル
+-- 1. users テーブル
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  self_mbti VARCHAR(10),
-  baseline_caution INT NOT NULL CHECK (baseline_caution BETWEEN 0 AND 100),
-  baseline_calmness INT NOT NULL CHECK (baseline_calmness BETWEEN 0 AND 100),
-  baseline_logic INT NOT NULL CHECK (baseline_logic BETWEEN 0 AND 100),
-  baseline_coop INT NOT NULL CHECK (baseline_coop BETWEEN 0 AND 100),
-  baseline_positive INT NOT NULL CHECK (baseline_positive BETWEEN 0 AND 100),
-  created_at TIMESTAMP DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    auth_type TEXT NOT NULL DEFAULT 'dummy',
+    auth_payload JSONB DEFAULT '{}'::jsonb,
+    exp_web INTEGER NOT NULL DEFAULT 0,
+    exp_ai INTEGER NOT NULL DEFAULT 0,
+    exp_security INTEGER NOT NULL DEFAULT 0,
+    exp_infrastructure INTEGER NOT NULL DEFAULT 0,
+    exp_design INTEGER NOT NULL DEFAULT 0,
+    exp_game INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- GameLogs テーブル
@@ -55,3 +58,37 @@ CREATE TABLE analysis_results (
 -- インデックス
 CREATE INDEX idx_game_logs_user_id ON game_logs(user_id);
 CREATE INDEX idx_game_logs_game_type ON game_logs(game_type);
+
+-- 2. quizzes テーブル
+CREATE TABLE quizzes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_by UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    title TEXT NOT NULL,
+    max_points INTEGER NOT NULL CHECK (max_points >= 10 AND max_points <= 100),
+    genres JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 3. questions テーブル
+CREATE TABLE questions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    quiz_id UUID NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
+    order_num INTEGER NOT NULL CHECK (order_num >= 1),
+    question_text TEXT NOT NULL,
+    options JSONB NOT NULL,
+    correct_index INTEGER NOT NULL CHECK (correct_index >= 0),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 4. quiz_results テーブル
+CREATE TABLE quiz_results (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    quiz_id UUID NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
+    correct_count INTEGER NOT NULL CHECK (correct_count >= 0),
+    total_questions INTEGER NOT NULL CHECK (total_questions > 0),
+    earned_points INTEGER NOT NULL CHECK (earned_points >= 0),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    CHECK (correct_count <= total_questions),
+    UNIQUE(user_id, quiz_id)
+);
