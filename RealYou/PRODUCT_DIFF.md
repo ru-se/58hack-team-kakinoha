@@ -24,12 +24,12 @@
 
 **変更前:** トップ画面 → スタートボタン → `/games/terms`（利用規約ゲーム）
 
-**変更後:** トップ画面 → スタートボタン → `/games/group-chat`（空気読みゲーム）
+**変更後:** トップ画面 → スタートボタン → `/quiz`（理解度入力）
 
 ```diff
 // frontend/src/app/page.tsx
 - router.push('/games/terms');
-+ router.push('/games/group-chat');
++ router.push('/quiz');
 ```
 
 ---
@@ -104,11 +104,11 @@ interface StageDefinition {
 
 ### 4. 理解度フェーズ・復習フェーズの追加
 
-グループチャット終了後に `/quiz` へ遷移する新しいフローを追加。
+スタート画面から `/quiz` へ遷移する新しいフローを追加。
 
 **画面遷移:**
 ```
-/games/group-chat → /quiz → /result
+/quiz → /result
 ```
 
 **フェーズ構成:**
