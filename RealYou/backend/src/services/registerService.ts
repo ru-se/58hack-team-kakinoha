@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { userRepository } from '../repositories/userRepository';
 import { BaselineAnswers, BaselineScores } from '../types';
+import { supabase } from '../db/client';
+import { ChimeraRegisterDTO } from '../schemas/authSchema';
 
 // 回答 → スコア変換マップ
 const SCORE_MAP: Record<string, number> = {
@@ -59,3 +61,29 @@ export const registerService = {
         return userId;
     }
 };
+
+// ダミー認証用ユーザー登録（キメラプロジェクト向け）
+export async function registerChimeraUser(dto: ChimeraRegisterDTO): Promise<string> {
+    if (dto.auth_type === 'dummy') {
+        const id = uuidv4();
+
+        const { data, error } = await supabase
+            .from('users')
+            .insert({
+                id,
+                name: dto.name,
+                auth_type: dto.auth_type,
+                auth_payload: dto.auth_payload ?? null,
+            })
+            .select('id')
+            .single();
+
+        if (error || !data) {
+            throw { status: 500, code: 'db_error', message: error?.message ?? 'ユーザーの登録に失敗しました' };
+        }
+
+        return data.id as string;
+    }
+
+    throw { status: 400, code: 'unsupported_auth_type', message: `auth_type '${dto.auth_type}' は現在サポートされていません` };
+}
