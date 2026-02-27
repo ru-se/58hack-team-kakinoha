@@ -15,7 +15,37 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 
-<body>
+<body class="chimera-active">
+
+    <!-- 有機的な歪みフィルター (SVG) -->
+    <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true" focusable="false">
+        <filter id="organic-distortion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" seed="1" result="noise">
+                <animate attributeName="baseFrequency" values="0.01;0.015;0.01" dur="10s" repeatCount="indefinite" />
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+
+        <!-- 色収差フィルター -->
+        <filter id="chromatic">
+            <feOffset in="SourceGraphic" dx="-2" dy="0" result="red" />
+            <feOffset in="SourceGraphic" dx="2" dy="0" result="blue" />
+            <feComposite in="red" in2="blue" operator="xor" />
+        </filter>
+    </svg>
+
+    <!-- 背景・演出用レイヤー（文字を歪ませないよう独立） -->
+    <div id="digital-noise"></div>
+    <div id="visceral-overlay"></div>
+    <div id="whisper-bar"></div>
+    <div id="static-flash"></div>
+
+    <!-- 乱雑なワイヤー（つぎはぎ演出） -->
+    <div class="wires-container">
+        <div class="wire wire-1"></div>
+        <div class="wire wire-2"></div>
+        <div class="wire wire-3"></div>
+    </div>
 
     <!-- 動的背景コンテナ -->
     <div id="dynamic-bg-container">
@@ -38,6 +68,9 @@
                 <span class="t4">O</span><span class="t1">S</span>
             </h1>
             <div class="duct-tape tape-title"></div>
+            <!-- ホッチキスの針の演出 -->
+            <div class="staple staple-t1"></div>
+            <div class="staple staple-t2"></div>
             <p class="subtitle">System: UNSTABLE // MULTIPLE KERNELS DETECTED</p>
         </div>
 
