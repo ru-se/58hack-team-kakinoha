@@ -2,24 +2,15 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { isAuthenticated } from "@/lib/auth/client";
 
 export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const authed = await isAuthenticated();
-      if (authed) {
-        router.replace("/dashboard");
-      } else {
-        router.replace("/login");
-      }
-    };
-    checkAuth();
+    // デモ版: 認証チェックをスキップしてスキルツリーへ直接遷移
+    router.replace("/skills");
   }, [router]);
 
-  // リダイレクト中はローディング表示
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#FDFEF0]">
       <div className="text-center">

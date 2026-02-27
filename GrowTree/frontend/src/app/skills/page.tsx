@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { withAuth } from "@/lib/auth/withAuth";
 import { SkillTreeCanvas } from "../../features/skill-tree/components/SkillTreeCanvas";
 import { SkillNodePanel } from "../../features/skill-tree/components/SkillNodePanel";
 import { RankBar } from "../../features/skill-tree/components/RankBar";
@@ -9,7 +8,9 @@ import { SkillLegend } from "../../features/skill-tree/components/SkillLegend";
 import { ZoomControls } from "../../features/skill-tree/components/ZoomControls";
 import type { SkillNode } from "../../features/skill-tree/types/data";
 
-function SkillTreePage() {
+// デモ版: 認証ガードなし・サンプルデータで動作
+
+export default function SkillTreePage() {
   const [selectedNode, setSelectedNode] = useState<SkillNode | null>(null);
   const [zoomAction, setZoomAction] = useState<{
     type: string;
@@ -23,7 +24,7 @@ function SkillTreePage() {
 
   return (
     <div
-      className="relative w-full h-[calc(100vh-4rem)] overflow-hidden rounded-lg border border-border"
+      className="relative w-full h-screen overflow-hidden"
       style={{ background: "#0a0f08" }}
     >
       <SkillTreeCanvas
@@ -73,5 +74,3 @@ function SkillTreePage() {
     </div>
   );
 }
-
-export default withAuth(SkillTreePage);
