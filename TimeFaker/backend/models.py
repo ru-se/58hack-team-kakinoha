@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from database import Base
+from datetime import datetime
 
 class UserSetting(Base):
     __tablename__ = "user_settings"
@@ -23,3 +24,19 @@ class Schedule(Base):
     scheduled_at = Column(DateTime, nullable=False, index=True)
 
     user = relationship("UserSetting", back_populates="schedules")
+
+
+class ReviewNotification(Base):
+    __tablename__ = "review_notifications"
+    __table_args__ = (
+        UniqueConstraint("source_problem_url", "generated_at", name="uq_review_notifications_source_generated"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    source_problem_url = Column(String, nullable=False, index=True)
+    generated_at = Column(DateTime, nullable=False, index=True)
+    scheduled_for = Column(DateTime, nullable=False, index=True)
+    status = Column(String, nullable=False, default="pending", index=True)  # pending/sent/failed
+    sent_at = Column(DateTime, nullable=True)
+    error_message = Column(String, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
