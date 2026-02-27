@@ -1,11 +1,16 @@
 'use client';
 
 import Image from "next/image";
-import { RANKS, SKILL_NODES } from "../types/data";
+import { RANKS, SKILL_NODES, type SkillNode } from "../types/data";
 
-export function RankBar() {
-  const completedCount = SKILL_NODES.filter((n) => n.status === "completed").length
-  const totalCount = SKILL_NODES.length
+interface Props {
+  nodes?: SkillNode[];
+}
+
+export function RankBar({ nodes }: Props) {
+  const activeNodes = nodes || SKILL_NODES;
+  const completedCount = activeNodes.filter((n) => n.status === "completed").length
+  const totalCount = activeNodes.length
   const progress = completedCount / totalCount
   const tierIndex = Math.min(Math.floor(progress * 10), 9)
   const currentRank = RANKS[tierIndex]

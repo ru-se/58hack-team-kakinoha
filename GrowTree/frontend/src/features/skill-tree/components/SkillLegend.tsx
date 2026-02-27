@@ -19,6 +19,7 @@ const categoryEntries = [
   { color: "#e85555", label: "Security" },
   { color: "#55cc55", label: "Infra" },
   { color: "#cc66dd", label: "Design" },
+  { color: "#fb923c", label: "Game" },
 ]
 
 export function SkillLegend() {
