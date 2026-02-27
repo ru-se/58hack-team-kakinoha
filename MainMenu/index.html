@@ -4,30 +4,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chimera Portal</title>
+    <title>C H I M E R A - P O R T A L</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Inter:wght@300;400;700&family=M+PLUS+Rounded+1c:wght@700;800&family=Share+Tech+Mono&family=Creepster&family=Rubik+Glitch&display=swap"
+        rel="stylesheet">
+
     <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
-    <div class="gradient-bg"></div>
+
+    <!-- 動的背景コンテナ -->
+    <div id="dynamic-bg-container">
+        <div class="dynamic-bg bg-talkscope"></div>
+        <div class="dynamic-bg bg-realyou"></div>
+        <div class="dynamic-bg bg-growtree"></div>
+        <div class="dynamic-bg bg-settings"></div>
+    </div>
+
+    <!-- CRTスキャンラインとベース背景のオーバーレイ -->
+    <div class="patchwork-bg"></div>
+    <div class="scanlines"></div>
 
     <main id="portal-view">
         <div class="title-container">
-            <h1 class="title">Chimera OS</h1>
-            <p class="subtitle">Unified Application Portal</p>
+            <h1 class="title">
+                <span class="t1">C</span><span class="t2">H</span><span class="t3">I</span><span
+                    class="t4">M</span><span class="t1">E</span><span class="t5">R</span><span class="t2">A</span>
+                <span class="t3">_</span>
+                <span class="t4">O</span><span class="t1">S</span>
+            </h1>
+            <div class="duct-tape tape-title"></div>
+            <p class="subtitle">System: UNSTABLE // MULTIPLE KERNELS DETECTED</p>
         </div>
 
-        <!-- メニューカードがここに追加されます -->
-        <div class="grid-container" id="app-grid"></div>
+        <!-- メニューカード -->
+        <div class="chaos-grid" id="app-grid"></div>
     </main>
 
-    <!-- アプリをシームレスに表示するコンテナ -->
     <div id="app-view" class="hidden">
         <div class="app-header">
-            <button id="back-button" class="back-btn">
-                <span class="back-icon">←</span> メニューに戻る
+            <button id="back-button" class="back-btn glitch-btn">
+                <span class="back-icon">✕</span> EJECT TO CHIMERA
             </button>
-            <h2 id="current-app-title" class="app-title">App Name</h2>
+            <div class="duct-tape tape-header"></div>
+            <marquee id="current-app-title" class="app-title scroll-text" scrollamount="15">...</marquee>
         </div>
         <iframe id="app-frame" src="" frameborder="0"></iframe>
     </div>

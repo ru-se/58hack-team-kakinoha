@@ -1,33 +1,33 @@
 const APPS = [
   {
     id: 'talkscope',
-    name: 'TalkScope',
-    icon: '🎙️',
-    description: '専門用語のリアルタイム解説と音声の自動文字起こし',
-    url: 'http://localhost:3000', // バックエンドのポートにあわせて変更可能
+    name: 'TalkScope_v3.1.4',
+    icon: '🗣️',
+    description: 'Real-time Terminology AI. Clean, Glassmorphic, Perfection.',
+    url: 'http://localhost:3000', 
     className: 'talkscope'
   },
   {
     id: 'realyou',
-    name: 'RealYou',
+    name: 'REAL YOU!!!',
     icon: '🎭',
-    description: 'あなたの「空気読み」スキルを診断・チェックするゲーム',
+    description: 'POP! BRUTAL! DETECT YOUR SOCIAL SKILLS NOW!',
     url: 'http://localhost:3001',
     className: 'realyou'
   },
   {
     id: 'growtree',
-    name: 'GrowTree',
+    name: 'GrowTree - Quest Log',
     icon: '🌳',
-    description: 'GitHubの活動履歴からあなたのエンジニアとしての成長を可視化',
+    description: '[Lv.99] A visualization of your Github grinding history. Retro vibes only.',
     url: 'http://localhost:3002',
     className: 'growtree'
   },
   {
     id: 'settings',
-    name: 'Settings',
+    name: 'sys_config.exe',
     icon: '⚙️',
-    description: 'アプリの全体設定やAPIキー、外部連携を構成する',
+    description: 'WARN: UNSTABLE MODULE. ACCESS AT OWN RISK. \n root@chimera:~# _',
     url: '#',
     className: 'settings'
   }
@@ -41,52 +41,96 @@ document.addEventListener('DOMContentLoaded', () => {
   const backButton = document.getElementById('back-button');
   const currentAppTitle = document.getElementById('current-app-title');
 
-  // メニューカードの生成
+  // 動的背景の要素群
+  const bgElements = {
+    talkscope: document.querySelector('.bg-talkscope'),
+    realyou: document.querySelector('.bg-realyou'),
+    growtree: document.querySelector('.bg-growtree'),
+    settings: document.querySelector('.bg-settings'),
+  };
+
+  const stitch1 = document.createElement('div');
+  stitch1.className = 'patch-stitch stitch-1';
+  document.body.appendChild(stitch1);
+
+  const stitch2 = document.createElement('div');
+  stitch2.className = 'patch-stitch stitch-2';
+  document.body.appendChild(stitch2);
+
   APPS.forEach((app, index) => {
-    const card = document.createElement('div'); // aタグからdivに変更し、デフォルトの遷移を防ぐ
+    const card = document.createElement('div');
     card.className = `app-card ${app.className}`;
     
-    // アニメーションのディレイ
-    card.style.animationDelay = `${(index + 1) * 0.1}s`;
+    const tape = document.createElement('div');
+    tape.className = 'duct-tape card-tape';
+    if(Math.random() > 0.5) {
+      tape.style.top = Math.random() > 0.5 ? '-15px' : 'auto';
+      tape.style.bottom = tape.style.top === 'auto' ? '-15px' : 'auto';
+      tape.style.left = Math.random() > 0.5 ? '-15px' : 'auto';
+      tape.style.right = tape.style.left === 'auto' ? '-15px' : 'auto';
+      tape.style.transform = `rotate(${Math.floor(Math.random() * 90 - 45)}deg)`;
+      card.appendChild(tape);
+    }
 
-    card.innerHTML = `
+    const content = document.createElement('div');
+    content.innerHTML = `
       <span class="card-icon">${app.icon}</span>
       <h2 class="card-title">${app.name}</h2>
-      <p class="card-desc">${app.description}</p>
+      <p class="card-desc">${app.id === 'settings' ? app.description + '<span class="cursor"></span>' : app.description}</p>
     `;
+    card.appendChild(content);
 
-    // クリックイベント: 別タブではなく、同じ画面内にシームレスに表示する
+    // ======== ホバー時の背景変化イベント ========
+    card.addEventListener('mouseenter', () => {
+      // 一旦すべての背景を非アクティブ化
+      Object.keys(bgElements).forEach(key => {
+        if(bgElements[key]) bgElements[key].classList.remove('active');
+      });
+      // 該当アプリの背景をアクティブ化
+      if(bgElements[app.id]) {
+        bgElements[app.id].classList.add('active');
+      }
+    });
+
+    card.addEventListener('mouseleave', () => {
+      // マウスが外れたら背景を元に戻す
+      if(bgElements[app.id]) {
+        bgElements[app.id].classList.remove('active');
+      }
+    });
+    // ===========================================
+
+    // クリックイベント
     card.addEventListener('click', () => {
-      if (app.url === '#') return; // 実装待ちのSettingsなどは何もしない
+      if (app.url === '#') {
+        alert("CRITICAL ERROR 0x000F: CANNOT MOUNT VOLUME.\nSYSTEM INSTABILITY DETECTED.");
+        return; 
+      }
 
-      // 1. ポータルをフェードアウト
+      document.body.style.animation = 'terminalShake 0.2s';
+      setTimeout(() => document.body.style.animation = '', 200);
+
       portalView.classList.add('fade-out');
       
-      // 2. iframeにURLをセットし、タイトルを更新
       appFrame.src = app.url;
-      currentAppTitle.textContent = app.name;
+      currentAppTitle.textContent = `>>> MOUNTING: ${app.name} >>> CAUTION: INTEGRATION UNSTABLE >>> `;
 
-      // 3. アプリビューをフェードイン
       setTimeout(() => {
         appView.classList.remove('hidden');
-      }, 200); // わずかに遅らせてから表示
+      }, 300);
     });
 
     gridContainer.appendChild(card);
   });
 
-  // 戻るボタンの処理: アプリを閉じてメニューに戻る
   backButton.addEventListener('click', () => {
-    // 1. アプリビューをフェードアウト
     appView.classList.add('hidden');
     
-    // 2. ポータルをフェードイン
     setTimeout(() => {
       portalView.classList.remove('fade-out');
-      // 3. メモリ解放のためiframeのsrcをクリア（通信も切断される）
       setTimeout(() => {
         appFrame.src = '';
-      }, 400);
-    }, 200);
+      }, 500);
+    }, 400);
   });
 });
