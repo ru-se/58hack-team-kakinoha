@@ -1,3 +1,25 @@
+# 🧠 プロジェクトコンテキスト：キメラプロダクト（バックエンド）
+
+## プロジェクト概要
+複数の既存アプリを融合させた「キメラプロダクト」のバックエンドです。
+既存の「RealYou（性格診断アプリ）」のコードベースに、新機能（クイズ・スキルツリー）を追加しています。
+
+---
+
+## 技術スタック
+- **Runtime**: Node.js / TypeScript
+- **Framework**: Express v5
+- **DB**: Supabase（PostgreSQL）
+- **AI**: Google Gemini API
+- **バリデーション**: Zod v4
+- **パス**: `RealYou/backend/src/`
+
+---
+
+## アーキテクチャ（3層構造）
+routes/ → services/ → repositories/ → Supabase
+↓
+analysis/（純粋な計算ロジック、DB無依存）
 | 層 | 責務 |
 |----|------|
 | `routes/` | HTTPリクエスト受付・レスポンス返却 |
