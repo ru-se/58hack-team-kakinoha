@@ -39,6 +39,7 @@ export function SkillTreeCanvas({ nodes, onSelectNode, selectedNode, zoomAction 
   const boxRef    = useRef<HTMLDivElement>(null);
   const tf        = useRef({ x: 0, y: 0, s: 0.65 });
   const drag      = useRef({ on: false, sx: 0, sy: 0, ox: 0, oy: 0 });
+  const hoverRef  = useRef<SkillNode | null>(null);
   const particles = useRef<Particle[]>([]);
   const raf       = useRef(0);
   const tick      = useRef(0);
@@ -612,6 +613,44 @@ export function SkillTreeCanvas({ nodes, onSelectNode, selectedNode, zoomAction 
       });
       for (const n of sorted) drawNode(ctx, n, selectedNode?.id === n.id);
 
+      // Hover tooltip
+      const hNode = hoverRef.current;
+      if (hNode && hNode.status !== "completed") {
+        ctx.save();
+        ctx.translate(hNode.x, hNode.y - 65);
+        ctx.scale(1 / T.s, 1 / T.s); // ズームにかかわらず一定サイズにするなら有効だが、今回はツリーと一緒に拡縮させる
+        
+        const pt = hNode.requiredPoints;
+        const text = hNode.status === "available" ? `必要: ${pt}pt` : `必要: ${pt}pt (未解放)`;
+        const bg = hNode.status === "available" ? "rgba(20,83,45,0.9)" : "rgba(55,65,81,0.9)";
+        const border = hNode.status === "available" ? "#4ade80" : "#6b7280";
+        const color = hNode.status === "available" ? "#4ade80" : "#9ca3af";
+        
+        ctx.font = "bold 13px sans-serif";
+        const tm = ctx.measureText(text);
+        const w = tm.width + 20;
+        const h = 26;
+        
+        ctx.fillStyle = bg;
+        ctx.strokeStyle = border;
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 4;
+        ctx.beginPath();
+        ctx.roundRect(-w/2, -h/2, w, h, 6);
+        ctx.fill();
+        ctx.shadowColor = "transparent";
+        ctx.stroke();
+        
+        ctx.fillStyle = color;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, 0, 1);
+        
+        ctx.restore();
+      }
+
       ctx.restore();
 
       drawScanlines(ctx);
@@ -638,6 +677,9 @@ export function SkillTreeCanvas({ nodes, onSelectNode, selectedNode, zoomAction 
       drag.current = { on: true, sx: e.clientX, sy: e.clientY, ox: tf.current.x, oy: tf.current.y };
     };
     const onMM = (e: MouseEvent) => {
+      const rect = c.getBoundingClientRect();
+      const w    = toWorld(e.clientX - rect.left, e.clientY - rect.top);
+      hoverRef.current = hitNode(w.x, w.y);
       if (!drag.current.on) return;
       const dpr = window.devicePixelRatio || 1;
       tf.current.x = drag.current.ox + (e.clientX - drag.current.sx) * dpr;

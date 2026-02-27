@@ -7,9 +7,7 @@ import { RankBar } from "../../features/skill-tree/components/RankBar";
 import { SkillLegend } from "../../features/skill-tree/components/SkillLegend";
 import { ZoomControls } from "../../features/skill-tree/components/ZoomControls";
 import { DebugPanel, type DebugPoints, type GenreKey } from "../../features/skill-tree/components/DebugPanel";
-import type { SkillNode } from "../../features/skill-tree/types/data";
-
-// デモ版: 認証ガードなし・サンプルデータで動作
+import { SKILL_NODES, type SkillNode } from "../../features/skill-tree/types/data";
 
 const INITIAL_POINTS: DebugPoints = {
   web: 0,
@@ -20,7 +18,17 @@ const INITIAL_POINTS: DebugPoints = {
   game: 0,
 };
 
+const CAT_TO_GENRE: Record<string, GenreKey> = {
+  infra: "infrastructure",
+  security: "security",
+  ai: "ai",
+  web: "web",
+  design: "design",
+  game: "game",
+};
+
 export default function SkillTreePage() {
+  const [nodes, setNodes] = useState<SkillNode[]>(SKILL_NODES);
   const [selectedNode, setSelectedNode] = useState<SkillNode | null>(null);
   const [zoomAction, setZoomAction] = useState<{ type: string; ts: number } | null>(null);
   const [mounted] = useState(true);
@@ -34,15 +42,59 @@ export default function SkillTreePage() {
     setDebugPoints(prev => ({ ...prev, [genre]: prev[genre] + 1 }));
   }, []);
 
+  const handleUnlock = useCallback((nodeId: string, cost: number, rawCat: string) => {
+    const genre = CAT_TO_GENRE[rawCat];
+    if (!genre) return;
+
+    // Deduct points
+    setDebugPoints(prev => ({
+      ...prev,
+      [genre]: Math.max(0, prev[genre] - cost)
+    }));
+
+    // Update nodes status
+    setNodes(prev => {
+      let next = prev.map(n => n.id === nodeId ? { ...n, status: "completed" as const } : n);
+      const completedIds = new Set(next.filter(n => n.status === "completed").map(n => n.id));
+      const availableSet = new Set<string>();
+      
+      next.forEach(n => {
+        if (n.status === "completed") {
+          n.children.forEach(childId => availableSet.add(childId));
+        }
+      });
+
+      return next.map(n => {
+        if (n.status === "completed") return n;
+        if (availableSet.has(n.id)) return { ...n, status: "available" as const };
+        return { ...n, status: "locked" as const };
+      });
+    });
+
+    // Update selected node visually in panel
+    setSelectedNode(prev => {
+      if (!prev || prev.id !== nodeId) return prev;
+      return { ...prev, status: "completed" as const };
+    });
+  }, []);
+
+  // Compute what category points should be passed to the panel
+  const getPointsForCategory = (cat: string) => {
+    const genre = CAT_TO_GENRE[cat];
+    return genre ? debugPoints[genre] : 0;
+  };
+
   return (
-    <div className="relative w-full h-screen overflow-hidden" style={{ background: "#0a0f08" }}>
+    <div className="relative w-full h-[calc(100vh-4rem)] overflow-hidden" style={{ background: "#0a0f08" }}>
       <SkillTreeCanvas
+        nodes={nodes}
         onSelectNode={handleSelectNode}
         selectedNode={selectedNode}
         zoomAction={zoomAction}
       />
 
-      <RankBar />
+      {/* RankBar now needs to see the dynamic nodes to calculate progress */}
+      <RankBar nodes={nodes} />
       <SkillLegend />
       <ZoomControls
         onZoomIn={() => setZoomAction({ type: "in",    ts: Date.now() })}
@@ -50,7 +102,6 @@ export default function SkillTreePage() {
         onReset={() =>  setZoomAction({ type: "reset", ts: Date.now() })}
       />
 
-      {/* Title */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 text-center pointer-events-none font-sans">
         <h1
           className="text-base font-bold tracking-widest"
@@ -65,11 +116,15 @@ export default function SkillTreePage() {
         )}
       </div>
 
-      {/* Debug panel (bottom-left) */}
       <DebugPanel points={debugPoints} onAddPoint={handleAddPoint} />
 
       {selectedNode && (
-        <SkillNodePanel node={selectedNode} onClose={() => setSelectedNode(null)} />
+        <SkillNodePanel
+          node={selectedNode}
+          userPoints={getPointsForCategory(selectedNode.category)}
+          onClose={() => setSelectedNode(null)}
+          onUnlock={handleUnlock}
+        />
       )}
     </div>
   );

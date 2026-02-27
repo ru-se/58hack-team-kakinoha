@@ -11,6 +11,7 @@ export interface SkillNode {
   tier: number
   description: string
   children: string[]
+  requiredPoints: number
 }
 
 export interface RankInfo {
@@ -33,24 +34,6 @@ export const RANKS: RankInfo[] = [
   { tier: 10, nameJa: "世界樹", nameEn: "World Tree", level: "master" },
 ]
 
-/**
- * ノード配置設計
- *
- * ジャンル隣接順（関係性が高いものを隣に）:
- *   インフラ | セキュリティ | AI | Web | デザイン | ゲーム
- *
- * 理由:
- *   - インフラ ↔ セキュリティ (ネットワーク/インフラセキュリティ)
- *   - セキュリティ ↔ AI (AI活用セキュリティ)
- *   - AI ↔ Web (AI搭載Webアプリ)
- *   - Web ↔ デザイン (Webデザイン/UI)
- *   - デザイン ↔ ゲーム (ビジュアルデザイン/ゲームUI)
- *
- * x座標: -1250 ~ +1250 (6ジャンル × 500px間隔)
- * y座標: 下(高tier) → 上(低tier)  下:ground, 上:crown
- */
-
-// X座標定数（ジャンルごとの中心X）
 const X = {
   infra: -1250,
   security: -750,
@@ -61,9 +44,6 @@ const X = {
 }
 
 export const SKILL_NODES: SkillNode[] = [
-  // =====================================================
-  //  TIER 0 — ROOT (中央下)
-  // =====================================================
   {
     id: "egg",
     label: "エンジニアの卵",
@@ -73,11 +53,8 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 0,
     description: "すべてのエンジニアの出発点。ここから技術の旅が始まる。",
     children: ["infra-1", "security-1", "ai-1", "web-1", "design-1", "game-1"],
+    requiredPoints: 0,
   },
-
-  // =====================================================
-  //  TIER 1 — ジャンル入門（6分岐）
-  // =====================================================
   {
     id: "infra-1",
     label: "インフラ入門",
@@ -87,6 +64,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 1,
     description: "Linux・ネットワーク・サーバーの基礎。すべての土台となる知識。",
     children: ["infra-2a", "infra-2b"],
+    requiredPoints: 1,
   },
   {
     id: "security-1",
@@ -97,6 +75,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 1,
     description: "情報セキュリティの基本と脅威モデルを理解する。",
     children: ["security-2a", "security-2b"],
+    requiredPoints: 1,
   },
   {
     id: "ai-1",
@@ -107,6 +86,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 1,
     description: "機械学習の基本概念とPythonデータサイエンスの入門。",
     children: ["ai-2a", "ai-2b"],
+    requiredPoints: 1,
   },
   {
     id: "web-1",
@@ -117,6 +97,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 1,
     description: "HTML/CSS/JavaScriptを理解し、Webの仕組みを学ぶ。",
     children: ["web-2a", "web-2b"],
+    requiredPoints: 1,
   },
   {
     id: "design-1",
@@ -127,6 +108,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 1,
     description: "UI/UXデザインの基本原則とデザインツールを習得する。",
     children: ["design-2a", "design-2b"],
+    requiredPoints: 1,
   },
   {
     id: "game-1",
@@ -137,13 +119,8 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 1,
     description: "ゲームエンジンと基本的なゲーム開発の概念を学ぶ。",
     children: ["game-2a", "game-2b"],
+    requiredPoints: 1,
   },
-
-  // =====================================================
-  //  TIER 2 — 各ジャンルの基礎スキル（各2ノード）
-  // =====================================================
-
-  // --- Infra ---
   {
     id: "infra-2a",
     label: "コンテナ技術",
@@ -153,6 +130,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "Docker・コンテナの基本概念と運用を習得する。",
     children: ["infra-3"],
+    requiredPoints: 2,
   },
   {
     id: "infra-2b",
@@ -163,9 +141,8 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "AWS/GCP/Azureの主要サービスを理解する。",
     children: ["infra-3"],
+    requiredPoints: 2,
   },
-
-  // --- Security ---
   {
     id: "security-2a",
     label: "Webセキュリティ",
@@ -175,6 +152,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "XSS・CSRF・SQLインジェクションなどの攻撃と防御。",
     children: ["security-3"],
+    requiredPoints: 2,
   },
   {
     id: "security-2b",
@@ -185,9 +163,8 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "ファイアウォール・IDS/IPS・VPNの設定と管理。",
     children: ["security-3"],
+    requiredPoints: 2,
   },
-
-  // --- AI ---
   {
     id: "ai-2a",
     label: "機械学習応用",
@@ -197,6 +174,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "教師あり/なし学習、モデル評価の中級スキル。",
     children: ["ai-3"],
+    requiredPoints: 2,
   },
   {
     id: "ai-2b",
@@ -207,9 +185,8 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "大規模言語モデルの仕組みとプロンプトエンジニアリング。",
     children: ["ai-3"],
+    requiredPoints: 2,
   },
-
-  // --- Web ---
   {
     id: "web-2a",
     label: "フロントエンド",
@@ -219,6 +196,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "React/Next.jsを使ったモダンフロントエンド開発。",
     children: ["web-3"],
+    requiredPoints: 2,
   },
   {
     id: "web-2b",
@@ -229,9 +207,8 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "Node.js・API設計・データベースの基礎。",
     children: ["web-3"],
+    requiredPoints: 2,
   },
-
-  // --- Design ---
   {
     id: "design-2a",
     label: "UIデザイン",
@@ -241,6 +218,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "FigmaでUIコンポーネントを設計する。",
     children: ["design-3"],
+    requiredPoints: 2,
   },
   {
     id: "design-2b",
@@ -251,9 +229,8 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "ユーザーインタビューとユーザビリティテスト手法。",
     children: ["design-3"],
+    requiredPoints: 2,
   },
-
-  // --- Game ---
   {
     id: "game-2a",
     label: "ゲームエンジン",
@@ -263,6 +240,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "Unity/Unreal Engineの基本操作とシーン設計。",
     children: ["game-3"],
+    requiredPoints: 2,
   },
   {
     id: "game-2b",
@@ -273,11 +251,8 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 2,
     description: "ゲームメカニクス・レベルデザインの基礎理論。",
     children: ["game-3"],
+    requiredPoints: 2,
   },
-
-  // =====================================================
-  //  TIER 3 — 各ジャンルの中級スキル（各1ノード）
-  // =====================================================
   {
     id: "infra-3",
     label: "Kubernetes",
@@ -287,6 +262,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 3,
     description: "Kubernetesクラスター管理とオーケストレーション。",
     children: ["infra-4"],
+    requiredPoints: 3,
   },
   {
     id: "security-3",
@@ -297,6 +273,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 3,
     description: "脆弱性診断とペネトレーションテスト手法。",
     children: ["security-4"],
+    requiredPoints: 3,
   },
   {
     id: "ai-3",
@@ -307,6 +284,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 3,
     description: "CNN・RNN・TransformerアーキテクチャとLLMアプリ構築。",
     children: ["ai-4"],
+    requiredPoints: 3,
   },
   {
     id: "web-3",
@@ -317,6 +295,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 3,
     description: "フロント/バック/DBを統合した開発力を身につける。",
     children: ["web-4"],
+    requiredPoints: 3,
   },
   {
     id: "design-3",
@@ -327,6 +306,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 3,
     description: "スケーラブルなデザインシステムの構築と運用。",
     children: ["design-4"],
+    requiredPoints: 3,
   },
   {
     id: "game-3",
@@ -337,11 +317,8 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 3,
     description: "物理演算・シェーダー・最適化を駆使したゲーム開発。",
     children: ["game-4"],
+    requiredPoints: 3,
   },
-
-  // =====================================================
-  //  TIER 4 — 各ジャンルの上級スキル（各1ノード）
-  // =====================================================
   {
     id: "infra-4",
     label: "SREエンジニア",
@@ -351,6 +328,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 4,
     description: "信頼性エンジニアリング・SLO設計・インシデント対応。",
     children: [],
+    requiredPoints: 4,
   },
   {
     id: "security-4",
@@ -361,6 +339,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 4,
     description: "ゼロトラスト・脅威モデリング・セキュリティアーキテクチャ。",
     children: [],
+    requiredPoints: 4,
   },
   {
     id: "ai-4",
@@ -371,6 +350,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 4,
     description: "AI/MLシステムの設計から本番運用まで。MLOps実践。",
     children: [],
+    requiredPoints: 4,
   },
   {
     id: "web-4",
@@ -381,6 +361,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 4,
     description: "チームを技術的にリードし、アーキテクチャを設計する。",
     children: [],
+    requiredPoints: 4,
   },
   {
     id: "design-4",
@@ -391,6 +372,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 4,
     description: "3D・アニメーション・インタラクティブアートを統合する。",
     children: [],
+    requiredPoints: 4,
   },
   {
     id: "game-4",
@@ -401,6 +383,7 @@ export const SKILL_NODES: SkillNode[] = [
     tier: 4,
     description: "ゲーム全体の設計・開発・ローンチを主導する。",
     children: [],
+    requiredPoints: 4,
   },
 ]
 
