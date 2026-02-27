@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { highlightTerms } from '../utils/termDetection';
 import { Term } from '../data/terms';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mic, Square, Radio, Play, RotateCcw, FastForward, Pause, LoaderCircle, Star } from 'lucide-react';
+import { Mic, Square, Radio, Play, RotateCcw, FastForward, Pause, LoaderCircle, Star, X } from 'lucide-react';
 import { UseDemoStreamReturn } from '../hooks/useDemoStream';
 
 const TOOLTIP = { W: 208, H: 100, PAD: 8, GAP_ABOVE: 12 } as const;
@@ -23,6 +23,8 @@ interface TranscriptionViewProps {
   darkMode?: boolean;
   /** API で発見された動的用語（ハイライト対象に含める） */
   apiTerms?: Term[];
+  /** 発表終了ボタンが押されたとき（録音・デモを停止してから呼ばれる） */
+  onPresentationEnd?: () => void;
 }
 
 export const TranscriptionView: React.FC<TranscriptionViewProps> = ({
@@ -38,11 +40,33 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({
   demoStream,
   darkMode = true,
   apiTerms = [],
+  onPresentationEnd,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const termButtonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
   const [hoveredPartIndex, setHoveredPartIndex] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ left: number; top: number; showBelow: boolean } | null>(null);
+
+  // 連打防止: isActive が true になるたびに hasEnded をリセットし、3秒後に終了ボタンを有効化
+  // 一度押したら hasEnded=true になるが、次のセッション開始（isActive=true）で自動リセット
+  const [canEnd, setCanEnd] = useState(false);
+  const [hasEnded, setHasEnded] = useState(false);
+  const endTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isStreaming = demoStream?.status === 'playing';
+  const isActive = isListening || isStreaming;
+
+  useEffect(() => {
+    if (isActive) {
+      // 新しいセッション開始 — hasEnded を必ずリセット
+      setHasEnded(false);
+      setCanEnd(false);
+      endTimerRef.current = setTimeout(() => setCanEnd(true), 3000);
+    } else {
+      if (endTimerRef.current) clearTimeout(endTimerRef.current);
+      setCanEnd(false);
+    }
+    return () => { if (endTimerRef.current) clearTimeout(endTimerRef.current); };
+  }, [isActive]);
 
   const updateTooltipPos = useCallback((partIndex: number) => {
     const btn = termButtonRefs.current[partIndex];
@@ -98,7 +122,6 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({
   const parts = highlightTerms(transcript, apiTerms);
   const dk = darkMode;
 
-  const isStreaming = demoStream?.status === 'playing';
   const isPaused = demoStream?.status === 'paused';
   const isDone = demoStream?.status === 'done';
   const progress = demoStream?.progress ?? 0;
@@ -275,6 +298,38 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({
             </motion.button>
             <span className={`text-[10px] font-bold ${dk ? 'text-slate-600' : 'text-slate-400'}`}>リセット</span>
           </div>
+
+          {/* 発表終了ボタン */}
+          {onPresentationEnd && (
+            <div className="flex flex-col items-center gap-1.5">
+              <motion.button
+                onClick={() => {
+                  if (!canEnd || hasEnded) return;
+                  setHasEnded(true);
+                  setCanEnd(false);
+                  if (isListening) onToggleListening();
+                  demoStream?.stopStream?.();
+                  onPresentationEnd();
+                }}
+                whileTap={{ scale: (canEnd && !hasEnded) ? 0.88 : 1 }}
+                whileHover={{ scale: (canEnd && !hasEnded) ? 1.08 : 1 }}
+                disabled={!canEnd || hasEnded}
+                className={`relative w-16 h-16 rounded-full flex items-center justify-center shadow-2xl border-2 transition-all
+                  ${(canEnd && !hasEnded)
+                    ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/50 border-rose-400/50 cursor-pointer'
+                    : 'bg-rose-900/40 text-rose-800 border-rose-900/30 shadow-none cursor-not-allowed opacity-40'
+                  }`}
+                title={(canEnd && !hasEnded) ? '発表終了' : hasEnded ? '終了済みです' : '発表開始から少し待ってください'}
+              >
+                {/* グロー */}
+                <span className="absolute inset-0 rounded-full bg-rose-400 opacity-0 hover:opacity-20 transition-opacity pointer-events-none" />
+                <X size={28} strokeWidth={3} />
+
+              </motion.button>
+              <span className="text-[10px] font-black text-rose-500">発表終了</span>
+            </div>
+          )}
+
 
           {/* 録音開始/中断ボタン（メイン） */}
           <div className="flex flex-col items-center gap-1.5">

@@ -471,6 +471,11 @@ const App: React.FC = () => {
         demoStream={demoStream}
         darkMode={dk}
         apiTerms={apiTerms}
+        onPresentationEnd={() => {
+          if (isListening) stopListening();
+          demoStream.stopStream();
+          toast.success('🏁 発表が終了しました');
+        }}
       />
     ),
     bubbleCloud: (
