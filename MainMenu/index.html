@@ -11,7 +11,7 @@
 <body>
     <div class="gradient-bg"></div>
 
-    <main>
+    <main id="portal-view">
         <div class="title-container">
             <h1 class="title">Chimera OS</h1>
             <p class="subtitle">Unified Application Portal</p>
@@ -20,6 +20,17 @@
         <!-- メニューカードがここに追加されます -->
         <div class="grid-container" id="app-grid"></div>
     </main>
+
+    <!-- アプリをシームレスに表示するコンテナ -->
+    <div id="app-view" class="hidden">
+        <div class="app-header">
+            <button id="back-button" class="back-btn">
+                <span class="back-icon">←</span> メニューに戻る
+            </button>
+            <h2 id="current-app-title" class="app-title">App Name</h2>
+        </div>
+        <iframe id="app-frame" src="" frameborder="0"></iframe>
+    </div>
 
     <script type="module" src="./script.js"></script>
 </body>
