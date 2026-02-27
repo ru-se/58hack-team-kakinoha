@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { registerService } from '../services/registerService';
+import { registerChimeraUser } from '../services/registerService';
 import { RegisterRequest, RegisterResponse } from '../types';
+import { ChimeraRegisterSchema } from '../schemas/authSchema';
 
 const router = Router();
 
@@ -16,4 +18,20 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     }
 });
 
+router.post('/chimera', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const parsed = ChimeraRegisterSchema.safeParse(req.body);
+        if (!parsed.success) {
+            res.status(400).json({ error: 'バリデーションエラー', details: parsed.error.issues });
+            return;
+        }
+
+        const user_id = await registerChimeraUser(parsed.data);
+        res.status(201).json({ user_id, message: '登録成功' });
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default router;
+
