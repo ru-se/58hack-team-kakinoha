@@ -4,6 +4,7 @@ import time
 import threading
 import asyncio
 import uuid
+import requests
 import uvicorn
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -17,8 +18,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
 from gpiozero import Button
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 from fastapi.responses import FileResponse
+from typing import Optional
 
 # 自作モジュール
 import models
@@ -281,8 +283,6 @@ def get_db():
     finally:
         db.close()
 
-from typing import Optional
-
 class PlanRequest(BaseModel):
     discord_user_id: str
     date: Optional[str] = None   # 予定日付 "YYYY-MM-DD"
@@ -296,8 +296,93 @@ class TestPingRequest(BaseModel):
     discord_user_id: Optional[str] = None
 
 
+class ProblemUrlNotifyRequest(BaseModel):
+    problem_url: HttpUrl
+    generated_at: datetime
+
+
 test_ping_history = deque(maxlen=100)
 test_ping_lock = threading.Lock()
+problem_url_history = deque(maxlen=100)
+problem_url_lock = threading.Lock()
+
+
+@app.get("/api/discord/problem-url/sample")
+def get_problem_url_payload_sample():
+    """
+    Webアプリが送るべきJSONフォーマットのサンプルを返す。
+    """
+    return {
+        "problem_url": "https://example.com/self-check",
+        "generated_at": "2026-02-26T10:30:00+09:00"
+    }
+
+
+@app.post("/api/discord/problem")
+def notify_discord_problem_url(req: ProblemUrlNotifyRequest):
+    """
+    Webアプリで問題URLが生成された際にDiscordへ通知するための仮エンドポイント。
+    DISCORD_BOT_TOKEN と DISCORD_CHANNEL_ID が設定されていればDiscordへ投稿し、
+    未設定なら受信のみ行う。
+    """
+    bot_token = os.getenv("DISCORD_BOT_TOKEN")
+    channel_id = os.getenv("DISCORD_CHANNEL_ID")
+
+    lines = [
+        "知識の定着度を自己採点する",
+        f"🔗 {req.problem_url}",
+    ]
+
+    discord_content = "\n".join(lines)
+
+    delivery = "skipped"
+    error_message = None
+    if bot_token and channel_id:
+        try:
+            resp = requests.post(
+                f"https://discord.com/api/v10/channels/{channel_id}/messages",
+                headers={
+                    "Authorization": f"Bot {bot_token}",
+                    "Content-Type": "application/json",
+                },
+                json={"content": discord_content},
+                timeout=10,
+            )
+            resp.raise_for_status()
+            delivery = "sent"
+        except Exception as e:
+            delivery = "failed"
+            error_message = str(e)
+
+    entry = {
+        "problem_url": str(req.problem_url),
+        "generated_at": req.generated_at.isoformat(),
+        "discord_delivery": delivery,
+        "error": error_message,
+        "received_at": datetime.utcnow().isoformat() + "Z",
+    }
+
+    with problem_url_lock:
+        problem_url_history.append(entry)
+
+    return {
+        "status": "accepted",
+        "discord_delivery": delivery,
+        "bot_token_configured": bool(bot_token),
+        "channel_configured": bool(channel_id),
+        "latest": entry,
+    }
+
+
+@app.get("/api/discord/problem-url/latest")
+def get_latest_problem_url_notification():
+    with problem_url_lock:
+        latest = problem_url_history[-1] if problem_url_history else None
+
+    if not latest:
+        return {"status": "empty", "message": "no problem url notification received yet"}
+
+    return {"status": "ok", "latest": latest, "count": len(problem_url_history)}
 
 
 @app.post("/api/test/ping")
@@ -614,4 +699,3 @@ def setup_page():
         return {"error": f"ファイルが見つかりません: {file_path}"}
         
     return FileResponse(file_path)
-    
