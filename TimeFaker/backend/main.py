@@ -39,6 +39,10 @@ PROFILE_GMT9_5 = os.getenv("MDM_PROFILE_GMT9_5")
 PROFILE_GMT10 = os.getenv("MDM_PROFILE_GMT10")
 PROFILE_GMT10_5 = os.getenv("MDM_PROFILE_GMT10_5")
 PROFILE_GMT11 = os.getenv("MDM_PROFILE_GMT11")
+DEFAULT_REVIEW_NOTIFY_DAYS_AFTER = 1
+DEFAULT_REVIEW_NOTIFY_HOUR_24 = 21
+SETTING_KEY_REVIEW_NOTIFY_DAYS_AFTER = "review_notify_days_after"
+SETTING_KEY_REVIEW_NOTIFY_HOUR_24 = "review_notify_hour_24"
 
 # DBテーブル作成
 models.Base.metadata.create_all(bind=engine)
@@ -301,6 +305,46 @@ class ProblemUrlNotifyRequest(BaseModel):
     generated_at: datetime
 
 
+class ReviewDelayConfigRequest(BaseModel):
+    days_after: int
+    hour_24: int
+
+
+def get_setting_value(db: Session, key: str) -> Optional[str]:
+    row = db.query(models.AppSetting).filter(models.AppSetting.key == key).first()
+    return row.value if row else None
+
+
+def set_setting_value(db: Session, key: str, value: str):
+    row = db.query(models.AppSetting).filter(models.AppSetting.key == key).first()
+    if row:
+        row.value = value
+    else:
+        db.add(models.AppSetting(key=key, value=value))
+
+
+def get_review_delay_config_values(db: Session) -> tuple[int, int]:
+    env_days = os.getenv("REVIEW_NOTIFY_DAYS_AFTER", str(DEFAULT_REVIEW_NOTIFY_DAYS_AFTER))
+    env_hour = os.getenv("REVIEW_NOTIFY_HOUR_24", str(DEFAULT_REVIEW_NOTIFY_HOUR_24))
+
+    days_raw = get_setting_value(db, SETTING_KEY_REVIEW_NOTIFY_DAYS_AFTER) or env_days
+    hour_raw = get_setting_value(db, SETTING_KEY_REVIEW_NOTIFY_HOUR_24) or env_hour
+
+    try:
+        days_after = int(days_raw)
+    except Exception:
+        days_after = DEFAULT_REVIEW_NOTIFY_DAYS_AFTER
+
+    try:
+        hour_24 = int(hour_raw)
+    except Exception:
+        hour_24 = DEFAULT_REVIEW_NOTIFY_HOUR_24
+
+    days_after = max(0, days_after)
+    hour_24 = min(23, max(0, hour_24))
+    return days_after, hour_24
+
+
 test_ping_history = deque(maxlen=100)
 test_ping_lock = threading.Lock()
 problem_url_history = deque(maxlen=100)
@@ -315,6 +359,33 @@ def get_problem_url_payload_sample():
     return {
         "problem_url": "https://example.com/self-check",
         "generated_at": "2026-02-26T10:30:00+09:00"
+    }
+
+
+@app.get("/api/config/review-delay")
+def get_review_delay_config(db: Session = Depends(get_db)):
+    days_after, hour_24 = get_review_delay_config_values(db)
+    return {
+        "days_after": days_after,
+        "hour_24": hour_24,
+    }
+
+
+@app.put("/api/config/review-delay")
+def update_review_delay_config(req: ReviewDelayConfigRequest, db: Session = Depends(get_db)):
+    if req.days_after < 0:
+        raise HTTPException(status_code=400, detail="days_after must be >= 0")
+    if req.hour_24 < 0 or req.hour_24 > 23:
+        raise HTTPException(status_code=400, detail="hour_24 must be between 0 and 23")
+
+    set_setting_value(db, SETTING_KEY_REVIEW_NOTIFY_DAYS_AFTER, str(req.days_after))
+    set_setting_value(db, SETTING_KEY_REVIEW_NOTIFY_HOUR_24, str(req.hour_24))
+    db.commit()
+
+    return {
+        "status": "updated",
+        "days_after": req.days_after,
+        "hour_24": req.hour_24,
     }
 
 
