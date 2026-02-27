@@ -70,7 +70,7 @@ export async function registerChimeraUser(dto: ChimeraRegisterDTO): Promise<stri
             .insert({
                 name: dto.name,
                 auth_type: dto.auth_type,
-                auth_payload: dto.auth_payload ?? {},
+                auth_payload: dto.auth_payload ?? null,
             })
             .select('id')
             .single();
