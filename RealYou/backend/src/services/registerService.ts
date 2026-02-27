@@ -65,9 +65,12 @@ export const registerService = {
 // ダミー認証用ユーザー登録（キメラプロジェクト向け）
 export async function registerChimeraUser(dto: ChimeraRegisterDTO): Promise<string> {
     if (dto.auth_type === 'dummy') {
+        const id = uuidv4();
+
         const { data, error } = await supabase
             .from('users')
             .insert({
+                id,
                 name: dto.name,
                 auth_type: dto.auth_type,
                 auth_payload: dto.auth_payload ?? null,
