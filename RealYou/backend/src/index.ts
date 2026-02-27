@@ -12,19 +12,22 @@ import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const allowedOrigins = process.env.FRONTEND_URL
-    ? process.env.FRONTEND_URL.split(',')
-    : ['http://localhost:3000'];
+const allowedOriginsStr = process.env.FRONTEND_URL || 'http://localhost:3000,http://localhost:3001,http://localhost:5173';
+const allowedOrigins = allowedOriginsStr.split(',');
 
 // Middleware
 app.use(cors({
     origin: (origin, callback) => {
+        // originがundefined（Postman等からの直接アクセス）の場合は許可
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
         }
     },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true,
 }));
 app.use(express.json());
 
