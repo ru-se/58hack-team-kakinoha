@@ -100,6 +100,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 3000);
 
+  // ======== Auth Mock Logic ========
+  const authOverlay = document.getElementById('auth-overlay');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  const authUsernameInput = document.getElementById('auth-username');
+  const authConfirmBtn = document.getElementById('auth-confirm-btn');
+  const mockStartBtn = document.getElementById('mock-start-btn');
+  const loadingProgress = document.getElementById('loading-progress');
+  const loadingText = document.getElementById('loading-text');
+
+  const savedUser = localStorage.getItem('chimera_username');
+  if (savedUser) {
+      portalView.classList.remove('hidden');
+  } else {
+      if (authOverlay) authOverlay.classList.remove('hidden');
+  }
+
+  if (authConfirmBtn) {
+      authConfirmBtn.addEventListener('click', () => {
+          const userVal = authUsernameInput.value.trim() || 'ANONYMOUS';
+          authOverlay.classList.add('hidden');
+          loadingOverlay.classList.remove('hidden');
+          
+          let progress = 0;
+          const interval = setInterval(() => {
+              progress += Math.random() * 15;
+              if (progress >= 100) {
+                  progress = 100;
+                  clearInterval(interval);
+                  loadingText.textContent = 'ACCESS GRANTED.';
+                  loadingText.style.color = '#0f0';
+                  mockStartBtn.classList.remove('hidden');
+              }
+              loadingProgress.style.width = progress + '%';
+          }, 200);
+
+          mockStartBtn.onclick = () => {
+              localStorage.setItem('chimera_username', userVal);
+              loadingOverlay.classList.add('hidden');
+              portalView.classList.remove('hidden');
+              triggerFlash();
+              document.body.style.animation = 'terminalShake 0.4s';
+              setTimeout(() => document.body.style.animation = '', 400);
+          };
+      });
+  }
+  // ===================================
+
   // 動的背景の要素群
   const bgElements = {
     talkscope: document.querySelector('.bg-talkscope'),
