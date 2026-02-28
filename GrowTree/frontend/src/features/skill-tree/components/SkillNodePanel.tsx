@@ -29,6 +29,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   infra: "Infrastructure",
   design: "UI/UX Design",
   game: "Game Dev",
+  mixed: "Achievement",
 };
 
 const CAT_COLORS: Record<string, string> = {
@@ -39,27 +40,30 @@ const CAT_COLORS: Record<string, string> = {
   infra: "#34d399",
   design: "#c084fc",
   game: "#fb923c",
+  mixed: "#f472b6",
 };
 
 export function SkillNodePanel({ node, userPoints, onClose, onUnlock }: Props) {
   const catColor = CAT_COLORS[node.category] || "#888";
   const statusColor = STATUS_COLORS[node.status];
-  const canUnlock = node.status === "available" && (userPoints ?? 0) >= node.requiredPoints;
+  
+  const isMixed = node.category === "mixed";
 
   return (
     <div
       className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 w-[360px] max-w-[calc(100vw-2rem)] p-4 font-sans animate-in slide-in-from-bottom-4 duration-200"
       style={{
         background: "rgba(31, 41, 55, 0.95)",
-        border: "4px solid #e8b849",
-        boxShadow:
-          "inset 2px 2px 0 #fcd34d, inset -2px -2px 0 #b45309, 0 4px 0 #000",
+        border: `4px solid ${isMixed ? "#db2777" : "#e8b849"}`,
+        boxShadow: isMixed
+          ? "inset 2px 2px 0 #fbcfe8, inset -2px -2px 0 #831843, 0 4px 0 #000"
+          : "inset 2px 2px 0 #fcd34d, inset -2px -2px 0 #b45309, 0 4px 0 #000",
         imageRendering: "pixelated",
       }}
     >
       <button
         onClick={onClose}
-        className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center border-2 border-[#e8b849] bg-[#1f2937] text-sm text-[#e8b849] hover:bg-[#e8b849] hover:text-[#1f2937]"
+        className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center border-2 border-gray-600 bg-[#1f2937] text-sm text-gray-400 hover:bg-gray-600 hover:text-white"
         aria-label="Close panel"
       >
         X
@@ -106,35 +110,35 @@ export function SkillNodePanel({ node, userPoints, onClose, onUnlock }: Props) {
       </div>
 
       {/* Unlock action section */}
-      {node.status === "available" && (
+      {node.status !== "completed" && (
         <div className="mt-2 text-center flex flex-col items-center gap-2">
-          <div className="text-xs font-bold" style={{ color: "#a5b4fc" }}>
-            必要ポイント: <span className="text-lg text-white">{node.requiredPoints}pt</span> 
-            <span className="text-gray-400 ml-1">(所持: {userPoints ?? 0}pt)</span>
-          </div>
+          {isMixed ? (
+            <div className="text-xs font-bold w-full" style={{ color: "#a5b4fc" }}>
+              必要到達度:
+              <br />
+              {node.requiredPointsMap && Object.entries(node.requiredPointsMap).map(([reqCat, reqPoints]) => (
+                <div key={reqCat} className="text-white bg-gray-800 border border-gray-600 mt-1 py-1 px-2 rounded-md">
+                   {CATEGORY_LABELS[reqCat] || reqCat}: {reqPoints}pt 以上
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-xs font-bold" style={{ color: "#a5b4fc" }}>
+              解放条件: <span className="text-lg text-white font-mono">{node.requiredPoints}pt</span>
+              <span className="text-gray-400 ml-1"> (現在: {userPoints}pt)</span>
+            </div>
+          )}
           
-          <button
-            onClick={() => onUnlock?.()}
-            disabled={!canUnlock}
-            className="w-full py-2 text-sm font-bold tracking-widest transition-all mt-1 uppercase"
-            style={{
-              background: canUnlock ? "#14532d" : "#374151",
-              border: `2px solid ${canUnlock ? "#4ade80" : "#6b7280"}`,
-              color: canUnlock ? "#4ade80" : "#9ca3af",
-              opacity: canUnlock ? 1 : 0.6,
-              cursor: canUnlock ? "pointer" : "not-allowed",
-              boxShadow: canUnlock ? "0 0 10px rgba(74,222,128,0.3)" : "none",
-            }}
-          >
-            {canUnlock ? "スキル解放" : "ポイント不足"}
-          </button>
+          <div className="w-full text-xs text-center py-2 mt-2 font-bold tracking-wider" style={{ background: "#1f2937", border: "1px solid #374151", color: "#9ca3af" }}>
+             ポイント到達により自動解放されます
+          </div>
         </div>
       )}
 
-      {node.status === "locked" && (
+      {node.status === "completed" && (
         <div className="mt-2 text-xs text-center py-2 font-bold tracking-wider"
-             style={{ background: "#374151", border: "1px solid #6b7280", color: "#9ca3af" }}>
-          LOCKED - PREREQUISITES REQUIRED
+             style={{ background: "#14532d", border: "1px solid #4ade80", color: "#4ade80" }}>
+          SKILL UNLOCKED
         </div>
       )}
     </div>

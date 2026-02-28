@@ -1,17 +1,18 @@
 // /Users/ryu/58/58hack-team-kakinoha/RealYou/backend/src/services/quizService.ts
 import { QuizSubmitRequestDTO, QuizSubmitResponseDTO } from '../schemas/quizSchema';
-import { calculateQuizScore } from '../analysis/quizScorer';
 import { analyzeGap } from '../analysis/gapAnalyzer';
 import { quizRepository } from '../repositories/quizRepository';
 
 export const quizService = {
-    async submitQuiz(request: QuizSubmitRequestDTO): Promise<QuizSubmitResponseDTO> {
-        // 1. 解答の採点 (実際の点数算出)
-        // src/analysis/quizScorer.tsの純粋な関数を呼び出す
-        const actualScore = calculateQuizScore(request.answers);
+    async submitQuiz(
+        correctCount: number,
+        totalQuestions: number,
+        request: QuizSubmitRequestDTO
+    ): Promise<QuizSubmitResponseDTO> {
+        // 1. 解答の採点 (呼び出し元で計算済みのためscoreAnswersは呼ばない)
+        const actualScore = Math.round((correctCount / totalQuestions) * 100);
 
         // 2. ギャップ分析とフィードバックの生成
-        // src/analysis/gapAnalyzer.tsの純粋な関数を呼び出す
         const analysisResult = analyzeGap(actualScore, request.self_evaluation_level);
 
         // 3. Response DTO にマッピングして返す

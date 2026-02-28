@@ -24,6 +24,7 @@ const CAT: Record<string, string> = {
   infra:    "#34d399",
   design:   "#c084fc",
   game:     "#fb923c",
+  mixed:    "#f472b6",
 };
 
 /* ---- particle ---- */

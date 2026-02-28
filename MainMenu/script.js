@@ -100,6 +100,87 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 3000);
 
+  // ======== Auth Mock Logic ========
+  const authOverlay = document.getElementById('auth-overlay');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  const authUsernameInput = document.getElementById('auth-username');
+  const authConfirmBtn = document.getElementById('auth-confirm-btn');
+  const loadingProgress = document.getElementById('loading-progress');
+  const loadingText = document.getElementById('loading-text');
+
+  const savedUser = localStorage.getItem('chimera_username');
+  if (savedUser) {
+      portalView.classList.remove('hidden');
+  } else {
+      if (authOverlay) authOverlay.classList.remove('hidden');
+  }
+
+  if (authConfirmBtn) {
+      authConfirmBtn.addEventListener('click', () => {
+        const userVal = authUsernameInput.value.trim() || 'ANONYMOUS';
+
+        const enterPortal = () => {
+          localStorage.setItem('chimera_username', userVal);
+          loadingOverlay.classList.add('hidden');
+          portalView.classList.remove('hidden');
+          triggerFlash();
+          document.body.style.animation = 'terminalShake 0.4s';
+          setTimeout(() => document.body.style.animation = '', 400);
+        };
+
+        authOverlay.classList.add('hidden');
+        loadingOverlay.classList.remove('hidden');
+        loadingText.textContent = 'AUTHENTICATING...';
+        loadingText.style.color = '#fff';
+        loadingProgress.style.width = '20%';
+
+        fetch('http://127.0.0.1:3001/api/register/chimera', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: userVal,
+                auth_type: 'dummy'
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error(`APIエラー: ${response.status}`);
+            }
+        })
+        .then(data => {
+            console.log('APIレスポンス:', data.message);
+          if (!data.user_id) {
+            throw new Error('user_id が返却されませんでした');
+          }
+
+          localStorage.setItem('chimera_user_id', data.user_id);
+          loadingProgress.style.width = '100%';
+          loadingText.textContent = 'ACCESS GRANTED.';
+          loadingText.style.color = '#0f0';
+
+          setTimeout(() => {
+            enterPortal();
+          }, 300);
+        })
+        .catch(error => {
+            console.error('通信エラー:', error);
+          loadingProgress.style.width = '0%';
+          loadingText.textContent = 'AUTH FAILED.';
+          loadingText.style.color = '#f00';
+
+          setTimeout(() => {
+            loadingOverlay.classList.add('hidden');
+            authOverlay.classList.remove('hidden');
+          }, 1200);
+        });
+    });
+  }
+  // ===================================
+
   // 動的背景の要素群
   const bgElements = {
     talkscope: document.querySelector('.bg-talkscope'),
@@ -417,17 +498,58 @@ document.addEventListener('DOMContentLoaded', () => {
       tfSetBtn.addEventListener('click', () => {
           const formattedDate = tfDateInput.value;
           const h = tfHoursInput.value;
-          
-          tfStatusMsg.textContent = `OVERRIDE ACCEPTED: ${formattedDate} ${h}:00`;
-          tfStatusMsg.style.color = '#0ff';
-          
-          triggerFlash();
-          document.body.style.animation = 'terminalShake 0.4s';
-          setTimeout(() => document.body.style.animation = '', 400);
 
-          setTimeout(() => {
-              tfModal.classList.remove('active');
-          }, 1500);
+          console.log("取得した日付:", formattedDate);
+          console.log("取得した時間:", h);
+          
+          const hour24 = Number(h); // 時間を文字列から数値に変換
+
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // 時間をリセットして日付のみで比較
+          const targetDate = new Date(formattedDate);
+          targetDate.setHours(0, 0, 0, 0);
+          
+          const diffTime = targetDate.getTime() - today.getTime();
+          const daysAfter = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+          const payload = {
+              "days_after": daysAfter,
+              "hour_24": hour24
+          };
+          console.log("送信するデータ:", payload);
+
+          fetch('http://127.0.0.1:8000/api/config/review-delay', {
+              method: 'PUT',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(payload)
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error(`HTTPエラー: ${response.status}`);
+              }
+              return response.json();
+          })
+          .then(data => {
+              console.log("API送信成功:", data);
+              
+              tfStatusMsg.textContent = `OVERRIDE ACCEPTED: ${formattedDate} ${h}:00`;
+              tfStatusMsg.style.color = '#0ff';
+              
+              triggerFlash();
+              document.body.style.animation = 'terminalShake 0.4s';
+              setTimeout(() => document.body.style.animation = '', 400);
+
+              setTimeout(() => {
+                  tfModal.classList.remove('active');
+              }, 1500);
+          })
+          .catch(error => {
+              console.error("API送信エラー:", error);
+              tfStatusMsg.textContent = `ERROR: CONNECTION FAILED`;
+              tfStatusMsg.style.color = '#f00';
+          });
       });
   }
 });

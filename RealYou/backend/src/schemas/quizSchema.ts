@@ -4,11 +4,10 @@ import { z } from 'zod';
 export const QuizSubmitRequestSchema = z.object({
     user_id: z.string().uuid("Invalid UUID format"),
     self_evaluation_level: z.number().int().min(1).max(5),
-    // 任意の数の問題（q_1, q_2, ...）に対応し、選択肢は1〜4に制限
-    answers: z.record(
-        z.string().regex(/^q_\d+$/, "Keys must be in the format 'q_1', 'q_2', etc."),
-        z.number().int().min(1).max(4)
-    )
+    answers: z.array(z.object({
+        question_id: z.string().uuid("Invalid UUID for question_id"),
+        selected_index: z.number().int()
+    }))
 });
 
 export type QuizSubmitRequestDTO = z.infer<typeof QuizSubmitRequestSchema>;
