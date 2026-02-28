@@ -76,6 +76,51 @@
         <iframe id="app-frame" src="" frameborder="0"></iframe>
     </div>
 
+    <!-- TimeFaker Alarm Modal -->
+    <div id="timefaker-modal" class="tf-modal">
+        <div class="tf-modal-overlay"></div>
+        <div class="tf-modal-content">
+            <div class="scanlines" style="z-index: 1; pointer-events: none;"></div>
+            <div class="tf-modal-header glitch-text" data-text="TEMPORAL OVERRIDE">TEMPORAL OVERRIDE</div>
+            <div class="tf-modal-body" style="z-index: 2;">
+                <!-- NEW Quick Actions -->
+                <div class="tf-quick-actions">
+                    <button id="tf-btn-now" class="tf-quick-btn">SYNC<br>NOW</button>
+                    <button id="tf-btn-24h" class="tf-quick-btn">FFWD<br>24H</button>
+                    <button id="tf-btn-3d" class="tf-quick-btn">FFWD<br>3 DAYS</button>
+                </div>
+
+                <!-- NEW Date Section -->
+                <div class="tf-date-group">
+                    <button id="tf-date-prev" class="tf-arrow-btn">◄</button>
+                    <input type="date" id="tf-date-input" class="tf-date-input">
+                    <button id="tf-date-next" class="tf-arrow-btn">►</button>
+                </div>
+
+                <!-- UPDATED Time Section (Slot Machine Feel) -->
+                <div class="tf-input-group">
+                    <div class="tf-slot">
+                        <button id="tf-hour-up" class="tf-slot-btn">▲</button>
+                        <input type="number" id="tf-hours" class="tf-time-input" min="0" max="23" value="00">
+                        <button id="tf-hour-down" class="tf-slot-btn">▼</button>
+                    </div>
+                    <span class="tf-colon">:</span>
+                    <div class="tf-slot">
+                        <button id="tf-minute-up" class="tf-slot-btn">▲</button>
+                        <input type="number" id="tf-minutes" class="tf-time-input" min="0" max="59" value="00">
+                        <button id="tf-minute-down" class="tf-slot-btn">▼</button>
+                    </div>
+                </div>
+
+                <div class="tf-message" id="tf-status-msg">AWAITING INPUT...</div>
+            </div>
+            <div class="tf-modal-footer" style="z-index: 2;">
+                <button id="tf-cancel-btn" class="tf-btn tf-btn-cancel">CANCEL</button>
+                <button id="tf-set-btn" class="tf-btn tf-btn-set">SET ALARM</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="./script.js"></script>
 </body>
 
