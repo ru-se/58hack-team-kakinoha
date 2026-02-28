@@ -269,6 +269,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // クリックイベント
     card.addEventListener('click', () => {
+      if (app.id === 'timefaker') {
+         const modal = document.getElementById('timefaker-modal');
+         if (modal) {
+             triggerFlash();
+             document.body.style.animation = 'terminalShake 0.2s';
+             setTimeout(() => document.body.style.animation = '', 200);
+             modal.classList.add('active');
+             
+             // Pre-fill current time
+             const now = new Date();
+             document.getElementById('tf-hours').value = String(now.getHours()).padStart(2, '0');
+             document.getElementById('tf-minutes').value = String(now.getMinutes()).padStart(2, '0');
+             document.getElementById('tf-status-msg').textContent = 'AWAITING INPUT...';
+             document.getElementById('tf-status-msg').style.color = '#fff';
+         }
+         return;
+      }
+
       if (app.url === '#') {
         triggerFlash();
         alert("CRITICAL ERROR 0x000F: CANNOT MOUNT VOLUME.\nSYSTEM INSTABILITY DETECTED.");
@@ -302,4 +320,114 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 500);
     }, 400);
   });
+
+  // TimeFaker Modal Logic
+  const tfModal = document.getElementById('timefaker-modal');
+  const tfCancelBtn = document.getElementById('tf-cancel-btn');
+  const tfSetBtn = document.getElementById('tf-set-btn');
+  const tfStatusMsg = document.getElementById('tf-status-msg');
+  
+  // Date Elements
+  const tfDateInput = document.getElementById('tf-date-input');
+  const tfDatePrev = document.getElementById('tf-date-prev');
+  const tfDateNext = document.getElementById('tf-date-next');
+  
+  // Time Elements
+  const tfHoursInput = document.getElementById('tf-hours');
+  const tfMinutesInput = document.getElementById('tf-minutes');
+  const tfHourUp = document.getElementById('tf-hour-up');
+  const tfHourDown = document.getElementById('tf-hour-down');
+
+  // Quick Action Elements
+  const tfBtnNow = document.getElementById('tf-btn-now');
+  const tfBtn24h = document.getElementById('tf-btn-24h');
+  const tfBtn3d = document.getElementById('tf-btn-3d');
+
+  let currentTemporalState = new Date();
+
+  const syncStateToUI = () => {
+      currentTemporalState.setMinutes(0);
+      currentTemporalState.setSeconds(0);
+      
+      if(!tfDateInput || !tfHoursInput || !tfMinutesInput) return;
+      
+      const y = currentTemporalState.getFullYear();
+      const m = String(currentTemporalState.getMonth() + 1).padStart(2, '0');
+      const d = String(currentTemporalState.getDate()).padStart(2, '0');
+      tfDateInput.value = `${y}-${m}-${d}`;
+
+      tfHoursInput.value = String(currentTemporalState.getHours()).padStart(2, '0');
+      tfMinutesInput.textContent = '00';
+      
+      // Flash inputs to show change
+      [tfHoursInput, tfMinutesInput].forEach(el => {
+          el.style.textShadow = '0 0 20px #fff, 0 0 30px #0ff';
+          el.style.color = '#fff';
+          setTimeout(() => {
+              el.style.textShadow = '';
+              el.style.color = '';
+          }, 150);
+      });
+  };
+
+  const syncUIToState = () => {
+      const dateParts = tfDateInput.value.split('-');
+      if(dateParts.length === 3) {
+          currentTemporalState.setFullYear(parseInt(dateParts[0]));
+          currentTemporalState.setMonth(parseInt(dateParts[1]) - 1);
+          currentTemporalState.setDate(parseInt(dateParts[2]));
+      }
+      currentTemporalState.setHours(parseInt(tfHoursInput.value) || 0);
+      currentTemporalState.setMinutes(0);
+  };
+
+  if (tfModal && tfCancelBtn && tfSetBtn) {
+      // Modifiers
+      tfDatePrev.addEventListener('click', () => { currentTemporalState.setDate(currentTemporalState.getDate() - 1); syncStateToUI(); });
+      tfDateNext.addEventListener('click', () => { currentTemporalState.setDate(currentTemporalState.getDate() + 1); syncStateToUI(); });
+      
+      tfHourUp.addEventListener('click', () => { currentTemporalState.setHours((currentTemporalState.getHours() + 1) % 24); syncStateToUI(); });
+      tfHourDown.addEventListener('click', () => { currentTemporalState.setHours((currentTemporalState.getHours() - 1 + 24) % 24); syncStateToUI(); });
+
+      // Quick Actions
+      tfBtnNow.addEventListener('click', () => { currentTemporalState = new Date(); syncStateToUI(); tfStatusMsg.textContent = 'SYNCED TO PRESENT HOUR'; });
+      tfBtn24h.addEventListener('click', () => { currentTemporalState.setHours(currentTemporalState.getHours() + 24); syncStateToUI(); tfStatusMsg.textContent = 'FAST FORWARD 24H'; });
+      tfBtn3d.addEventListener('click', () => { currentTemporalState.setDate(currentTemporalState.getDate() + 3); syncStateToUI(); tfStatusMsg.textContent = 'FAST FORWARD 3 DAYS'; });
+
+      // Manual Inputs
+      tfDateInput.addEventListener('change', syncUIToState);
+      
+      const inputs = [tfHoursInput];
+      inputs.forEach(input => {
+          input.addEventListener('change', (e) => {
+              let val = parseInt(e.target.value) || 0;
+              let max = parseInt(e.target.max);
+              if (val > max) val = max;
+              if (val < 0) val = 0;
+              e.target.value = String(val).padStart(2, '0');
+              syncUIToState();
+          });
+      });
+
+      // Base Modal interactions
+      tfCancelBtn.addEventListener('click', () => {
+          tfModal.classList.remove('active');
+      });
+
+      tfSetBtn.addEventListener('click', () => {
+          const formattedDate = tfDateInput.value;
+          const h = tfHoursInput.value;
+          
+          tfStatusMsg.textContent = `OVERRIDE ACCEPTED: ${formattedDate} ${h}:00`;
+          tfStatusMsg.style.color = '#0ff';
+          
+          triggerFlash();
+          document.body.style.animation = 'terminalShake 0.4s';
+          setTimeout(() => document.body.style.animation = '', 400);
+
+          setTimeout(() => {
+              tfModal.classList.remove('active');
+          }, 1500);
+      });
+  }
 });
