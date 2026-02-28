@@ -1,7 +1,6 @@
 // /Users/ryu/58/58hack-team-kakinoha/RealYou/backend/src/routes/quizzes.ts
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import rateLimit from 'express-rate-limit';
 import { quizService } from '../services/quizService';
 import { QuizSubmitRequestSchema } from '../schemas/quizSchema';
 import { generateQuizFromPresentation, saveQuizToDb } from '../services/aiGenerationService';
@@ -16,14 +15,7 @@ const GenerateRequestSchema = z.object({
     presentation_text: z.string().min(1).max(10000),
 });
 
-// 1分間に5回まで（Gemini API のクォータ消費・開発中の連打を防止）
-const generateLimiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 5,
-    message: { error: 'リクエストが多すぎます。しばらく待ってください。' },
-});
-
-router.post('/generate', generateLimiter, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/generate', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const parsed = GenerateRequestSchema.safeParse(req.body);
         if (!parsed.success) {
