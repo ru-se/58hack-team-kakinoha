@@ -21,38 +21,45 @@ router.post('/generate', async (req: Request, res: Response) => {
 });
 
 // =========================================================
-// モックAPI: 問題一覧取得 (GET /:quiz_id/questions)
+// 問題一覧取得 (GET /:quiz_id/questions) 本実装
 // =========================================================
-router.get('/:quiz_id/questions', (req: Request, res: Response) => {
-    const quiz_id = req.params.quiz_id;
-    res.status(200).json({
-        questions: [
-            {
-                id: "dummy-q-1",
-                quiz_id,
-                order_num: 1,
-                question_text: "（ダミー1）このハッカソンで一番大事なことは？",
-                options: ["睡眠", "気合い", "フロントを止めないこと", "おやつ"],
-                correct_index: 2
-            },
-            {
-                id: "dummy-q-2",
-                quiz_id,
-                order_num: 2,
-                question_text: "（ダミー2）最強のデバッグ方法は？",
-                options: ["console.log", "祈る", "再起動", "先輩に聞く"],
-                correct_index: 0
-            },
-            {
-                id: "dummy-q-3",
-                quiz_id,
-                order_num: 3,
-                question_text: "（ダミー3）締め切り前夜にすべきことは？",
-                options: ["徹夜", "早寝", "現実逃避", "スコープ削減"],
-                correct_index: 3
-            }
-        ]
-    });
+router.get('/:quiz_id/questions', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { quiz_id } = req.params;
+
+        // バリデーション
+        if (!quiz_id) {
+            return res.status(400).json({ error: 'quiz_id は必須です' });
+        }
+
+        const { supabase } = await import('../db/client');
+
+        // quiz の存在確認
+        const { data: quiz, error: quizError } = await supabase
+            .from('quizzes')
+            .select('id')
+            .eq('id', quiz_id)
+            .single();
+
+        if (quizError || !quiz) {
+            return res.status(404).json({ error: '指定されたクイズが存在しません' });
+        }
+
+        // questions を order_num 昇順で取得
+        const { data: questions, error: questionsError } = await supabase
+            .from('questions')
+            .select('id, quiz_id, order_num, question_text, options, correct_index')
+            .eq('quiz_id', quiz_id)
+            .order('order_num', { ascending: true });
+
+        if (questionsError) {
+            throw new Error(`問題の取得に失敗しました: ${questionsError.message}`);
+        }
+
+        res.status(200).json({ questions: questions ?? [] });
+    } catch (err) {
+        next(err);
+    }
 });
 
 // =========================================================
