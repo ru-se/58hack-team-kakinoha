@@ -1,9 +1,16 @@
 :root {
-    --text-default: #fff;
-    --tape-color: rgba(180, 180, 180, 0.75);
-    --wire-color: #333;
-    --nerve: #00ffcc;
-    --whisper-text: #666;
+    --bg-color: #0a0515;
+    /* より深い夜の青へ変更 */
+    --text-primary: #fff;
+    --text-glitch: #ff0055;
+    --whisper-text: #0f0;
+
+    /* Semantic Grid Setup */
+    --grid-left-width: 1.2fr;
+    --grid-right-realyou-width: 1fr;
+    --grid-right-growtree-width: 1fr;
+    --grid-top-height: 1.5fr;
+    --grid-bottom-height: 0.8fr;
 }
 
 * {
@@ -538,16 +545,23 @@ body {
     opacity: 0.5;
 }
 
-/* 非対称・不規則なカオスレイアウト */
+/* 階層順序を明確にした Semantic Split Grid レイアウト */
 .chaos-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: var(--grid-left-width) var(--grid-right-realyou-width) var(--grid-right-growtree-width);
+    grid-template-rows: var(--grid-top-height) var(--grid-bottom-height);
+    grid-template-areas:
+        "talkscope realyou growtree"
+        "timefaker realyou growtree";
     gap: 2rem;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 2rem 5rem;
+    /* 再び適度な隙間を持たせる */
+    max-width: 1400px;
+    height: clamp(500px, 90vh, 1000px);
+    /* タイトルが無い分、画面を極限まで縦に使う */
+    width: 95vw;
+    margin: 3vh auto 0;
+    /* 上に少しだけ隙間を開ける */
+    padding: 0 1rem 1rem;
     position: relative;
 }
 
@@ -559,6 +573,7 @@ body {
     color: inherit;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
+    /* Gridセルを完全に充填させるため以前のFlex制約をリセット */
 }
 
 /* ホバーされていないカードをボカして沈ませる（Focus効果） */
@@ -576,16 +591,26 @@ body {
    TALKSCOPE: BUBBLE ARCHITECTURE
    ========================================= */
 .app-card.talkscope {
+    grid-area: talkscope;
     background: transparent;
     border: none;
     box-shadow: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 400px;
     transform: none;
-    cursor: pointer;
+    cursor: default;
+    pointer-events: none;
+    /* 透明な親要素全体の判定を消す */
     transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bubble-layout {
+    pointer-events: none;
+    /* 外枠の判定は持たない */
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
 .app-card.talkscope:hover {
@@ -607,8 +632,10 @@ body {
 
 .bubble-layout {
     position: relative;
-    width: 300px;
-    height: 300px;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* 外枠の判定は持たない */
 }
 
 .main-bubble {
@@ -616,10 +643,10 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 140px;
-    height: 140px;
+    width: 150px;
+    /* 大サイズ復活 */
+    height: 150px;
     background: rgba(0, 20, 50, 0.65);
-    /* デフォルトも少し濃く */
     backdrop-filter: blur(25px);
     border: 2px solid rgba(255, 255, 255, 0.6);
     border-radius: 50%;
@@ -628,12 +655,16 @@ body {
     justify-content: center;
     font-weight: 900;
     color: #fff;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    /* 見やすい大きさに復元 */
     z-index: 10;
     box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
     animation: pulse 4s infinite ease-in-out;
     transition: all 0.4s ease;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    pointer-events: auto;
+    /* バブルだけ当たり判定を持つ */
+    cursor: pointer;
 }
 
 .sub-bubble {
@@ -647,9 +678,13 @@ body {
     justify-content: center;
     color: #fff;
     padding: 1rem;
+    /* ゆとりあるパディング復活 */
     text-align: center;
     transition: all 0.4s ease;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    pointer-events: auto;
+    /* サブバブルも当たり判定をもつ */
+    cursor: pointer;
 }
 
 .app-card.talkscope:hover .sub-bubble {
@@ -661,18 +696,20 @@ body {
 }
 
 .sub-bubble.info {
-    bottom: 10%;
-    right: -20px;
+    bottom: -10px;
+    right: 5%;
     width: 120px;
+    /* 存在感復活 */
     height: 120px;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     z-index: 5;
 }
 
 .sub-bubble.icon {
-    top: 0;
-    left: -10px;
+    top: -10px;
+    left: 5%;
     width: 80px;
+    /* 大きく戻す */
     height: 80px;
     font-size: 2rem;
     z-index: 5;
@@ -731,15 +768,15 @@ body {
    REALYOU: CHAT UI ARCHITECTURE
    ========================================= */
 .app-card.realyou {
+    grid-area: realyou;
     background: #fff;
-    border: 8px solid #000;
+    border: 12px solid #222;
+    /* よりスマホらしい太枠に */
     border-radius: 40px;
-    padding: 0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     box-shadow: 15px 15px 0 #ff0055;
-    transform: rotate(2deg) translateY(20px);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -773,6 +810,7 @@ body {
 .chat-header {
     background: #f0f0f0;
     padding: 0.8rem 1.5rem;
+    /* 読みやすいパディング復元 */
     border-bottom: 5px solid #000;
     display: flex;
     justify-content: space-between;
@@ -790,9 +828,11 @@ body {
 
 .chat-body {
     padding: 1.5rem;
+    /* 豪華なゆとり復活 */
     display: flex;
     flex-direction: column;
     gap: 1.2rem;
+    /* 文字が詰まらないように */
     flex: 1;
     background: #e5ddd5;
     background-image: radial-gradient(#d3c9bf 1px, transparent 1px);
@@ -805,6 +845,7 @@ body {
     border-radius: 25px;
     font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 0.95rem;
+    /* 綺麗に読めるサイズへ */
     font-weight: 500;
     color: #000;
     border: 3px solid #000;
@@ -828,7 +869,8 @@ body {
     border: none;
     box-shadow: none;
     background: transparent;
-    font-size: 2.5rem;
+    font-size: 3rem;
+    /* 感情豊かに巨大化 */
     align-self: center;
 }
 
@@ -836,16 +878,17 @@ body {
    GROWTREE: TREE ARCHITECTURE
    ========================================= */
 .app-card.growtree {
+    grid-area: growtree;
     background: #0d1b0d;
     border: 5px solid #2C5F2D;
     border-radius: 20px;
     position: relative;
     overflow: hidden;
-    padding: 3rem;
+    padding: 2.5rem;
+    /* 美しい余白 */
     color: #559C71;
     box-shadow: inset 0 0 60px #000, 0 15px 40px rgba(0, 0, 0, 0.7);
     transform: rotate(-2deg);
-    min-height: 380px;
     transition: all 0.4s ease;
 }
 
@@ -860,22 +903,26 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    /* 縦長空間の下から上へ育つ配置 */
 }
 
 .tree-svg {
     position: absolute;
-    top: 0;
+    bottom: -10%;
+    /* 縦長空間を下から生えるように */
     right: 0;
     width: 100%;
-    height: 100%;
+    height: 120%;
+    /* 縦長空間を活かす高さ */
     color: rgba(44, 95, 45, 0.4);
     z-index: 0;
     pointer-events: none;
+    transform-origin: bottom center;
     transition: transform 0.6s ease;
 }
 
 .app-card.growtree:hover .tree-svg {
-    transform: scale(1.1) translateY(-5%);
+    transform: scale(1.1) translateY(-10%);
     fill: rgba(85, 156, 113, 0.6);
 }
 
@@ -886,7 +933,8 @@ body {
 
 .app-card.growtree .card-title {
     font-family: 'DotGothic16', sans-serif;
-    font-size: 3rem;
+    font-size: 2.5rem;
+    /* ハッカーらしい巨大文字復元 */
     color: #bbf7d0;
     margin-bottom: 0.8rem;
     text-shadow: 0 0 20px rgba(187, 247, 208, 0.5);
@@ -904,7 +952,7 @@ body {
 }
 
 .app-card.growtree .gt-xp-bar {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     height: 15px;
     background: #050a05;
     border: 2px solid #559C71;
@@ -940,18 +988,21 @@ body {
    TIMEFAKER: CLOCK ARCHITECTURE
    ========================================= */
 .app-card.timefaker {
+    grid-area: timefaker;
     background: #000;
     border: 4px solid #ff4400;
     border-radius: 10px;
-    padding: 2.5rem;
+    padding: 1.5rem 3rem;
+    /* 横方向の広がりを強調 */
     color: #ff4400;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: row;
+    /* 横長なので横並びに */
+    align-items: center;
+    justify-content: space-between;
     gap: 2rem;
     box-shadow: 0 0 40px rgba(255, 68, 0, 0.3), inset 0 0 30px rgba(255, 68, 0, 0.15);
     transform: rotate(1deg);
-    min-height: 350px;
     transition: all 0.2s;
 }
 
@@ -963,14 +1014,15 @@ body {
 
 .digital-clock {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 4rem;
+    font-size: 2.2rem;
+    /* 迫力のあるグリッチ時計へ復元 */
     font-weight: 900;
     text-align: center;
     background: rgba(255, 68, 0, 0.08);
-    padding: 1.5rem;
+    padding: 1.2rem;
     border: 2px dashed #ff4400;
-    letter-spacing: 0.2rem;
-    text-shadow: 0 0 20px rgba(255, 68, 0, 0.6);
+    letter-spacing: 0.15rem;
+    text-shadow: 0 0 15px rgba(255, 68, 0, 0.6);
     transition: all 0.2s;
 }
 
@@ -999,20 +1051,25 @@ body {
 }
 
 .clock-details {
-    text-align: center;
+    text-align: right;
+    /* 右寄せに */
     font-family: 'Share Tech Mono', monospace;
+    flex: 1;
 }
 
 .app-card.timefaker .card-title {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
+    /* 少し大きく */
     text-transform: uppercase;
-    margin-bottom: 0.5rem;
-    letter-spacing: 4px;
+    margin-bottom: 0.2rem;
+    letter-spacing: 2px;
 }
 
 .app-card.timefaker .card-desc {
-    font-size: 0.9rem;
-    opacity: 0.9;
+    display: block;
+    /* 横長スペースがあるため復活 */
+    font-size: 0.8rem;
+    opacity: 0.7;
 }
 
 .sys-log {
