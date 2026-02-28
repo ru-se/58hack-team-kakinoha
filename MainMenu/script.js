@@ -1,9 +1,13 @@
+// 環境検出: localhost なら開発環境
+const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
 const APPS = [
   {
     id: 'talkscope',
     name: 'TalkScope',
     description: 'AI-Powered Terminology Mapping.',
-    url: '/talkscope/',
+    url: '/talkscope/',              // prod: Vercel rewrite proxy
+    localUrl: 'http://localhost:5173', // local: Vite dev server
     icon: '🫧',
     className: 'talkscope',
     whisper: 'EXTRACTING INTENT FROM PACKET:%ID%...'
@@ -13,6 +17,7 @@ const APPS = [
     name: 'RealYou',
     description: 'Your true self, visualized.',
     url: '/realyou/',
+    localUrl: 'http://localhost:3001',
     icon: '💬',
     className: 'realyou',
     whisper: 'DETECTING EMOTIONAL DISSONANCE IN %ID%...'
@@ -22,6 +27,7 @@ const APPS = [
     name: 'GrowTree',
     description: 'Climb the tree of growth.',
     url: '/growtree/',
+    localUrl: 'http://localhost:3000',
     icon: '🌳',
     className: 'growtree',
     whisper: 'SYNTHESIZING EXPERIENTIAL DATA %ID%...'
@@ -30,12 +36,18 @@ const APPS = [
     id: 'timefaker',
     name: 'TimeFacker',
     description: 'Manipulate the temporal flow.',
-    url: '#', // Placeholder or real URL if known
+    url: '#',
+    localUrl: '#',
     icon: '🕒',
     className: 'timefaker',
     whisper: 'TEMPORAL DRIFT DETECTED IN SESSION %ID%...'
   }
 ];
+
+// 環境に応じたURLを返す
+function getAppUrl(app) {
+  return IS_LOCAL ? app.localUrl : app.url;
+}
 
 // 囁きの更新メッセージ
 const statuses = [
@@ -52,8 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const appView = document.getElementById('app-view');
   const appFrame = document.getElementById('app-frame');
   const backButton = document.getElementById('back-button');
-  const currentAppTitle = document.getElementById('current-app-title');
-  const whisperBar = document.getElementById('whisper-bar');
+const whisperBar = document.getElementById('whisper-bar');
 
   // ======== 共通演出システム ========
 
@@ -368,24 +379,22 @@ document.addEventListener('DOMContentLoaded', () => {
          return;
       }
 
-      if (app.url === '#') {
+      const targetUrl = getAppUrl(app);
+
+      if (targetUrl === '#') {
         triggerFlash();
         alert("CRITICAL ERROR 0x000F: CANNOT MOUNT VOLUME.\nSYSTEM INSTABILITY DETECTED.");
-        return; 
+        return;
       }
 
       triggerFlash();
       document.body.style.animation = 'terminalShake 0.2s';
       setTimeout(() => document.body.style.animation = '', 200);
 
-      portalView.classList.add('fade-out');
-      
-      appFrame.src = app.url;
-      currentAppTitle.textContent = `>>> MOUNTING: ${app.name} >>> CAUTION: INTEGRATION UNSTABLE >>> `;
-
+      // 別タブで各アプリを開く
       setTimeout(() => {
-        appView.classList.remove('hidden');
-      }, 300);
+        window.open(targetUrl, '_blank');
+      }, 200);
     });
 
     gridContainer.appendChild(card);
