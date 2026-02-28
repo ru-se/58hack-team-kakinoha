@@ -1,10 +1,30 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useMemo } from 'react';
-import { MOCK_PROBLEMS, ProblemStatus } from '../data/mockProblems';
+import { useState, useMemo, useEffect } from 'react';
+import { getQuizList, ApiQuiz } from '@/lib/api';
+import Spinner from '@/components/ui/Spinner';
 
 type FilterType = 'all' | 'unanswered' | 'not-perfect' | 'week';
+
+const GENRE_ICONS: Record<string, string> = {
+  web: '🌐',
+  ai: '🤖',
+  security: '🔒',
+  infrastructure: '⚙️',
+  design: '🎨',
+  game: '🎮',
+};
+
+const GENRE_LABELS: Record<string, string> = {
+  web: 'Web',
+  ai: 'AI',
+  security: 'Security',
+  infrastructure: 'Infra',
+  design: 'Design',
+  game: 'Game',
+};
+
 
 const getWeekString = (dateString: string) => {
   // ISO-8601 (Monday start) Week Calculation
@@ -18,11 +38,36 @@ const getWeekString = (dateString: string) => {
   return `${date.getFullYear()}-W${weekStr}`;
 };
 
+// TODO: 本番では localStorage の user_id のみ使用。DEV_USER_IDは削除すること
+const DEV_USER_ID = '46f441c6-cc35-4bd3-ab49-953f5a287c83';
+
 export default function ProblemListFlow() {
   const router = useRouter();
   const [filterType, setFilterType] = useState<FilterType>('all');
-  const [filterWeek, setFilterWeek] = useState<string>('2026-W09'); // Default to current week
+  const [filterWeek, setFilterWeek] = useState<string>(() => getWeekString(new Date().toISOString()));
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
+
+  const [quizzes, setQuizzes] = useState<ApiQuiz[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchQuizzes = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const userId = localStorage.getItem('user_id') ?? DEV_USER_ID;
+      const data = await getQuizList(userId);
+      setQuizzes(data.quizzes);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'クイズの取得に失敗しました');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuizzes();
+  }, []);
 
   // オペレーターのセリフ
   const operatorMessage = selectedProblemId
@@ -30,37 +75,27 @@ export default function ProblemListFlow() {
     : 'どの問題を解きますか？';
 
   const filteredProblems = useMemo(() => {
-    return MOCK_PROBLEMS.filter((problem) => {
+    return quizzes.filter((quiz) => {
       if (filterType === 'all') return true;
-      if (filterType === 'unanswered') return problem.status === 'unanswered';
-      if (filterType === 'not-perfect') return problem.status !== 'perfect';
-      if (filterType === 'week') return getWeekString(problem.date) === filterWeek;
+      if (filterType === 'unanswered' || filterType === 'not-perfect') {
+        return !quiz.answered;
+      }
+      if (filterType === 'week') return getWeekString(quiz.created_at) === filterWeek;
       return true;
     });
-  }, [filterType, filterWeek]);
+  }, [quizzes, filterType, filterWeek]);
 
   const handleSelectProblem = (id: string) => {
     if (selectedProblemId) return; // 既に選択済みなら何もしない
-    
+
     const audio = new Audio('/sounds/general-button-se.mp3');
-    audio.play().catch(() => {});
+    audio.play().catch(() => { });
 
     setSelectedProblemId(id);
 
     setTimeout(() => {
       router.push('/quiz');
     }, 2500);
-  };
-
-  const getStatusLabel = (status: ProblemStatus) => {
-    switch (status) {
-      case 'unanswered':
-        return null;
-      case 'answered':
-        return { text: '⭐️', className: 'text-lg bg-transparent border-none px-0 py-0' };
-      case 'perfect':
-        return { text: '⭐️💯', className: 'text-lg bg-transparent border-none px-0 py-0 tracking-widest' };
-    }
   };
 
   return (
@@ -102,7 +137,7 @@ export default function ProblemListFlow() {
               </div>
             </div>
           </div>
-          
+
           {filterType === 'week' && (
             <div className="mt-2 flex items-center gap-2">
               <span className="text-xs font-bold">週:</span>
@@ -118,45 +153,69 @@ export default function ProblemListFlow() {
 
         {/* リスト部分 */}
         <div className="flex-1 overflow-y-auto p-3 bg-gray-50 pb-8">
-          {filteredProblems.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col gap-4 items-center justify-center h-full text-black">
+              <Spinner />
+              <p className="font-bold">読み込み中...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col gap-4 items-center justify-center h-full">
+              <span className="text-4xl text-black">⚠️</span>
+              <p className="font-bold text-black text-center">{error}</p>
+              <button
+                onClick={fetchQuizzes}
+                className="rounded-xl border-[3px] border-black bg-[#e17a78] px-4 py-2 font-black tracking-widest text-white shadow-[4px_4px_0_0_#000] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000]"
+              >
+                もう一度試す
+              </button>
+            </div>
+          ) : filteredProblems.length === 0 ? (
             <div className="flex flex-col gap-2 items-center justify-center h-full text-gray-500">
               <span className="text-4xl text-black">🤔</span>
               <p className="font-bold text-black">見つかりません</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {filteredProblems.map((problem) => {
-                const statusInfo = getStatusLabel(problem.status);
-                const isSelected = selectedProblemId === problem.id;
-                const isOtherSelected = selectedProblemId && selectedProblemId !== problem.id;
+              {filteredProblems.map((quiz) => {
+                const isSelected = selectedProblemId === quiz.quiz_id;
+                const isOtherSelected = selectedProblemId && selectedProblemId !== quiz.quiz_id;
+                const dateString = new Date(quiz.created_at).toLocaleDateString('ja-JP');
 
                 return (
                   <button
-                    key={problem.id}
-                    onClick={() => handleSelectProblem(problem.id)}
+                    key={quiz.quiz_id}
+                    onClick={() => handleSelectProblem(quiz.quiz_id)}
                     disabled={!!selectedProblemId}
-                    className={`flex flex-col w-full text-left bg-white border-[3px] border-black rounded-xl p-3 transition-all ${
-                      isSelected ? 'bg-[#e9eb7c] ring-4 ring-[#e9eb7c] ring-offset-2' : ''
-                    } ${isOtherSelected ? 'opacity-40 grayscale' : ''} ${
-                      !selectedProblemId ? 'shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000]' : ''
-                    }`}
+                    className={`flex flex-col w-full text-left bg-white border-[3px] border-black rounded-xl p-3 transition-all ${isSelected ? 'bg-[#e9eb7c] ring-4 ring-[#e9eb7c] ring-offset-2' : ''
+                      } ${isOtherSelected ? 'opacity-40 grayscale' : ''} ${!selectedProblemId ? 'shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000]' : ''
+                      }`}
                   >
                     <div className="flex justify-between items-start mb-2 gap-2">
                       <span className="font-bold text-sm leading-tight text-black line-clamp-2">
-                        {problem.title}
+                        {quiz.title}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center w-full">
-                      <div className="flex items-center gap-1">
-                        {statusInfo && (
-                          <span className={`${statusInfo.className}`}>
-                            {statusInfo.text}
+                    <div className="flex justify-between items-end w-full mt-2">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {Object.keys(quiz.genres).map((genreKey) => (
+                          <span key={genreKey} className="text-sm font-black text-black flex items-center gap-1">
+                            {GENRE_ICONS[genreKey] || '❔'}
+                            {GENRE_LABELS[genreKey] || genreKey}
                           </span>
-                        )}
+                        ))}
                       </div>
-                      <span className="text-xs font-bold text-gray-500">
-                        {problem.date}
-                      </span>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        {quiz.answered && (
+                          <div className="flex items-center justify-center w-6 h-6 rounded bg-[#00c800] border-2 border-black rotate-[-5deg]">
+                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                        <span className="text-sm font-black text-[#5a6270]">
+                          {dateString}
+                        </span>
+                      </div>
                     </div>
                   </button>
                 );
@@ -173,11 +232,11 @@ export default function ProblemListFlow() {
             <div className="absolute -top-7 right-8 rounded-t-xl border-x-[6px] border-t-[6px] border-black bg-[#d9d9d9] px-6 py-1 text-lg font-black tracking-widest text-[#e17a78]">
               サポートデスク
             </div>
-            
+
             <p className="text-xl font-bold leading-relaxed text-black whitespace-pre-line text-center">
               {operatorMessage}
             </p>
-            
+
             {/* 吹き出しの尻尾 */}
             <div className="absolute -top-6 right-20 w-8 h-8 bg-[#d9d9d9] border-l-[6px] border-t-[6px] border-black transform rotate-45 z-[-1]"></div>
           </div>
