@@ -9,7 +9,7 @@ export const quizService = {
         totalQuestions: number,
         request: QuizSubmitRequestDTO
     ): Promise<QuizSubmitResponseDTO> {
-        // 1. 解答の採点 (呢び出し元で計算済みのためscoreAnswersは呼ばない)
+        // 1. 解答の採点 (呼び出し元で計算済みのためscoreAnswersは呼ばない)
         const actualScore = Math.round((correctCount / totalQuestions) * 100);
 
         // 2. ギャップ分析とフィードバックの生成
