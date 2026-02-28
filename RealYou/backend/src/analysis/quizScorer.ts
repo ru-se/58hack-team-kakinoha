@@ -4,8 +4,13 @@
  * ユーザーの解答を受け取り、実際の点数（0〜100点）を算出する
  * ※現在はダミーの採点ロジックです。将来的に本物の採点ロジックに置き換えてください。
  */
-export function calculateQuizScore(answers: Record<string, number>): number {
-    const answerValues = Object.values(answers);
+export function calculateQuizScore(answers: Record<string, number> | { question_id: string; selected_index: number }[]): number {
+    let answerValues: number[] = [];
+    if (Array.isArray(answers)) {
+        answerValues = answers.map(a => a.selected_index);
+    } else {
+        answerValues = Object.values(answers);
+    }
 
     // 何も解答がない場合は0点
     if (answerValues.length === 0) {
