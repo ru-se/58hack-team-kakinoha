@@ -23,23 +23,31 @@ export function RankBar({ nodes }: Props) {
   };
   const colors = levelColors[currentRank.level];
 
-  const coreGenres = [
-    { key: 'web', label: 'Web/App', color: '#55aaff' },
-    { key: 'ai', label: 'AI', color: '#e8b849' },
-    { key: 'security', label: 'Security', color: '#e85555' },
-    { key: 'infra', label: 'Infra', color: '#55cc55' },
-    { key: 'design', label: 'Design', color: '#cc66dd' },
-    { key: 'game', label: 'Game', color: '#fb923c' }
-  ];
-
-  const getTopAchievement = (genreKey: string) => {
-    const completedInGenre = activeNodes.filter(n => n.category === genreKey && n.status === "completed");
-    if (completedInGenre.length === 0) return "--- Not Reached ---";
-    
-    // Find the one with highest tier
-    const topNode = completedInGenre.reduce((max, node) => (node.tier > max.tier ? node : max), completedInGenre[0]);
-    return topNode.label;
+  // Map category to color
+  const catColorMap: Record<string, string> = {
+    'web': '#55aaff',
+    'ai': '#e8b849',
+    'security': '#e85555',
+    'infra': '#55cc55',
+    'design': '#cc66dd',
+    'game': '#fb923c',
+    'mixed': '#ffd700', // Gold color for mixed nodes
   };
+
+  const catLabelMap: Record<string, string> = {
+    'web': 'Web/App',
+    'ai': 'AI',
+    'security': 'Security',
+    'infra': 'Infra',
+    'design': 'Design',
+    'game': 'Game',
+    'mixed': 'Achievement',
+  };
+
+  const topAchievements = activeNodes
+    .filter(n => n.status === "completed" && n.id !== "egg")
+    .sort((a, b) => (b.importance || 0) - (a.importance || 0))
+    .slice(0, 3);
 
   return (
     <div
@@ -109,29 +117,43 @@ export function RankBar({ nodes }: Props) {
         </div>
       </div>
 
-      {/* Top Achievements per Genre */}
+      {/* Top 3 Achievements Overall */}
       <div className="mt-2 pt-4 border-t border-gray-700">
         <div className="flex items-center gap-2 mb-4 justify-center">
-            <span className="text-xs font-bold tracking-widest text-gray-300">▼ TOP ACHIEVEMENTS ▼</span>
+            <span className="text-xs font-bold tracking-widest text-gray-300">▼ LATEST ACHIEVEMENTS ▼</span>
         </div>
         
         <div className="flex flex-col gap-3">
-          {coreGenres.map(genre => {
-            const topLabel = getTopAchievement(genre.key);
-            const isUnlocked = topLabel !== "--- Not Reached ---";
-            return (
-              <div key={genre.key} className="flex flex-col bg-[#080b0f] border-l-4 p-2 pl-3 relative overflow-hidden transition-all"
-                   style={{ borderLeftColor: isUnlocked ? genre.color : '#334155' }}>
-                <div className="absolute top-0 right-0 w-16 h-16 opacity-5 pointer-events-none" style={{ background: genre.color, borderRadius: '50%', transform: 'translate(30%, -30%)' }}></div>
-                <span className="text-[10px] uppercase font-black tracking-widest mb-[2px]" style={{ color: isUnlocked ? genre.color : '#64748b' }}>
-                    {genre.label}
-                </span>
-                <span className={`text-[13px] font-bold truncate tracking-wide ${isUnlocked ? 'text-gray-100' : 'text-gray-600'}`} title={topLabel}>
-                    {topLabel}
-                </span>
-              </div>
-            )
-          })}
+          {topAchievements.length === 0 ? (
+            <div className="text-center text-xs text-gray-500 italic py-2">
+              No achievements unlocked yet.
+            </div>
+          ) : (
+            topAchievements.map((node, i) => {
+              const nodeColor = catColorMap[node.category] || '#fff';
+              const nodeCatLabel = catLabelMap[node.category] || node.category;
+              // Make the #1 rank slightly more prominent
+              const isFirst = i === 0;
+
+              return (
+                <div key={node.id} className="flex flex-col bg-[#080b0f] p-2 pl-3 relative overflow-hidden transition-all group"
+                     style={{ borderLeft: `4px solid ${nodeColor}`, borderBottom: isFirst ? `1px solid ${nodeColor}44` : 'none' }}>
+                  <div className="absolute top-0 right-0 w-16 h-16 opacity-10 pointer-events-none transition-transform group-hover:scale-150 group-hover:opacity-20" style={{ background: nodeColor, borderRadius: '50%', transform: 'translate(30%, -30%)' }}></div>
+                  <div className="flex justify-between items-center mb-[2px]">
+                    <span className="text-[10px] uppercase font-black tracking-widest" style={{ color: nodeColor }}>
+                        {nodeCatLabel}
+                    </span>
+                    <span className="text-[9px] font-bold text-gray-600">
+                        {isFirst ? '★ TOP TIER' : `RANK ${i + 1}`}
+                    </span>
+                  </div>
+                  <span className={`text-[13px] font-bold truncate tracking-wide text-gray-100 drop-shadow-md`} title={node.label}>
+                      {node.label}
+                  </span>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
