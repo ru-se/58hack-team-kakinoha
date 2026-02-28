@@ -7,8 +7,8 @@ import { quizRepository } from '../repositories/quizRepository';
 export const quizService = {
     async submitQuiz(quizId: string, request: QuizSubmitRequestDTO): Promise<QuizSubmitResponseDTO> {
         // 1. 解答の採点 (実際の点数算出)
-        const { correctCount, totalQuestions } = await scoreAnswers(quizId, request.answers as any);
-        const actualScore = totalQuestions > 0 ? Math.floor((correctCount / totalQuestions) * 100) : 0;
+        const { correctCount, totalQuestions } = await scoreAnswers(quizId, request.answers);
+        const actualScore = Math.round((correctCount / totalQuestions) * 100);
 
         // 2. ギャップ分析とフィードバックの生成
         const analysisResult = analyzeGap(actualScore, request.self_evaluation_level);
