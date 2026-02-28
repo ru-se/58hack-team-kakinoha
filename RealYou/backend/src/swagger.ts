@@ -440,8 +440,8 @@ export const swaggerDocument = {
                         name: 'quiz_id',
                         in: 'path',
                         required: true,
-                        schema: { type: 'string', format: 'uuid' },
-                        example: 'a26cce4a-d19c-4466-8070-10404b47f98c',
+                        schema: { type: 'string', format: 'uuid', example: 'a26cce4a-d19c-4466-8070-10404b47f98c' },
+                        description: 'クイズのUUID',
                     },
                 ],
                 responses: {
@@ -481,8 +481,8 @@ export const swaggerDocument = {
                         name: 'quiz_id',
                         in: 'path',
                         required: true,
-                        schema: { type: 'string', format: 'uuid' },
-                        example: 'a26cce4a-d19c-4466-8070-10404b47f98c',
+                        schema: { type: 'string', format: 'uuid', example: 'a26cce4a-d19c-4466-8070-10404b47f98c' },
+                        description: 'クイズのUUID',
                     },
                 ],
                 requestBody: {
