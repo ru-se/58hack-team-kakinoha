@@ -5,6 +5,7 @@ import { quizService } from '../services/quizService';
 import { QuizSubmitRequestSchema } from '../schemas/quizSchema';
 import { quizRepository } from '../repositories/quizRepository';
 import { generateQuizFromPresentation, saveQuizToDb } from '../services/aiGenerationService';
+import { processExpGrant, scoreAnswers } from '../services/expService';
 
 const router = Router();
 
@@ -95,19 +96,30 @@ router.get('/:quiz_id/questions', async (req: Request, res: Response, next: Next
 // =========================================================
 router.post('/:quiz_id/submit', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const quizId = req.params.quiz_id;
+        const quizId = req.params.quiz_id as string;
 
         // 1. Request Validation (Zod)
         const parsedRequest = QuizSubmitRequestSchema.parse(req.body);
 
-        // 2. Execute Service (quiz_idも渡す仕様に拡張可能ですが今回はそのまま)
-        const responseDto = await quizService.submitQuiz(parsedRequest);
+        // 2. 採点（1回のみDBクエリ）
+        const { correctCount, totalQuestions } = await scoreAnswers(quizId, parsedRequest.answers);
 
-        // 3. Send Response（モック値を追記）
+        // 3. Execute Service (既存ギャップ分析): 採点結果を渡す
+        const responseDto = await quizService.submitQuiz(correctCount, totalQuestions, parsedRequest);
+
+        // 4. 経験値計算・履歴保存（新規）: 採点結果を渡す
+        const { earned_points, total_exp } = await processExpGrant(
+            parsedRequest.user_id,
+            quizId,
+            correctCount,
+            totalQuestions,
+        );
+
+        // 4. Send Response（結合）
         res.status(200).json({
             ...responseDto,
-            earned_points: 40,
-            total_exp: { web: 150, ai: 200, security: 50, infrastructure: 80, design: 120, game: 90 }
+            earned_points,
+            total_exp
         });
     } catch (error) {
         if (error instanceof z.ZodError) {

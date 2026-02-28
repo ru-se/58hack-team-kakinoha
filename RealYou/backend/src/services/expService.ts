@@ -75,7 +75,8 @@ function calcEarnedPoints(
 export async function processExpGrant(
     userId: string,
     quizId: string,
-    answers: SubmitAnswers
+    correctCount: number,
+    totalQuestions: number,
 ): Promise<ExpGrantResult> {
     // 1. クイズ情報取得（max_points, genres）
     const { data: quiz, error: quizError } = await supabase
@@ -86,10 +87,7 @@ export async function processExpGrant(
 
     if (quizError || !quiz) throw new Error('クイズの取得に失敗しました');
 
-    // 2. 採点
-    const { correctCount, totalQuestions } = await scoreAnswers(quizId, answers);
-
-    // 3. 初回判定
+    // 2. 初回判定（採点結果を受け取り済みのためscoreAnswers呼び出しなし）
     const firstAttempt = await isFirstAttempt(userId, quizId);
     const earnedPoints = firstAttempt
         ? calcEarnedPoints(correctCount, totalQuestions, quiz.max_points)
