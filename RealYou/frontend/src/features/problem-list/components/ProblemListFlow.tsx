@@ -2,8 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useMemo, useEffect } from 'react';
+import { useSetAtom } from 'jotai';
 import { getQuizList, ApiQuiz } from '@/lib/api';
 import Spinner from '@/components/ui/Spinner';
+import { selectedQuizIdAtom } from '@/store/quizAtoms';
 
 type FilterType = 'all' | 'unanswered' | 'not-perfect' | 'week';
 
@@ -46,6 +48,7 @@ export default function ProblemListFlow() {
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [filterWeek, setFilterWeek] = useState<string>(() => getWeekString(new Date().toISOString()));
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
+  const setSelectedQuizId = useSetAtom(selectedQuizIdAtom);
 
   const [quizzes, setQuizzes] = useState<ApiQuiz[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,6 +95,7 @@ export default function ProblemListFlow() {
     audio.play().catch(() => { });
 
     setSelectedProblemId(id);
+    setSelectedQuizId(id);
 
     setTimeout(() => {
       router.push('/quiz');

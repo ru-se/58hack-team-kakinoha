@@ -105,3 +105,26 @@ export async function getQuizList(userId: string): Promise<{ quizzes: ApiQuiz[] 
 
   return res.json();
 }
+
+export interface ApiQuestion {
+  id: string;
+  quiz_id: string;
+  order_num: number;
+  question_text: string;
+  options: string[];
+  correct_index: number;
+  explanation?: string;
+}
+
+export async function getQuizQuestions(quizId: string): Promise<{ questions: ApiQuestion[] }> {
+  const res = await fetch(`${API_BASE}/api/quizzes/${quizId}/questions`, {
+    method: 'GET',
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    throw new Error(errorData?.error || '問題の取得に失敗しました');
+  }
+
+  return res.json();
+}
