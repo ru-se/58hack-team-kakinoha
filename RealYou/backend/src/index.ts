@@ -9,6 +9,8 @@ import resultsRouter from './routes/results';
 import voiceRouter from './routes/voice';
 import quizzesRouter from './routes/quizzes';
 import { errorHandler } from './middleware/errorHandler';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerDocument } from './swagger';
 
 const app = express();
 app.disable('x-powered-by');
@@ -61,6 +63,9 @@ app.get('/health', async (req, res) => {
         });
     }
 });
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(errorHandler);
 
