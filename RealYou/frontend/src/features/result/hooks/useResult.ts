@@ -13,10 +13,12 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function fetchResult(): Promise<ResultResponse> {
+  const DEV_USER_ID = '46f441c6-cc35-4bd3-ab49-953f5a287c83';
   const userId =
     typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-  if (!userId) throw new Error('ユーザーが見つかりません');
-  return await getResult(userId);
+  const targetId = userId ?? DEV_USER_ID;
+  if (!targetId) throw new Error('ユーザーが見つかりません');
+  return await getResult(targetId);
 }
 
 export type ResultStatus = 'loading' | 'error' | 'success';

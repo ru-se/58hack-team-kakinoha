@@ -128,3 +128,38 @@ export async function getQuizQuestions(quizId: string): Promise<{ questions: Api
 
   return res.json();
 }
+
+export interface QuizSubmitRequest {
+  user_id: string;
+  self_evaluation_level: number;
+  answers: {
+    question_id: string;
+    selected_index: number;
+  }[];
+}
+
+export interface QuizSubmitResponse {
+  actual_score: number;
+  gap: number;
+  feedback_message: string;
+  chimera_parameters: Record<string, unknown>;
+  rival_parameters: Record<string, unknown>;
+}
+
+export async function submitQuizAnswers(
+  quizId: string,
+  body: QuizSubmitRequest
+): Promise<QuizSubmitResponse> {
+  const res = await fetch(`${API_BASE}/api/quizzes/${quizId}/submit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    throw new Error(errorData?.error || '解答の送信に失敗しました');
+  }
+
+  return res.json();
+}

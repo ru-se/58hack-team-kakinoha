@@ -21,6 +21,7 @@ export default function AnalyzingView(props: AnalyzingViewProps) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-gray-100 p-4">
         <p className="text-center text-lg text-gray-800">通信に失敗しました</p>
+        <p className="text-center text-sm text-red-500">{props.errorMessage}</p>
         <button
           type="button"
           onClick={props.onRetry}
