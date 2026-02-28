@@ -242,6 +242,39 @@ export const swaggerDocument = {
         // =========================================================
         // Results  ← types/index.ts: ResultResponse
         // =========================================================
+        '/api/results/{user_id}/total-exp': {
+            get: {
+                tags: ['results'],
+                summary: '総経験値取得（GrowTree連携用）',
+                description: 'ユーザーの total_exp のみを返す軽量エンドポイント',
+                parameters: [
+                    {
+                        name: 'user_id',
+                        in: 'path',
+                        required: true,
+                        schema: { type: 'string', format: 'uuid' },
+                        example: '46f441c6-cc35-4bd3-ab49-953f5a287c83',
+                    },
+                ],
+                responses: {
+                    200: {
+                        description: '総経験値',
+                        content: {
+                            'application/json': {
+                                example: {
+                                    total_exp: { web: 60, ai: 0, security: 0, infrastructure: 0, design: 0, game: 0 },
+                                },
+                            },
+                        },
+                    },
+                    404: {
+                        description: 'ユーザーが存在しない',
+                        content: { 'application/json': { example: { status: 'error', code: 'user_not_found', message: 'User not found' } } },
+                    },
+                },
+            },
+        },
+
         '/api/results/{user_id}': {
             get: {
                 tags: ['results'],

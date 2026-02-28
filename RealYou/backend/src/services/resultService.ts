@@ -7,6 +7,33 @@ import { getMbtiScores } from '../analysis/mbtiScoreTable';
 import { BaselineScores, ResultResponse } from '../types';
 
 export const resultService = {
+    async getTotalExp(userId: string): Promise<{
+        total_exp: {
+            web: number;
+            ai: number;
+            security: number;
+            infrastructure: number;
+            design: number;
+            game: number;
+        };
+    }> {
+        const user = await userRepository.findById(userId);
+        if (!user) {
+            throw { status: 404, code: 'user_not_found', message: 'User not found' };
+        }
+
+        return {
+            total_exp: {
+                web: user.exp_web ?? 0,
+                ai: user.exp_ai ?? 0,
+                security: user.exp_security ?? 0,
+                infrastructure: user.exp_infrastructure ?? 0,
+                design: user.exp_design ?? 0,
+                game: user.exp_game ?? 0,
+            },
+        };
+    },
+
     async getResult(userId: string): Promise<ResultResponse> {
         // ユーザー取得
         const user = await userRepository.findById(userId);
