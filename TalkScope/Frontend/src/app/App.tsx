@@ -1,26 +1,39 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useSpeechRecognition } from './hooks/useSpeechRecognition';
-import { useDemoStream } from './hooks/useDemoStream';
-import { useVectorSend } from '@/app/hooks/useVectorSend';
-import { useReferDict, type DictTermResult } from '@/app/hooks/useReferDict';
-import type { VectorPayload } from '@/app/utils/vectorSendWithOverlap';
-import { fetchThemeVector, type ThemeVectorResult } from '@/app/utils/themeVectorApi';
-import { DEMO_TEXT_INSTANT } from './demo/demo';
-import { TranscriptionView } from './components/TranscriptionView';
-import { BubbleCloud } from './components/BubbleCloud';
-import { TermDetailPanel } from './components/TermDetailPanel';
-import { HistoryPanel } from './components/HistoryPanel';
-import { DictionaryManagerModal } from './components/DictionaryManagerModal';
-import { Term } from './data/terms';
-import { getAllPinnedTerms, addPinnedTerm, removePinnedTerm } from './db';
-import { extractTerms, countTermFrequencies } from './utils/termDetection';
-import { Book, LayoutGrid, LibraryBig, Settings, Target } from 'lucide-react';
-import { SettingsModal } from './components/SettingsModal';
-import { Toaster, toast } from 'sonner';
-import { LayoutEngine } from './layout/LayoutEngine';
-import { LayoutNode, PanelId } from './layout/types';
-import { cosineSimilarity, getMockThemeVector, MOCK_DIM } from './utils/mockVectors';
-import { sendFullTranscript } from './utils/externalApi';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
+import { useSpeechRecognition } from "./hooks/useSpeechRecognition";
+import { useDemoStream } from "./hooks/useDemoStream";
+import { useVectorSend } from "@/app/hooks/useVectorSend";
+import { useReferDict, type DictTermResult } from "@/app/hooks/useReferDict";
+import type { VectorPayload } from "@/app/utils/vectorSendWithOverlap";
+import {
+  fetchThemeVector,
+  type ThemeVectorResult,
+} from "@/app/utils/themeVectorApi";
+import { DEMO_TEXT_INSTANT } from "./demo/demo";
+import { TranscriptionView } from "./components/TranscriptionView";
+import { BubbleCloud } from "./components/BubbleCloud";
+import { TermDetailPanel } from "./components/TermDetailPanel";
+import { HistoryPanel } from "./components/HistoryPanel";
+import { DictionaryManagerModal } from "./components/DictionaryManagerModal";
+import { Term } from "./data/terms";
+import { getAllPinnedTerms, addPinnedTerm, removePinnedTerm } from "./db";
+import { extractTerms, countTermFrequencies } from "./utils/termDetection";
+import { Book, LayoutGrid, LibraryBig, Settings, Target } from "lucide-react";
+import { SettingsModal } from "./components/SettingsModal";
+import { Toaster, toast } from "sonner";
+import { LayoutEngine } from "./layout/LayoutEngine";
+import { LayoutNode, PanelId } from "./layout/types";
+import {
+  cosineSimilarity,
+  getMockThemeVector,
+  MOCK_DIM,
+} from "./utils/mockVectors";
+import { sendFullTranscript } from "./utils/externalApi";
 import {
   makeDefaultLayout,
   make2x2Layout,
@@ -28,23 +41,28 @@ import {
   makeVerticalLayout,
   makeLeftRightLayout,
   removeLeaf,
-} from './layout/layoutUtils';
-
-
-
+} from "./layout/layoutUtils";
 
 // レイアウトプリセット定義
 const PRESETS = [
-  { key: 'default', label: 'デフォルト', make: makeDefaultLayout },
-  { key: 'leftRight', label: '左右+縦分割', make: makeLeftRightLayout },
-  { key: '2x2', label: '2×2', make: make2x2Layout },
-  { key: 'horizontal', label: '横4列', make: makeHorizontalLayout },
-  { key: 'vertical', label: '縦4列', make: makeVerticalLayout },
+  { key: "default", label: "デフォルト", make: makeDefaultLayout },
+  { key: "leftRight", label: "左右+縦分割", make: makeLeftRightLayout },
+  { key: "2x2", label: "2×2", make: make2x2Layout },
+  { key: "horizontal", label: "横4列", make: makeHorizontalLayout },
+  { key: "vertical", label: "縦4列", make: makeVerticalLayout },
 ] as const;
 
 const App: React.FC = () => {
-  if (import.meta.env.DEV) console.log('[TalkScope] App.tsx 読み込み（主題入力あり）');
-  const { transcript, setTranscript, isListening, startListening, stopListening, error } = useSpeechRecognition();
+  if (import.meta.env.DEV)
+    console.log("[TalkScope] App.tsx 読み込み（主題入力あり）");
+  const {
+    transcript,
+    setTranscript,
+    isListening,
+    startListening,
+    stopListening,
+    error,
+  } = useSpeechRecognition();
 
   const [activeTerms, setActiveTerms] = useState<Term[]>([]);
   const [selectedTerm, setSelectedTerm] = useState<Term | null>(null);
@@ -54,40 +72,51 @@ const App: React.FC = () => {
   const [isDictionaryManagerOpen, setIsDictionaryManagerOpen] = useState(false);
   const [isLayoutMenuOpen, setIsLayoutMenuOpen] = useState(false);
   const [layout, setLayout] = useState<LayoutNode>(makeDefaultLayout);
-  const [settings, setSettings] = useState({ darkMode: false, themeColor: 'indigo' });
+  const [settings, setSettings] = useState({
+    darkMode: false,
+    themeColor: "indigo",
+  });
   const [isPinned, setIsPinned] = useState<Set<string>>(new Set());
   /** ピン留めした用語一覧（IndexedDB と同期・ピン中タブで表示） */
   const [pinnedTermsList, setPinnedTermsList] = useState<Term[]>([]);
-  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
   /** バブルサイズ計算用：主題（ベクトル類似度の基準） */
-  const [themeText, setThemeText] = useState('');
+  const [themeText, setThemeText] = useState("");
   /** 主題テキストをAPIでベクトル化した結果（類似度計算用） */
-  const [themeVector, setThemeVector] = useState<ThemeVectorResult | null>(null);
+  const [themeVector, setThemeVector] = useState<ThemeVectorResult | null>(
+    null,
+  );
   /** API (refer_dictionary) で取得した動的用語一覧 */
   const [apiTerms, setApiTerms] = useState<Term[]>([]);
   /** API 用語の意味ベクトル (termId → vector)。バブルサイズ計算用 */
   const [termVectors, setTermVectors] = useState<Record<string, number[]>>({});
   /** フィルタ基準語（現状固定）との類似度フィルタ有効化 */
-  const [isSimilarityFilterEnabled, setIsSimilarityFilterEnabled] = useState(false);
+  const [isSimilarityFilterEnabled, setIsSimilarityFilterEnabled] =
+    useState(false);
   /** ベクトルフィルタの強さ（0〜100） */
   const [similarityFilterStrength, setSimilarityFilterStrength] = useState(8);
   /** "it" の基準ベクトル（初期はフォールバックで即時利用可能にする） */
-  const [itReferenceVector, setItReferenceVector] = useState<number[] | null>(() => getMockThemeVector(MOCK_DIM));
+  const [itReferenceVector, setItReferenceVector] = useState<number[] | null>(
+    () => getMockThemeVector(MOCK_DIM),
+  );
   /** "it" ベクトルをバックエンドから取得できたか */
   const [isItReferenceReady, setIsItReferenceReady] = useState(false);
   /** term.id が未解決なときの補助ベクトル（word単位） */
   const [wordVectors, setWordVectors] = useState<Record<string, number[]>>({});
 
   // ── バブル寿命管理 refs ────────────────────────────────────────
-  const termTimestamps    = useRef<Record<string, number>>({});       // termId → 追加時刻
-  const deathRowRef       = useRef<Record<string, number>>({});       // termId → 削除待機リストに入った時刻
-  const isPinnedRef  = useRef<Set<string>>(new Set());           // isPinned の ref ミラー
-  const activeTermsRef    = useRef<Term[]>([]);                       // activeTerms の ref ミラー
-  const historicalTermIdsRef = useRef<Set<string>>(new Set());        // これまでに抽出・生成された全用語ID（ゾンビ復活防止用）
+  const termTimestamps = useRef<Record<string, number>>({}); // termId → 追加時刻
+  const deathRowRef = useRef<Record<string, number>>({}); // termId → 削除待機リストに入った時刻
+  const isPinnedRef = useRef<Set<string>>(new Set()); // isPinned の ref ミラー
+  const activeTermsRef = useRef<Term[]>([]); // activeTerms の ref ミラー
+  const historicalTermIdsRef = useRef<Set<string>>(new Set()); // これまでに抽出・生成された全用語ID（ゾンビ復活防止用）
   const fetchingWordSetRef = useRef<Set<string>>(new Set());
   const failedWordSetRef = useRef<Set<string>>(new Set());
 
-  const normalizeWordKey = useCallback((word: string) => word.trim().toLowerCase(), []);
+  const normalizeWordKey = useCallback(
+    (word: string) => word.trim().toLowerCase(),
+    [],
+  );
 
   // 起動時に IndexedDB からピン留め一覧を復元
   useEffect(() => {
@@ -101,7 +130,7 @@ const App: React.FC = () => {
         });
       })
       .catch((err) => {
-        if (import.meta.env.DEV) console.warn('[pinnedTerms] load failed', err);
+        if (import.meta.env.DEV) console.warn("[pinnedTerms] load failed", err);
       });
   }, []);
 
@@ -112,14 +141,19 @@ const App: React.FC = () => {
   // ──────────────────────────────────────────────────────────────
 
   useVectorSend(transcript, {
-    baseUrl: (import.meta.env.VITE_BACKEND_URL ?? '').trim() || (import.meta.env.VITE_VECTOR_API_URL ?? '').trim(),
-    overlapSentences: Number(import.meta.env.VITE_VECTOR_OVERLAP_SENTENCES) || 5,
-    sendEveryNSentences: Number(import.meta.env.VITE_VECTOR_SEND_EVERY_N_SENTENCES) || 5,
+    baseUrl:
+      (import.meta.env.VITE_BACKEND_URL ?? "").trim() ||
+      (import.meta.env.VITE_VECTOR_API_URL ?? "").trim(),
+    overlapSentences:
+      Number(import.meta.env.VITE_VECTOR_OVERLAP_SENTENCES) || 5,
+    sendEveryNSentences:
+      Number(import.meta.env.VITE_VECTOR_SEND_EVERY_N_SENTENCES) || 5,
     intervalSec: Number(import.meta.env.VITE_VECTOR_SEND_INTERVAL_SEC) || 0,
     onSent: (payload: VectorPayload, result?: unknown) => {
-      if (import.meta.env.DEV) console.log('[vector] payload', payload.sentences.length, result);
+      if (import.meta.env.DEV)
+        console.log("[vector] payload", payload.sentences.length, result);
     },
-    onError: (err: unknown) => console.warn('[vector] send error', err),
+    onError: (err: unknown) => console.warn("[vector] send error", err),
   });
 
   // ── refer_dictionary API（1文ずつ送信し用語・意味・ベクトルを取得） ──
@@ -133,17 +167,17 @@ const App: React.FC = () => {
       }
     }
     if (newTerms.length > 0) {
-      setApiTerms(prev => [...prev, ...newTerms]);
-      setTermVectors(prev => ({ ...prev, ...newVectors }));
+      setApiTerms((prev) => [...prev, ...newTerms]);
+      setTermVectors((prev) => ({ ...prev, ...newVectors }));
     }
   }, []);
 
   useReferDict(transcript, {
-    baseUrl: (import.meta.env.VITE_BACKEND_URL ?? '').trim(),
-    intervalSec: 5,            // 5秒ごとのフォールバック送信
-    trailingDebounceMs: 1000,  // 入力が1秒止まったら末尾の未完了文も送信
+    baseUrl: (import.meta.env.VITE_BACKEND_URL ?? "").trim(),
+    intervalSec: 5, // 5秒ごとのフォールバック送信
+    trailingDebounceMs: 1000, // 入力が1秒止まったら末尾の未完了文も送信
     onResults: handleDictResults,
-    onError: (err: unknown) => console.warn('[referDict] send error', err),
+    onError: (err: unknown) => console.warn("[referDict] send error", err),
   });
 
   // 主題テキストをデバウンスしてAPIでベクトル化し、類似度計算用に保持
@@ -161,10 +195,12 @@ const App: React.FC = () => {
         .catch((err) => {
           if (!cancelled) {
             setThemeVector(null);
-            if (import.meta.env.DEV) console.warn('[themeVector]', err);
+            if (import.meta.env.DEV) console.warn("[themeVector]", err);
           }
         });
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }, 500);
     return () => clearTimeout(t);
   }, [themeText]);
@@ -176,7 +212,7 @@ const App: React.FC = () => {
 
     const fetchItReference = async () => {
       try {
-        const result = await fetchThemeVector('it');
+        const result = await fetchThemeVector("it");
         if (cancelled) return;
         if (result?.vector?.length) {
           setItReferenceVector(result.vector);
@@ -184,7 +220,8 @@ const App: React.FC = () => {
           return;
         }
       } catch (err) {
-        if (!cancelled && import.meta.env.DEV) console.warn('[itReferenceVector]', err);
+        if (!cancelled && import.meta.env.DEV)
+          console.warn("[itReferenceVector]", err);
       }
 
       if (!cancelled) {
@@ -203,13 +240,18 @@ const App: React.FC = () => {
   // term.id のベクトルが無い単語は word 単位で補助ベクトルを取得する
   useEffect(() => {
     const unresolvedWords = activeTerms
-      .map((term) => ({ key: normalizeWordKey(term.word), word: term.word, id: term.id }))
-      .filter(({ key, id }) =>
-        key &&
-        !termVectors[id]?.length &&
-        !wordVectors[key]?.length &&
-        !fetchingWordSetRef.current.has(key) &&
-        !failedWordSetRef.current.has(key),
+      .map((term) => ({
+        key: normalizeWordKey(term.word),
+        word: term.word,
+        id: term.id,
+      }))
+      .filter(
+        ({ key, id }) =>
+          key &&
+          !termVectors[id]?.length &&
+          !wordVectors[key]?.length &&
+          !fetchingWordSetRef.current.has(key) &&
+          !failedWordSetRef.current.has(key),
       );
 
     if (unresolvedWords.length === 0) return;
@@ -227,7 +269,7 @@ const App: React.FC = () => {
           return null;
         } catch (err) {
           failedWordSetRef.current.add(key);
-          if (import.meta.env.DEV) console.warn('[wordVector]', word, err);
+          if (import.meta.env.DEV) console.warn("[wordVector]", word, err);
           return null;
         } finally {
           fetchingWordSetRef.current.delete(key);
@@ -253,30 +295,38 @@ const App: React.FC = () => {
   const dk = settings.darkMode;
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', dk);
+    document.documentElement.classList.toggle("dark", dk);
   }, [dk]);
 
-  useEffect(() => { if (error) toast.error(error); }, [error]);
+  useEffect(() => {
+    if (error) toast.error(error);
+  }, [error]);
 
   // refs の同期
-  useEffect(() => { isPinnedRef.current = isPinned; }, [isPinned]);
-  useEffect(() => { activeTermsRef.current = activeTerms; }, [activeTerms]);
+  useEffect(() => {
+    isPinnedRef.current = isPinned;
+  }, [isPinned]);
+  useEffect(() => {
+    activeTermsRef.current = activeTerms;
+  }, [activeTerms]);
 
   useEffect(() => {
     if (!transcript) return;
     const extracted = extractTerms(transcript, apiTerms);
     const now = Date.now();
-    
+
     // まだ一度も画面に出ていない完全に新規の用語だけをフィルタリング
-    const completelyNewTerms = extracted.filter(t => !historicalTermIdsRef.current.has(t.id));
+    const completelyNewTerms = extracted.filter(
+      (t) => !historicalTermIdsRef.current.has(t.id),
+    );
     if (completelyNewTerms.length === 0) return;
 
-    completelyNewTerms.forEach(t => {
+    completelyNewTerms.forEach((t) => {
       historicalTermIdsRef.current.add(t.id);
       termTimestamps.current[t.id] = now;
     });
 
-    setActiveTerms(prev => [...prev, ...completelyNewTerms]);
+    setActiveTerms((prev) => [...prev, ...completelyNewTerms]);
   }, [transcript, apiTerms]);
 
   // ── バブル削除アルゴリズム (1秒ごとに実行) ───────────────────
@@ -300,7 +350,7 @@ const App: React.FC = () => {
       if (terms.length > 30) {
         const excess = terms.length - 30;
         const toRemove = terms.splice(0, excess);
-        toRemove.forEach(t => delete deathRow[t.id]);
+        toRemove.forEach((t) => delete deathRow[t.id]);
       }
 
       // 2. 20個〜30個の間のバブルにライフタイムを設定・判定
@@ -311,12 +361,12 @@ const App: React.FC = () => {
         const survivors = terms.slice(excess);
 
         // 対象から外れたバブルは削除待機リストから解除
-        survivors.forEach(t => delete deathRow[t.id]);
+        survivors.forEach((t) => delete deathRow[t.id]);
 
         let deletedAny = false;
         const finalTerms: Term[] = [];
 
-        oldestExcess.forEach(t => {
+        oldestExcess.forEach((t) => {
           if (!deathRow[t.id]) {
             deathRow[t.id] = now; // 初めて20個を超過した枠に入った時の時刻
           }
@@ -352,20 +402,22 @@ const App: React.FC = () => {
     setSelectedTerm(term);
     // ピン済みのバブルはクリックしても大きさ・重要度が変化しない
     if (isPinnedRef.current.has(term.id)) return;
-    
-    setTermWeights(prev => {
+
+    setTermWeights((prev) => {
       const newWeight = (prev[term.id] || 0) + 1;
-      
+
       // クリック回数が5回に達したら自動でピン留め
       if (newWeight === 5 && !isPinnedRef.current.has(term.id)) {
-        setIsPinned(p => new Set(p).add(term.id));
+        setIsPinned((p) => new Set(p).add(term.id));
         toast.success(`「${term.word}」が重要ワードとしてピン留めされました`);
       }
-      
+
       return { ...prev, [term.id]: newWeight };
     });
-    
-    setSearchHistory(prev => [term, ...prev.filter(t => t.id !== term.id)].slice(0, 50));
+
+    setSearchHistory((prev) =>
+      [term, ...prev.filter((t) => t.id !== term.id)].slice(0, 50),
+    );
   }, []);
 
   const handleTogglePin = useCallback((termId: string) => {
@@ -376,13 +428,23 @@ const App: React.FC = () => {
         setTermWeights((p) => ({ ...p, [termId]: 0 }));
         termTimestamps.current[termId] = Date.now();
         setPinnedTermsList((p) => p.filter((t) => t.id !== termId));
-        removePinnedTerm(termId).catch((err) => import.meta.env.DEV && console.warn('[pinnedTerms] remove failed', err));
+        removePinnedTerm(termId).catch(
+          (err) =>
+            import.meta.env.DEV &&
+            console.warn("[pinnedTerms] remove failed", err),
+        );
       } else {
         next.add(termId);
         const term = activeTermsRef.current.find((t) => t.id === termId);
         if (term) {
-          setPinnedTermsList((p) => (p.some((t) => t.id === termId) ? p : [...p, term]));
-          addPinnedTerm(term).catch((err) => import.meta.env.DEV && console.warn('[pinnedTerms] add failed', err));
+          setPinnedTermsList((p) =>
+            p.some((t) => t.id === termId) ? p : [...p, term],
+          );
+          addPinnedTerm(term).catch(
+            (err) =>
+              import.meta.env.DEV &&
+              console.warn("[pinnedTerms] add failed", err),
+          );
         }
       }
       return next;
@@ -390,14 +452,24 @@ const App: React.FC = () => {
   }, []);
 
   const toggleListening = () => {
-    if (isListening) { stopListening(); toast.info('録音を停止しました'); }
-    else { startListening(); toast.success('🎙 録音を開始しました'); }
+    if (isListening) {
+      stopListening();
+      toast.info("録音を停止しました");
+    } else {
+      startListening();
+      toast.success("🎙 録音を開始しました");
+    }
   };
-  const loadDemo = () => { setTranscript(DEMO_TEXT_INSTANT); toast.success('デモテキストを読み込みました'); };
+  const loadDemo = () => {
+    setTranscript(DEMO_TEXT_INSTANT);
+    toast.success("デモテキストを読み込みました");
+  };
   const clearAll = () => {
     if (isListening) stopListening();
     demoStream.stopStream();
-    setTranscript(''); setActiveTerms([]); setTermWeights({});
+    setTranscript("");
+    setActiveTerms([]);
+    setTermWeights({});
     setSelectedTerm(null);
     setIsPinned(new Set());
     setApiTerms([]);
@@ -408,7 +480,7 @@ const App: React.FC = () => {
     historicalTermIdsRef.current = new Set();
     fetchingWordSetRef.current.clear();
     failedWordSetRef.current.clear();
-    toast.info('リセットしました');
+    toast.info("リセットしました");
   };
 
   const termSimilarities = useMemo(() => {
@@ -418,12 +490,22 @@ const App: React.FC = () => {
     for (const term of activeTerms) {
       const direct = termVectors[term.id];
       const fallback = wordVectors[normalizeWordKey(term.word)];
-      const candidateVector = direct?.length ? direct : fallback?.length ? fallback : null;
+      const candidateVector = direct?.length
+        ? direct
+        : fallback?.length
+          ? fallback
+          : null;
       if (!candidateVector) continue;
       out[term.id] = cosineSimilarity(candidateVector, itReferenceVector);
     }
     return out;
-  }, [activeTerms, termVectors, wordVectors, itReferenceVector, normalizeWordKey]);
+  }, [
+    activeTerms,
+    termVectors,
+    wordVectors,
+    itReferenceVector,
+    normalizeWordKey,
+  ]);
 
   // 強さ(0〜100)をコサイン類似度しきい値に変換。
   // 仕様:
@@ -445,101 +527,131 @@ const App: React.FC = () => {
   }, [similarityFilterStrength]);
 
   const categoryFilteredTerms =
-    categoryFilter === 'ALL'
+    categoryFilter === "ALL"
       ? activeTerms
-      : categoryFilter === 'ピン中'
+      : categoryFilter === "ピン中"
         ? pinnedTermsList
-        : activeTerms.filter(t => t.category === categoryFilter);
+        : activeTerms.filter((t) => t.category === categoryFilter);
   const filteredTerms =
-    isSimilarityFilterEnabled && categoryFilter !== 'ピン中' && itReferenceVector?.length
-      ? categoryFilteredTerms.filter((term) => (termSimilarities[term.id] ?? -1) >= similarityThreshold)
+    isSimilarityFilterEnabled &&
+    categoryFilter !== "ピン中" &&
+    itReferenceVector?.length
+      ? categoryFilteredTerms.filter(
+          (term) => (termSimilarities[term.id] ?? -1) >= similarityThreshold,
+        )
       : categoryFilteredTerms;
-  const termFrequencies = useMemo(() => countTermFrequencies(transcript, activeTerms), [transcript, activeTerms]);
+  const termFrequencies = useMemo(
+    () => countTermFrequencies(transcript, activeTerms),
+    [transcript, activeTerms],
+  );
 
   // パネルコンテンツ（useMemo で過剰な再生成を抑制）
-  const panels: Record<PanelId, React.ReactNode> = useMemo(() => ({
-    transcription: (
-      <TranscriptionView
-        transcript={transcript}
-        isListening={isListening}
-        onToggleListening={toggleListening}
-        onClearTranscript={clearAll}
-        onTermClick={handleTermClick}
-        onTermHover={() => { }}
-        isPinned={isPinned}
-        onTogglePin={handleTogglePin}
-        onLoadDemo={loadDemo}
-        demoStream={demoStream}
-        darkMode={dk}
-        apiTerms={apiTerms}
-        onPresentationEnd={async () => {
-          if (isListening) stopListening();
-          demoStream.stopStream();
+  const panels: Record<PanelId, React.ReactNode> = useMemo(
+    () => ({
+      transcription: (
+        <TranscriptionView
+          transcript={transcript}
+          isListening={isListening}
+          onToggleListening={toggleListening}
+          onClearTranscript={clearAll}
+          onTermClick={handleTermClick}
+          onTermHover={() => {}}
+          isPinned={isPinned}
+          onTogglePin={handleTogglePin}
+          onLoadDemo={loadDemo}
+          demoStream={demoStream}
+          darkMode={dk}
+          apiTerms={apiTerms}
+          onPresentationEnd={async () => {
+            if (isListening) stopListening();
+            demoStream.stopStream();
 
-          if (transcript.trim().length === 0) {
-            toast.info('送信するテキストがありません');
-            return;
-          }
+            if (transcript.trim().length === 0) {
+              toast.info("送信するテキストがありません");
+              return;
+            }
 
-          try {
-            // TODO: 実際のユーザーIDを取得するロジックに置き換えてください
-            const currentUserId = 'user-12345'; 
-            
-            // API呼び出し（awaitで完了を待つ）
-            await sendFullTranscript({
-              userId: currentUserId,
-              transcript: transcript,
-            });
-            
-            toast.success('🏁 発表を終了し、全文データを送信しました');
-          } catch (err) {
-            console.error('送信エラー:', err);
-            toast.error('データの送信に失敗しましたが、発表は終了しました');
-          }
-        }}
-      />
-    ),
-    bubbleCloud: (
-      <BubbleCloud
-        activeTerms={filteredTerms}
-        termWeights={termWeights}
-        termFrequencies={termFrequencies}
-        onTermClick={handleTermClick}
-        darkMode={dk}
-        selectedTermId={selectedTerm?.id}
-        isPinned={isPinned}
-        onTogglePin={handleTogglePin}
-        themeVector={themeVector}
-        themeText={themeText}
-        termVectors={termVectors}
-        categoryFilter={categoryFilter}
-        onCategoryFilterChange={setCategoryFilter}
-      />
-    ),
-    detail: (
-      <TermDetailPanel
-        term={selectedTerm}
-        onClose={() => setSelectedTerm(null)}
-        onRelatedTermClick={handleTermClick}
-        darkMode={dk}
-        isPinned={selectedTerm ? isPinned.has(selectedTerm.id) : false}
-        onTogglePin={() => selectedTerm && handleTogglePin(selectedTerm.id)}
-      />
-    ),
-    history: (
-      <HistoryPanel
-        history={searchHistory}
-        onTermClick={handleTermClick}
-        onClear={() => { setSearchHistory([]); toast.success('履歴を削除しました'); }}
-        darkMode={dk}
-      />
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [transcript, isListening, filteredTerms, termWeights, termFrequencies, selectedTerm, searchHistory, dk, categoryFilter, handleTermClick, isPinned, handleTogglePin, themeVector, themeText, termVectors, apiTerms]);
+            try {
+              // TODO: 実際のユーザーIDを取得するロジックに置き換えてください
+              const currentUserId = "123e4567-e89b-12d3-a456-426614174000";
+
+              // API呼び出し（awaitで完了を待つ）
+              await sendFullTranscript({
+                user_id: currentUserId, // 修正: userId -> user_id
+                presentation_text: transcript, // 修正: transcript -> presentation_text
+              });
+
+              toast.success("🏁 発表を終了し、全文データを送信しました");
+            } catch (err) {
+              console.error("送信エラー:", err);
+              toast.error("データの送信に失敗しましたが、発表は終了しました");
+            }
+          }}
+        />
+      ),
+      bubbleCloud: (
+        <BubbleCloud
+          activeTerms={filteredTerms}
+          termWeights={termWeights}
+          termFrequencies={termFrequencies}
+          onTermClick={handleTermClick}
+          darkMode={dk}
+          selectedTermId={selectedTerm?.id}
+          isPinned={isPinned}
+          onTogglePin={handleTogglePin}
+          themeVector={themeVector}
+          themeText={themeText}
+          termVectors={termVectors}
+          categoryFilter={categoryFilter}
+          onCategoryFilterChange={setCategoryFilter}
+        />
+      ),
+      detail: (
+        <TermDetailPanel
+          term={selectedTerm}
+          onClose={() => setSelectedTerm(null)}
+          onRelatedTermClick={handleTermClick}
+          darkMode={dk}
+          isPinned={selectedTerm ? isPinned.has(selectedTerm.id) : false}
+          onTogglePin={() => selectedTerm && handleTogglePin(selectedTerm.id)}
+        />
+      ),
+      history: (
+        <HistoryPanel
+          history={searchHistory}
+          onTermClick={handleTermClick}
+          onClear={() => {
+            setSearchHistory([]);
+            toast.success("履歴を削除しました");
+          }}
+          darkMode={dk}
+        />
+      ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }),
+    [
+      transcript,
+      isListening,
+      filteredTerms,
+      termWeights,
+      termFrequencies,
+      selectedTerm,
+      searchHistory,
+      dk,
+      categoryFilter,
+      handleTermClick,
+      isPinned,
+      handleTogglePin,
+      themeVector,
+      themeText,
+      termVectors,
+      apiTerms,
+    ],
+  );
 
   return (
     <div
-      className={`h-full flex flex-col font-sans transition-colors duration-500 ${dk ? 'bg-[#0a0b14] text-slate-100' : 'bg-slate-50 text-slate-900'}`}
+      className={`h-full flex flex-col font-sans transition-colors duration-500 ${dk ? "bg-[#0a0b14] text-slate-100" : "bg-slate-50 text-slate-900"}`}
       style={{ fontFamily: "'Segoe UI', system-ui, sans-serif" }}
     >
       {dk && (
@@ -552,7 +664,9 @@ const App: React.FC = () => {
       <Toaster position="top-center" richColors />
 
       {/* Header */}
-      <header className={`border-b sticky top-0 z-40 transition-colors ${dk ? 'bg-[#0d0e1a]/90 backdrop-blur-xl border-slate-800/60' : 'bg-white/90 backdrop-blur-xl border-slate-200'}`}>
+      <header
+        className={`border-b sticky top-0 z-40 transition-colors ${dk ? "bg-[#0d0e1a]/90 backdrop-blur-xl border-slate-800/60" : "bg-white/90 backdrop-blur-xl border-slate-200"}`}
+      >
         <div className="w-full min-w-0 px-4 h-14 flex items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-3 shrink-0">
@@ -560,7 +674,9 @@ const App: React.FC = () => {
               <Book size={18} />
             </div>
             <span className="text-lg font-black tracking-tight">TalkScope</span>
-            <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-[0.2em] hidden sm:inline">Pro</span>
+            <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-[0.2em] hidden sm:inline">
+              Pro
+            </span>
           </div>
 
           {/* Actions（右詰め）: 主題 → レイアウト → API確認 → 設定 */}
@@ -568,40 +684,53 @@ const App: React.FC = () => {
             {/* 主題入力（非ホバー: アイコンのみ / ホバー: 横に伸びてテキスト表示） */}
             <label
               id="lexiflow-theme-input"
-              className={`flex items-center overflow-hidden rounded-lg border shrink-0 py-2 transition-[width] duration-200 ease-out w-9 hover:w-64 focus-within:w-60 ${dk ? 'bg-slate-900/50 border-slate-800/60 hover:border-slate-700/60' : 'bg-slate-50 border-slate-100 hover:border-slate-200'}`}
+              className={`flex items-center overflow-hidden rounded-lg border shrink-0 py-2 transition-[width] duration-200 ease-out w-9 hover:w-64 focus-within:w-60 ${dk ? "bg-slate-900/50 border-slate-800/60 hover:border-slate-700/60" : "bg-slate-50 border-slate-100 hover:border-slate-200"}`}
             >
               <span className="flex shrink-0 items-center justify-center w-9 h-6">
-                <Target size={12} className={dk ? 'text-slate-600' : 'text-slate-400'} aria-hidden />
+                <Target
+                  size={12}
+                  className={dk ? "text-slate-600" : "text-slate-400"}
+                  aria-hidden
+                />
               </span>
               <input
                 type="text"
                 value={themeText}
                 onChange={(e) => setThemeText(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') e.currentTarget.blur();
+                  if (e.key === "Enter") e.currentTarget.blur();
                 }}
                 placeholder="ハイライトしたいキーワードを入力"
-                className={`bg-transparent border-none outline-none text-xs flex-1 min-w-0 px-0 py-0 ${dk ? 'text-slate-300 placeholder-slate-600' : 'text-slate-600 placeholder-slate-400'}`}
+                className={`bg-transparent border-none outline-none text-xs flex-1 min-w-0 px-0 py-0 ${dk ? "text-slate-300 placeholder-slate-600" : "text-slate-600 placeholder-slate-400"}`}
                 aria-label="主題"
               />
             </label>
             {/* レイアウトプリセットメニュー */}
             <div className="relative">
               <button
-                onClick={() => setIsLayoutMenuOpen(v => !v)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${isLayoutMenuOpen ? (dk ? 'bg-indigo-600/20 border-indigo-500/50 text-indigo-300' : 'bg-indigo-50 border-indigo-200 text-indigo-600') : (dk ? 'text-slate-400 hover:text-slate-200 bg-slate-800/50 hover:bg-slate-800 border-slate-700/50' : 'text-slate-500 hover:text-slate-700 bg-white border-slate-200 hover:bg-slate-50')}`}
+                onClick={() => setIsLayoutMenuOpen((v) => !v)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${isLayoutMenuOpen ? (dk ? "bg-indigo-600/20 border-indigo-500/50 text-indigo-300" : "bg-indigo-50 border-indigo-200 text-indigo-600") : dk ? "text-slate-400 hover:text-slate-200 bg-slate-800/50 hover:bg-slate-800 border-slate-700/50" : "text-slate-500 hover:text-slate-700 bg-white border-slate-200 hover:bg-slate-50"}`}
               >
-                <LayoutGrid size={13} />レイアウト
+                <LayoutGrid size={13} />
+                レイアウト
               </button>
               {isLayoutMenuOpen && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setIsLayoutMenuOpen(false)} />
-                  <div className={`absolute right-0 top-full mt-1 z-50 rounded-xl border shadow-2xl overflow-hidden min-w-[160px] ${dk ? 'bg-[#12132a] border-slate-800/60' : 'bg-white border-slate-200'}`}>
-                    {PRESETS.map(p => (
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsLayoutMenuOpen(false)}
+                  />
+                  <div
+                    className={`absolute right-0 top-full mt-1 z-50 rounded-xl border shadow-2xl overflow-hidden min-w-[160px] ${dk ? "bg-[#12132a] border-slate-800/60" : "bg-white border-slate-200"}`}
+                  >
+                    {PRESETS.map((p) => (
                       <button
                         key={p.key}
-                        onClick={() => { setLayout(p.make()); setIsLayoutMenuOpen(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors ${dk ? 'hover:bg-indigo-600/20 text-slate-300 hover:text-white' : 'hover:bg-indigo-50 text-slate-600 hover:text-indigo-700'}`}
+                        onClick={() => {
+                          setLayout(p.make());
+                          setIsLayoutMenuOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors ${dk ? "hover:bg-indigo-600/20 text-slate-300 hover:text-white" : "hover:bg-indigo-50 text-slate-600 hover:text-indigo-700"}`}
                       >
                         {p.label}
                       </button>
@@ -611,21 +740,22 @@ const App: React.FC = () => {
               )}
             </div>
 
-
             <button
               onClick={() => setIsDictionaryManagerOpen(true)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
                 dk
-                  ? 'text-slate-400 hover:text-slate-200 bg-slate-800/50 hover:bg-slate-800 border-slate-700/50'
-                  : 'text-slate-500 hover:text-slate-700 bg-white border-slate-200 hover:bg-slate-50'
+                  ? "text-slate-400 hover:text-slate-200 bg-slate-800/50 hover:bg-slate-800 border-slate-700/50"
+                  : "text-slate-500 hover:text-slate-700 bg-white border-slate-200 hover:bg-slate-50"
               }`}
             >
               <LibraryBig size={13} />
               単語管理
             </button>
 
-
-            <button onClick={() => setIsSettingsOpen(true)} className={`p-1.5 rounded-lg transition-colors ${dk ? 'hover:bg-slate-800 text-slate-500 hover:text-slate-300' : 'hover:bg-slate-100 text-slate-400'}`}>
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className={`p-1.5 rounded-lg transition-colors ${dk ? "hover:bg-slate-800 text-slate-500 hover:text-slate-300" : "hover:bg-slate-100 text-slate-400"}`}
+            >
               <Settings size={18} />
             </button>
           </div>
@@ -633,7 +763,10 @@ const App: React.FC = () => {
       </header>
 
       {/* Layout Engine */}
-      <div className="relative z-10 flex-1 w-full" style={{ height: 'calc(100vh - 56px)' }}>
+      <div
+        className="relative z-10 flex-1 w-full"
+        style={{ height: "calc(100vh - 56px)" }}
+      >
         <LayoutEngine
           layout={layout}
           onLayoutChange={setLayout}
@@ -655,7 +788,7 @@ const App: React.FC = () => {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         settings={settings}
-        updateSettings={s => setSettings(prev => ({ ...prev, ...s }))}
+        updateSettings={(s) => setSettings((prev) => ({ ...prev, ...s }))}
         similarityFilterEnabled={isSimilarityFilterEnabled}
         onSimilarityFilterEnabledChange={setIsSimilarityFilterEnabled}
         similarityFilterStrength={similarityFilterStrength}
