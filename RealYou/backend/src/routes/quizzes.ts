@@ -43,6 +43,26 @@ router.post('/generate', async (req: Request, res: Response, next: NextFunction)
 });
 
 // =========================================================
+// クイズ一覧取得 (GET /api/quizzes?user_id=xxx)
+// =========================================================
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { user_id } = req.query;
+
+        // バリデーション
+        if (!user_id || typeof user_id !== 'string') {
+            return res.status(400).json({ error: 'user_id は必須です' });
+        }
+
+        const quizzes = await quizService.getQuizList(user_id);
+
+        res.status(200).json({ quizzes });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// =========================================================
 // 問題一覧取得 (GET /:quiz_id/questions) 本実装
 // =========================================================
 router.get('/:quiz_id/questions', async (req: Request, res: Response, next: NextFunction) => {
@@ -82,7 +102,7 @@ router.post('/:quiz_id/submit', async (req: Request, res: Response, next: NextFu
         const parsedRequest = QuizSubmitRequestSchema.parse(req.body);
 
         // 2. Execute Service (既存ギャップ分析)
-        const responseDto = await quizService.submitQuiz(parsedRequest);
+        const responseDto = await quizService.submitQuiz(quizId, parsedRequest);
 
         // 3. 経験値計算・履歴保存（新規）
         const { earned_points, total_exp } = await processExpGrant(
