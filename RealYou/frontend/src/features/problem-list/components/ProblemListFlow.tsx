@@ -45,11 +45,11 @@ export default function ProblemListFlow() {
   const getStatusLabel = (status: ProblemStatus) => {
     switch (status) {
       case 'unanswered':
-        return { text: '未回答', className: 'bg-[#e17a78] text-white' };
+        return null;
       case 'answered':
-        return { text: '回答済', className: 'bg-[#F0D44A] text-black' };
+        return { text: '⭐️', className: 'text-lg bg-transparent border-none px-0 py-0' };
       case 'perfect':
-        return { text: '満点', className: 'bg-[#57d071] text-black' };
+        return { text: '⭐️💯', className: 'text-lg bg-transparent border-none px-0 py-0 tracking-widest' };
     }
   };
 
@@ -137,9 +137,13 @@ export default function ProblemListFlow() {
                       </span>
                     </div>
                     <div className="flex justify-between items-center w-full">
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border-2 border-black ${statusInfo.className}`}>
-                        {statusInfo.text}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        {statusInfo && (
+                          <span className={`${statusInfo.className}`}>
+                            {statusInfo.text}
+                          </span>
+                        )}
+                      </div>
                       <span className="text-xs font-bold text-gray-500">
                         {problem.date}
                       </span>
