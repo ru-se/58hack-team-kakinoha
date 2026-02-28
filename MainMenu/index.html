@@ -60,7 +60,27 @@
     <div class="patchwork-bg"></div>
     <div class="scanlines"></div>
 
-    <main id="portal-view">
+    <!-- AUTH MOCK OVERLAY -->
+    <div id="auth-overlay" class="fullscreen-overlay hidden">
+        <div class="auth-container">
+            <h1 class="glitch-text" data-text="SYSTEM INITIALIZATION">SYSTEM INITIALIZATION</h1>
+            <p class="auth-desc">ENTER YOUR DESIGNATION</p>
+            <input type="text" id="auth-username" class="auth-input" placeholder="USERNAME_" autocomplete="off">
+            <button id="auth-confirm-btn" class="tf-btn tf-btn-set auth-btn">CONFIRM_</button>
+        </div>
+    </div>
+
+    <!-- LOADING MOCK OVERLAY -->
+    <div id="loading-overlay" class="fullscreen-overlay hidden">
+        <div class="loading-container">
+            <h2 class="blink" id="loading-text">AUTHENTICATING...</h2>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <main id="portal-view" class="hidden">
         <!-- メニューカード (タイトル削除に伴い最上部から全画面展開) -->
         <div class="chaos-grid" id="app-grid"></div>
     </main>
