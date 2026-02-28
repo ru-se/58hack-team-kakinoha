@@ -26,8 +26,8 @@ export const quizService = {
     },
 
     async getQuizList(userId: string) {
-        // 1. クイズ一覧取得
-        const { data: quizzes, error: quizzesError } = await quizRepository.getQuizList();
+        // 1. クイズ一覧取得 (自分のクイズのみ)
+        const { data: quizzes, error: quizzesError } = await quizRepository.getQuizList(userId);
         if (quizzesError) throw new Error(`クイズ一覧の取得に失敗しました: ${quizzesError.message}`);
 
         // 2. 回答済みquiz_idのセット作成
