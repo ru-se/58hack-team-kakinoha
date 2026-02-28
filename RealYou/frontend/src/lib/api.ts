@@ -132,18 +132,29 @@ export async function getQuizQuestions(quizId: string): Promise<{ questions: Api
 export interface QuizSubmitRequest {
   user_id: string;
   self_evaluation_level: number;
-  answers: {
-    question_id: string;
-    selected_index: number;
-  }[];
+  answers: Record<string, number>;
 }
 
 export interface QuizSubmitResponse {
   actual_score: number;
   gap: number;
   feedback_message: string;
-  chimera_parameters: Record<string, unknown>;
-  rival_parameters: Record<string, unknown>;
+  chimera_parameters: {
+    lucky: number;
+    happy: number;
+    nice: number;
+    cute: number;
+    cool: number;
+  };
+  rival_parameters: {
+    lucky: number;
+    happy: number;
+    nice: number;
+    cute: number;
+    cool: number;
+  };
+  earned_points: number;
+  total_exp: Record<string, number>;
 }
 
 export async function submitQuizAnswers(

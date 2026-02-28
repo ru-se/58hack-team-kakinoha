@@ -31,7 +31,7 @@ export default function QuizPage() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
 
-  const [answers, setAnswers] = useState<{ question_id: string; selected_index: number }[]>([]);
+  const [answers, setAnswers] = useState<Record<string, number>>({});
   const [questions, setQuestions] = useState<ApiQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +72,10 @@ export default function QuizPage() {
     if (isAnswered) return;
     setSelectedAnswer(idx);
     setIsAnswered(true);
-    setAnswers((prev) => [...prev, { question_id: currentReviewQ.id, selected_index: idx }]);
+    setAnswers((prev) => ({
+      ...prev,
+      [`q_${currentReviewQ.order_num}`]: idx + 1,
+    }));
   };
 
   const DEV_USER_ID = '46f441c6-cc35-4bd3-ab49-953f5a287c83';
