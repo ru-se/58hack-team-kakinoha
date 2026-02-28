@@ -412,3 +412,4 @@ backend/scripts/skill_tree_*.json
 
 renderbackup.yaml
 vercelbackup.json
+.vercel

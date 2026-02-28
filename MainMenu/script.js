@@ -3,7 +3,7 @@ const APPS = [
     id: 'talkscope',
     name: 'TalkScope',
     description: 'AI-Powered Terminology Mapping.',
-    url: '../TalkScope/Frontend/dist/index.html',
+    url: '/talkscope/',
     icon: '🫧',
     className: 'talkscope',
     whisper: 'EXTRACTING INTENT FROM PACKET:%ID%...'
@@ -12,7 +12,7 @@ const APPS = [
     id: 'realyou',
     name: 'RealYou',
     description: 'Your true self, visualized.',
-    url: '../RealYou/frontend/out/index.html',
+    url: '/realyou/',
     icon: '💬',
     className: 'realyou',
     whisper: 'DETECTING EMOTIONAL DISSONANCE IN %ID%...'
@@ -21,7 +21,7 @@ const APPS = [
     id: 'growtree',
     name: 'GrowTree',
     description: 'Climb the tree of growth.',
-    url: '../GrowTree/frontend/out/index.html',
+    url: '/growtree/',
     icon: '🌳',
     className: 'growtree',
     whisper: 'SYNTHESIZING EXPERIENTIAL DATA %ID%...'
