@@ -7,7 +7,9 @@ export const quizService = {
     async submitQuiz(
         correctCount: number,
         totalQuestions: number,
-        request: QuizSubmitRequestDTO
+        request: QuizSubmitRequestDTO,
+        earnedPoints: number,
+        totalExp: Record<string, number>
     ): Promise<QuizSubmitResponseDTO> {
         // 1. 解答の採点 (呼び出し元で計算済みのためscoreAnswersは呼ばない)
         const actualScore = Math.round((correctCount / totalQuestions) * 100);
@@ -21,7 +23,9 @@ export const quizService = {
             gap: analysisResult.gap,
             feedback_message: analysisResult.feedbackMessage,
             chimera_parameters: analysisResult.chimeraParameters,
-            rival_parameters: analysisResult.rivalParameters
+            rival_parameters: analysisResult.rivalParameters,
+            earned_points: earnedPoints,
+            total_exp: totalExp
         };
     },
 

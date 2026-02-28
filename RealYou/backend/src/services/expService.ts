@@ -3,10 +3,7 @@
 
 import { supabase } from '../db/client';
 
-export type SubmitAnswers = {
-    question_id: string;
-    selected_index: number;
-}[];
+export type SubmitAnswers = Record<string, number>;
 
 export type ExpGrantResult = {
     earned_points: number;   // 初回以外は0
@@ -29,15 +26,22 @@ export async function scoreAnswers(
 ): Promise<{ correctCount: number; totalQuestions: number }> {
     const { data: questions, error } = await supabase
         .from('questions')
-        .select('id, correct_index')
+        .select('id, correct_index, order_num')
         .eq('quiz_id', quizId);
 
     if (error || !questions) throw new Error('問題の取得に失敗しました');
 
-    const correctCount = answers.filter(a => {
-        const q = questions.find(q => q.id === a.question_id);
-        return q && q.correct_index === a.selected_index;
-    }).length;
+    let correctCount = 0;
+    for (const [key, value] of Object.entries(answers)) {
+        const match = key.match(/^q_(\d+)$/);
+        if (!match) continue;
+        const orderNum = parseInt(match[1], 10);
+        const q = questions.find(q => q.order_num === orderNum);
+        // value is 1-based (1-4), correct_index is 0-based (0-3)
+        if (q && q.correct_index === value - 1) {
+            correctCount++;
+        }
+    }
 
     return { correctCount, totalQuestions: questions.length };
 }

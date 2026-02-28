@@ -104,10 +104,7 @@ router.post('/:quiz_id/submit', async (req: Request, res: Response, next: NextFu
         // 2. 採点（1回のみDBクエリ）
         const { correctCount, totalQuestions } = await scoreAnswers(quizId, parsedRequest.answers);
 
-        // 3. Execute Service (既存ギャップ分析): 採点結果を渡す
-        const responseDto = await quizService.submitQuiz(correctCount, totalQuestions, parsedRequest);
-
-        // 4. 経験値計算・履歴保存（新規）: 採点結果を渡す
+        // 3. 経験値計算・履歴保存（新規）: 先に実行して結果を得る
         const { earned_points, total_exp } = await processExpGrant(
             parsedRequest.user_id,
             quizId,
@@ -115,12 +112,17 @@ router.post('/:quiz_id/submit', async (req: Request, res: Response, next: NextFu
             totalQuestions,
         );
 
-        // 4. Send Response（結合）
-        res.status(200).json({
-            ...responseDto,
+        // 4. Execute Service (既存ギャップ分析): 採点結果と経験値を渡して完了形を作る
+        const responseDto = await quizService.submitQuiz(
+            correctCount,
+            totalQuestions,
+            parsedRequest,
             earned_points,
             total_exp
-        });
+        );
+
+        // 5. Send Response（完了済みのDTOをそのまま返す）
+        res.status(200).json(responseDto);
     } catch (error) {
         if (error instanceof z.ZodError) {
             res.status(400).json({
