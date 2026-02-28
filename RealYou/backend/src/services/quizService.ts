@@ -26,12 +26,16 @@ export const quizService = {
     },
 
     async getQuizList(userId: string) {
-        // 1. クイズ一覧取得 (自分のクイズのみ)
-        const { data: quizzes, error: quizzesError } = await quizRepository.getQuizList(userId);
-        if (quizzesError) throw new Error(`クイズ一覧の取得に失敗しました: ${quizzesError.message}`);
+        // 1. クイズ一覧と回答履歴を並列取得
+        const [
+            { data: quizzes, error: quizzesError },
+            { data: results, error: resultsError },
+        ] = await Promise.all([
+            quizRepository.getQuizList(userId),
+            quizRepository.getAnsweredQuizIds(userId),
+        ]);
 
-        // 2. 回答済みquiz_idのセット作成
-        const { data: results, error: resultsError } = await quizRepository.getAnsweredQuizIds(userId);
+        if (quizzesError) throw new Error(`クイズ一覧の取得に失敗しました: ${quizzesError.message}`);
         if (resultsError) throw new Error(`回答履歴の取得に失敗しました: ${resultsError.message}`);
 
         const answeredSet = new Set(results?.map(r => r.quiz_id) ?? []);

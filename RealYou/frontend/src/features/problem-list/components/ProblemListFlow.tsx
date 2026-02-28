@@ -17,6 +17,16 @@ const GENRE_ICONS: Record<string, string> = {
   game: '🎮',
 };
 
+const GENRE_LABELS: Record<string, string> = {
+  web: 'Web',
+  ai: 'AI',
+  security: 'Security',
+  infrastructure: 'Infra',
+  design: 'Design',
+  game: 'Game',
+};
+
+
 const getWeekString = (dateString: string) => {
   // ISO-8601 (Monday start) Week Calculation
   const date = new Date(dateString);
@@ -29,18 +39,18 @@ const getWeekString = (dateString: string) => {
   return `${date.getFullYear()}-W${weekStr}`;
 };
 
+// TODO: 本番では localStorage の user_id のみ使用。DEV_USER_IDは削除すること
+const DEV_USER_ID = '46f441c6-cc35-4bd3-ab49-953f5a287c83';
+
 export default function ProblemListFlow() {
   const router = useRouter();
   const [filterType, setFilterType] = useState<FilterType>('all');
-  const [filterWeek, setFilterWeek] = useState<string>('2026-W09'); // Default to current week
+  const [filterWeek, setFilterWeek] = useState<string>(() => getWeekString(new Date().toISOString()));
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
 
   const [quizzes, setQuizzes] = useState<ApiQuiz[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // TODO: 本番では localStorage の user_id のみ使用。DEV_USER_IDは削除すること
-  const DEV_USER_ID = '46f441c6-cc35-4bd3-ab49-953f5a287c83';
 
   const fetchQuizzes = async () => {
     setIsLoading(true);
@@ -49,8 +59,8 @@ export default function ProblemListFlow() {
       const userId = localStorage.getItem('user_id') ?? DEV_USER_ID;
       const data = await getQuizList(userId);
       setQuizzes(data.quizzes);
-    } catch (err: any) {
-      setError(err.message || 'クイズの取得に失敗しました');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'クイズの取得に失敗しました');
     } finally {
       setIsLoading(false);
     }
@@ -191,7 +201,7 @@ export default function ProblemListFlow() {
                         {Object.keys(quiz.genres).map((genreKey) => (
                           <span key={genreKey} className="text-sm font-black text-black flex items-center gap-1">
                             {GENRE_ICONS[genreKey] || '❔'}
-                            {genreKey === 'web' ? 'Web' : genreKey === 'ai' ? 'AI' : genreKey === 'security' ? 'Security' : genreKey === 'infrastructure' ? 'Infra' : genreKey === 'design' ? 'Design' : 'Game'}
+                            {GENRE_LABELS[genreKey] || genreKey}
                           </span>
                         ))}
                       </div>
