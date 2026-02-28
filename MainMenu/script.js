@@ -337,8 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const tfMinutesInput = document.getElementById('tf-minutes');
   const tfHourUp = document.getElementById('tf-hour-up');
   const tfHourDown = document.getElementById('tf-hour-down');
-  const tfMinuteUp = document.getElementById('tf-minute-up');
-  const tfMinuteDown = document.getElementById('tf-minute-down');
 
   // Quick Action Elements
   const tfBtnNow = document.getElementById('tf-btn-now');
@@ -348,6 +346,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentTemporalState = new Date();
 
   const syncStateToUI = () => {
+      currentTemporalState.setMinutes(0);
+      currentTemporalState.setSeconds(0);
+      
       if(!tfDateInput || !tfHoursInput || !tfMinutesInput) return;
       
       const y = currentTemporalState.getFullYear();
@@ -356,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tfDateInput.value = `${y}-${m}-${d}`;
 
       tfHoursInput.value = String(currentTemporalState.getHours()).padStart(2, '0');
-      tfMinutesInput.value = String(currentTemporalState.getMinutes()).padStart(2, '0');
+      tfMinutesInput.textContent = '00';
       
       // Flash inputs to show change
       [tfHoursInput, tfMinutesInput].forEach(el => {
@@ -377,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
           currentTemporalState.setDate(parseInt(dateParts[2]));
       }
       currentTemporalState.setHours(parseInt(tfHoursInput.value) || 0);
-      currentTemporalState.setMinutes(parseInt(tfMinutesInput.value) || 0);
+      currentTemporalState.setMinutes(0);
   };
 
   if (tfModal && tfCancelBtn && tfSetBtn) {
@@ -387,19 +388,16 @@ document.addEventListener('DOMContentLoaded', () => {
       
       tfHourUp.addEventListener('click', () => { currentTemporalState.setHours((currentTemporalState.getHours() + 1) % 24); syncStateToUI(); });
       tfHourDown.addEventListener('click', () => { currentTemporalState.setHours((currentTemporalState.getHours() - 1 + 24) % 24); syncStateToUI(); });
-      
-      tfMinuteUp.addEventListener('click', () => { currentTemporalState.setMinutes((currentTemporalState.getMinutes() + 1) % 60); syncStateToUI(); });
-      tfMinuteDown.addEventListener('click', () => { currentTemporalState.setMinutes((currentTemporalState.getMinutes() - 1 + 60) % 60); syncStateToUI(); });
 
       // Quick Actions
-      tfBtnNow.addEventListener('click', () => { currentTemporalState = new Date(); syncStateToUI(); tfStatusMsg.textContent = 'SYNCED TO PRESENT'; });
+      tfBtnNow.addEventListener('click', () => { currentTemporalState = new Date(); syncStateToUI(); tfStatusMsg.textContent = 'SYNCED TO PRESENT HOUR'; });
       tfBtn24h.addEventListener('click', () => { currentTemporalState.setHours(currentTemporalState.getHours() + 24); syncStateToUI(); tfStatusMsg.textContent = 'FAST FORWARD 24H'; });
       tfBtn3d.addEventListener('click', () => { currentTemporalState.setDate(currentTemporalState.getDate() + 3); syncStateToUI(); tfStatusMsg.textContent = 'FAST FORWARD 3 DAYS'; });
 
       // Manual Inputs
       tfDateInput.addEventListener('change', syncUIToState);
       
-      const inputs = [tfHoursInput, tfMinutesInput];
+      const inputs = [tfHoursInput];
       inputs.forEach(input => {
           input.addEventListener('change', (e) => {
               let val = parseInt(e.target.value) || 0;
@@ -419,9 +417,8 @@ document.addEventListener('DOMContentLoaded', () => {
       tfSetBtn.addEventListener('click', () => {
           const formattedDate = tfDateInput.value;
           const h = tfHoursInput.value;
-          const m = tfMinutesInput.value;
           
-          tfStatusMsg.textContent = `OVERRIDE ACCEPTED: ${formattedDate} ${h}:${m}`;
+          tfStatusMsg.textContent = `OVERRIDE ACCEPTED: ${formattedDate} ${h}:00`;
           tfStatusMsg.style.color = '#0ff';
           
           triggerFlash();
