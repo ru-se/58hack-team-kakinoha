@@ -124,6 +124,7 @@ export function convertApiNodesToCanvasNodes(
         tier,
         description: apiNode.desc,
         children,
+        requiredPoints: tier,
       });
     });
   });
