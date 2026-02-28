@@ -5,9 +5,9 @@ import type { GenreKey } from "./DebugPanel";
 
 interface Props {
   node: SkillNode;
-  userPoints: number; // The user's current points for this category
+  userPoints?: number;
   onClose: () => void;
-  onUnlock: (nodeId: string, cost: number, cat: GenreKey) => void;
+  onUnlock?: (nodeId: string, cost: number, cat: GenreKey) => void;
 }
 
 const STATUS_LABELS: Record<string, string> = {
