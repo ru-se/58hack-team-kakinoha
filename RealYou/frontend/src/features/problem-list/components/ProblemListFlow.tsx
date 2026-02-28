@@ -186,25 +186,27 @@ export default function ProblemListFlow() {
                         {quiz.title}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      {Object.keys(quiz.genres).map((genreKey) => (
-                        <span key={genreKey} className="text-xs font-bold text-black flex items-center gap-1">
-                          {GENRE_ICONS[genreKey] || '❔'}
-                          {genreKey === 'web' ? 'Web' : genreKey === 'ai' ? 'AI' : genreKey === 'security' ? 'Security' : genreKey === 'infrastructure' ? 'Infra' : genreKey === 'design' ? 'Design' : 'Game'}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex justify-between items-center w-full">
-                      <div className="flex items-center gap-1">
-                        {quiz.answered && (
-                          <span className="text-lg bg-transparent border-none px-0 py-0">
-                            ✅
+                    <div className="flex justify-between items-end w-full mt-2">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {Object.keys(quiz.genres).map((genreKey) => (
+                          <span key={genreKey} className="text-sm font-black text-black flex items-center gap-1">
+                            {GENRE_ICONS[genreKey] || '❔'}
+                            {genreKey === 'web' ? 'Web' : genreKey === 'ai' ? 'AI' : genreKey === 'security' ? 'Security' : genreKey === 'infrastructure' ? 'Infra' : genreKey === 'design' ? 'Design' : 'Game'}
                           </span>
-                        )}
+                        ))}
                       </div>
-                      <span className="text-xs font-bold text-gray-500">
-                        {dateString}
-                      </span>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        {quiz.answered && (
+                          <div className="flex items-center justify-center w-6 h-6 rounded bg-[#00c800] border-2 border-black rotate-[-5deg]">
+                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                        <span className="text-sm font-black text-[#5a6270]">
+                          {dateString}
+                        </span>
+                      </div>
                     </div>
                   </button>
                 );
