@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { SkillTreeCanvas } from "../../features/skill-tree/components/SkillTreeCanvas";
 import { SkillNodePanel } from "../../features/skill-tree/components/SkillNodePanel";
 import { RankBar } from "../../features/skill-tree/components/RankBar";
@@ -28,61 +28,96 @@ const CAT_TO_GENRE: Record<string, GenreKey> = {
 };
 
 export default function SkillTreePage() {
-  const [nodes, setNodes] = useState<SkillNode[]>(SKILL_NODES);
-  const [selectedNode, setSelectedNode] = useState<SkillNode | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [zoomAction, setZoomAction] = useState<{ type: string; ts: number } | null>(null);
   const [mounted] = useState(true);
   const [debugPoints, setDebugPoints] = useState<DebugPoints>(INITIAL_POINTS);
 
   const handleSelectNode = useCallback((node: SkillNode | null) => {
-    setSelectedNode(node);
+    setSelectedNodeId(node ? node.id : null);
   }, []);
 
   const handleAddPoint = useCallback((genre: GenreKey) => {
     setDebugPoints(prev => ({ ...prev, [genre]: prev[genre] + 1 }));
   }, []);
 
-  const handleUnlock = useCallback((nodeId: string, cost: number, rawCat: string) => {
-    const genre = CAT_TO_GENRE[rawCat];
-    if (!genre) return;
-
-    // Deduct points
-    setDebugPoints(prev => ({
-      ...prev,
-      [genre]: Math.max(0, prev[genre] - cost)
-    }));
-
-    // Update nodes status
-    setNodes(prev => {
-      let next = prev.map(n => n.id === nodeId ? { ...n, status: "completed" as const } : n);
-      const completedIds = new Set(next.filter(n => n.status === "completed").map(n => n.id));
-      const availableSet = new Set<string>();
-      
-      next.forEach(n => {
-        if (n.status === "completed") {
-          n.children.forEach(childId => availableSet.add(childId));
-        }
-      });
-
-      return next.map(n => {
-        if (n.status === "completed") return n;
-        if (availableSet.has(n.id)) return { ...n, status: "available" as const };
-        return { ...n, status: "locked" as const };
-      });
-    });
-
-    // Update selected node visually in panel
-    setSelectedNode(prev => {
-      if (!prev || prev.id !== nodeId) return prev;
-      return { ...prev, status: "completed" as const };
-    });
+  const handleUnlock = useCallback((_nodeId: string, _cost: number, _rawCat: string) => {
+    // Unlocking is now automatic based on points, no manual point deduction needed.
   }, []);
 
-  // Compute what category points should be passed to the panel
-  const getPointsForCategory = (cat: string) => {
+  const getPointsForCategory = useCallback((cat: string) => {
     const genre = CAT_TO_GENRE[cat];
     return genre ? debugPoints[genre] : 0;
-  };
+  }, [debugPoints]);
+
+  const nodes = useMemo(() => {
+    const currentNodes: SkillNode[] = JSON.parse(JSON.stringify(SKILL_NODES));
+    
+    // Check points and mark completed
+    currentNodes.forEach(node => {
+      let canComplete = false;
+
+      if (node.id === "egg") {
+        canComplete = true; // Always unlocked
+      } else if (node.category === "mixed" && node.requiredPointsMap) {
+        canComplete = Object.entries(node.requiredPointsMap).every(
+          ([reqCat, reqPoints]) => getPointsForCategory(reqCat) >= reqPoints
+        );
+      } else {
+        canComplete = getPointsForCategory(node.category) >= node.requiredPoints;
+      }
+
+      node.status = canComplete ? "completed" : "locked";
+    });
+
+    // Determine 'available' status via graph traversal starting from 'egg'
+    const availableSet = new Set<string>();
+    const nodeMap = new Map(currentNodes.map(n => [n.id, n]));
+
+    const root = nodeMap.get("egg");
+    if (root && root.status === "completed") {
+      root.children.forEach(childId => availableSet.add(childId));
+    }
+
+    let changed = true;
+    while (changed) {
+      changed = false;
+      currentNodes.forEach(node => {
+        // Only consider a node really completed if it's reachable from an available/completed parent
+        // For linear trees, this is naturally true but mixed nodes might be different.
+        if (node.status === "completed") {
+          node.children.forEach(childId => {
+            const child = nodeMap.get(childId);
+            if (child && child.status === "locked" && !availableSet.has(childId)) {
+              availableSet.add(childId);
+              changed = true;
+            }
+          });
+        }
+      });
+    }
+
+    currentNodes.forEach(node => {
+      // If node is locked but is a child of a completed node, it's available.
+      // Exception: completed nodes remain completed.
+      // For mixed nodes, we just check if it's locked. Currently no parent sets them as children.
+      // Actually, in our new graph, tier 4 nodes have mixed nodes in their `children` array.
+      if (node.status === "locked" && availableSet.has(node.id)) {
+        node.status = "available";
+      }
+      
+      // Additional safety for mixed nodes: if they are not in availableSet but their pre-requisites are fulfilled by point, 
+      // they might be "available". Though with 2 requirements, they become completed natively when points are enough.
+      // E.g. mixed node needs infra: 4, security: 4. The tier 4 nodes must be completed.
+    });
+
+    return currentNodes;
+  }, [getPointsForCategory]);
+
+  const selectedNode = useMemo(() => {
+    return selectedNodeId ? nodes.find(n => n.id === selectedNodeId) || null : null;
+  }, [nodes, selectedNodeId]);
+
 
   return (
     <div className="relative w-full h-[calc(100vh-4rem)] overflow-hidden" style={{ background: "#0a0f08" }}>
@@ -93,7 +128,6 @@ export default function SkillTreePage() {
         zoomAction={zoomAction}
       />
 
-      {/* RankBar now needs to see the dynamic nodes to calculate progress */}
       <RankBar nodes={nodes} />
       <SkillLegend />
       <ZoomControls
@@ -121,8 +155,8 @@ export default function SkillTreePage() {
       {selectedNode && (
         <SkillNodePanel
           node={selectedNode}
-          userPoints={getPointsForCategory(selectedNode.category)}
-          onClose={() => setSelectedNode(null)}
+          userPoints={selectedNode.category === "mixed" ? 0 : getPointsForCategory(selectedNode.category)}
+          onClose={() => setSelectedNodeId(null)}
           onUnlock={handleUnlock}
         />
       )}
