@@ -150,9 +150,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="chat-layout">
           <div class="chat-header"><span>RealYou Messenger</span><span class="chat-status"></span></div>
           <div class="chat-body">
-            <div class="chat-bubble app">${app.name}</div>
-            <div class="chat-bubble user">${app.description} ${app.icon}</div>
+            <div class="chat-bubble app">hey, connection is unstable again.</div>
+            <div class="chat-bubble user">I know... the glitching is getting worse.</div>
+            <div class="chat-bubble app">Did you see the new TimeFaker module?</div>
+            <div class="chat-bubble user">${app.description}</div>
             <div class="chat-bubble app emoji">✨🌈💖</div>
+            <div class="chat-bubble user">We need to find the root node...</div>
+            <div class="chat-bubble app">${app.name} initialization complete.</div>
           </div>
         </div>
       `;
@@ -188,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Dynamic Behaviors ---
     if (app.id === 'talkscope') {
       const tsCloud = card.querySelector('.ts-bubble-cloud');
-      const TS_KEYWORDS = ['AI', 'Intent', 'Vector', 'Context', 'Graph'];
+      const TS_KEYWORDS = ['AI', 'Intent', 'Vector', 'Context', 'Graph', 'Semantic', 'Node'];
       TS_KEYWORDS.forEach((word, i) => {
           const b = document.createElement('div');
           b.className = 'ts-bubble';

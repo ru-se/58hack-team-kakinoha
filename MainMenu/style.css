@@ -643,9 +643,9 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 150px;
-    /* 大サイズ復活 */
-    height: 150px;
+    width: 220px;
+    /* 圧倒的な大サイズへ */
+    height: 220px;
     background: rgba(0, 20, 50, 0.65);
     backdrop-filter: blur(25px);
     border: 2px solid rgba(255, 255, 255, 0.6);
@@ -655,10 +655,10 @@ body {
     justify-content: center;
     font-weight: 900;
     color: #fff;
-    font-size: 1.3rem;
-    /* 見やすい大きさに復元 */
+    font-size: 1.8rem;
+    /* さらに見やすく巨大化 */
     z-index: 10;
-    box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
+    box-shadow: 0 0 40px rgba(0, 150, 255, 0.4);
     animation: pulse 4s infinite ease-in-out;
     transition: all 0.4s ease;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
@@ -696,22 +696,22 @@ body {
 }
 
 .sub-bubble.info {
-    bottom: -10px;
+    bottom: -15px;
     right: 5%;
-    width: 120px;
-    /* 存在感復活 */
-    height: 120px;
-    font-size: 0.75rem;
+    width: 160px;
+    /* 存在感をさらにアップ */
+    height: 160px;
+    font-size: 0.9rem;
     z-index: 5;
 }
 
 .sub-bubble.icon {
-    top: -10px;
+    top: -15px;
     left: 5%;
-    width: 80px;
-    /* 大きく戻す */
-    height: 80px;
-    font-size: 2rem;
+    width: 110px;
+    /* かなり大きく */
+    height: 110px;
+    font-size: 2.5rem;
     z-index: 5;
 }
 
@@ -908,13 +908,15 @@ body {
 
 .tree-svg {
     position: absolute;
-    bottom: -10%;
-    /* 縦長空間を下から生えるように */
-    right: 0;
-    width: 100%;
-    height: 120%;
-    /* 縦長空間を活かす高さ */
-    color: rgba(44, 95, 45, 0.4);
+    bottom: -20%;
+    /* さらに深くから生やす */
+    right: -10%;
+    width: 130%;
+    /* 横幅もオーバーさせる */
+    height: 160%;
+    /* 天上の限界まで高く！ */
+    color: rgba(44, 95, 45, 0.5);
+    /* 少し濃く */
     z-index: 0;
     pointer-events: none;
     transform-origin: bottom center;
@@ -1014,13 +1016,14 @@ body {
 
 .digital-clock {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 2.2rem;
-    /* 迫力のあるグリッチ時計へ復元 */
+    font-size: 4.5rem;
+    /* 圧倒的サイバーパンク巨大時計 */
     font-weight: 900;
     text-align: center;
     background: rgba(255, 68, 0, 0.08);
-    padding: 1.2rem;
-    border: 2px dashed #ff4400;
+    padding: 1.5rem 3rem;
+    /* ド迫力パディング */
+    border: 3px dashed #ff4400;
     letter-spacing: 0.15rem;
     text-shadow: 0 0 15px rgba(255, 68, 0, 0.6);
     transition: all 0.2s;
