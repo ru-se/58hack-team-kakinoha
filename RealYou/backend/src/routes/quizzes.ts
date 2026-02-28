@@ -10,17 +10,18 @@ const router = Router();
 // =========================================================
 // 問題生成 (POST /generate) ※AI生成 + DB保存の本実装
 // =========================================================
+const GenerateRequestSchema = z.object({
+    user_id: z.string().uuid(),
+    presentation_text: z.string().min(1),
+});
+
 router.post('/generate', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { user_id, presentation_text } = req.body;
-
-        // バリデーション
-        if (!user_id || !presentation_text) {
-            return res.status(400).json({ error: 'user_id と presentation_text は必須です' });
+        const parsed = GenerateRequestSchema.safeParse(req.body);
+        if (!parsed.success) {
+            return res.status(400).json({ error: 'バリデーションエラー', details: parsed.error.issues });
         }
-        if (typeof presentation_text !== 'string' || presentation_text.trim().length === 0) {
-            return res.status(400).json({ error: 'presentation_text が空です' });
-        }
+        const { user_id, presentation_text } = parsed.data;
 
         // AI生成
         const generated = await generateQuizFromPresentation(presentation_text);
