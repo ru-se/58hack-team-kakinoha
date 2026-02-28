@@ -18,7 +18,7 @@ body {
     overflow: hidden;
     min-height: 100vh;
     margin: 0;
-    background-color: #050505;
+    background-color: #020202;
 }
 
 /* =========================================
@@ -42,81 +42,40 @@ body {
     width: 100%;
     height: 100%;
     opacity: 0;
-    transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: scale(1.05);
+    /* ズームアウトしながらフェードインする演出用 */
+    transition: opacity 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .dynamic-bg.active {
     opacity: 1;
+    transform: scale(1);
 }
 
-/* 1. TalkScope: ガラスと光彩の海 */
+/* 1. TalkScope: 深海のネットワーク */
 .bg-talkscope {
-    background: radial-gradient(circle at 50% 50%, rgba(0, 150, 255, 0.4), rgba(100, 0, 200, 0.2), #050505 80%);
-    animation: bgBreathe 5s infinite alternate;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 70, 180, 0.2), rgba(10, 0, 50, 0.4), #020202 80%);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
 }
 
-@keyframes bgBreathe {
-    0% {
-        transform: scale(1);
-        filter: blur(20px);
-    }
-
-    100% {
-        transform: scale(1.1);
-        filter: blur(30px);
-    }
-}
-
-/* 2. RealYou: サイケデリックなシマシマ警告色 */
+/* 2. RealYou: ポップなネオンノイズ */
 .bg-realyou {
-    background: repeating-linear-gradient(45deg, #ff0055, #ff0055 40px, #ffe600 40px, #ffe600 80px);
-    filter: saturate(1.5) contrast(1.2) brightness(0.6);
-    animation: scanZ 10s linear infinite;
-    opacity: 0;
+    background: radial-gradient(circle at 70% 30%, rgba(255, 0, 85, 0.15), rgba(255, 230, 0, 0.05), #020202 80%);
+    background-image: radial-gradient(rgba(255, 0, 85, 0.1) 2px, transparent 2px);
+    background-size: 30px 30px;
 }
 
-@keyframes scanZ {
-    0% {
-        background-position: 0 0;
-    }
-
-    100% {
-        background-position: 800px 800px;
-    }
-}
-
-/* 3. GrowTree: 深い森のピクセルグリッドと緑の粒子 */
+/* 3. GrowTree: 漆黒の森の奥深く */
 .bg-growtree {
-    background-color: #051005;
-    background-image: linear-gradient(0deg, transparent 24%, rgba(0, 255, 0, 0.1) 25%, rgba(0, 255, 0, 0.1) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, 0.1) 75%, rgba(0, 255, 0, 0.1) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 255, 0, 0.1) 25%, rgba(0, 255, 0, 0.1) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, 0.1) 75%, rgba(0, 255, 0, 0.1) 76%, transparent 77%, transparent);
-    background-size: 50px 50px;
-    animation: gridScroll 10s linear infinite;
+    background: radial-gradient(circle at 30% 70%, rgba(44, 95, 45, 0.2), rgba(5, 15, 5, 0.8), #020202 90%);
+    box-shadow: inset 0 0 150px #000;
 }
 
-@keyframes gridScroll {
-    100% {
-        background-position: 0 500px;
-    }
-}
-
-/* 4. Settings: 真っ赤なクリティカルエラー / マトリックス */
-.bg-settings {
-    background: radial-gradient(circle at center, rgba(255, 0, 0, 0.5) 0%, #000 100%);
-    animation: glitchRed 0.2s infinite;
-}
-
-@keyframes glitchRed {
-    0% {
-        opacity: 0;
-    }
-
-    50% {
-        opacity: 0.8;
-    }
-
-    100% {
-        opacity: 1;
-    }
+/* 4. TimeFacker: 時を刻む深紅の歪み */
+.bg-timefaker {
+    background: radial-gradient(circle at center, rgba(255, 68, 0, 0.15), rgba(40, 0, 0, 0.7), #020202 90%);
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 68, 0, 0.03) 2px, rgba(255, 68, 0, 0.03) 4px);
 }
 
 /* デジタル・ノイズ / 血管 */
@@ -127,7 +86,8 @@ body {
     width: 200%;
     height: 200%;
     background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/76/White-noise-mv2-520x245.png');
-    opacity: 0.05;
+    opacity: 0.01;
+    /* 0.05から0.01へ大幅ダウン */
     z-index: 1000;
     pointer-events: none;
     animation: noiseJitter 0.1s steps(2) infinite;
@@ -151,8 +111,8 @@ body {
     height: 100vh;
     z-index: 998;
     pointer-events: none;
-    background: radial-gradient(circle at center, transparent 40%, rgba(80, 0, 0, 0.1) 100%);
-    box-shadow: inset 0 0 100px rgba(50, 0, 0, 0.3);
+    background: radial-gradient(circle at center, transparent 60%, rgba(40, 0, 0, 0.05) 100%);
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
     mix-blend-mode: multiply;
 }
 
@@ -206,10 +166,11 @@ body {
     height: 100vh;
     z-index: -2;
     background:
-        linear-gradient(45deg, rgba(10, 10, 16, 0.5) 25%, transparent 25%, transparent 75%, rgba(10, 10, 16, 0.5) 75%),
-        linear-gradient(-45deg, rgba(10, 10, 16, 0.5) 25%, transparent 25%, transparent 75%, rgba(10, 10, 16, 0.5) 75%);
+        linear-gradient(45deg, rgba(5, 5, 8, 0.1) 25%, transparent 25%, transparent 75%, rgba(5, 5, 8, 0.1) 75%),
+        linear-gradient(-45deg, rgba(5, 5, 8, 0.1) 25%, transparent 25%, transparent 75%, rgba(5, 5, 8, 0.1) 75%);
     background-size: 60px 60px;
-    animation: bgShift 20s infinite linear;
+    animation: bgShift 40s infinite linear;
+    /* ゆっくり動かす */
     pointer-events: none;
 }
 
@@ -509,175 +470,328 @@ body {
     cursor: pointer;
 }
 
-/* 
-===============================================
-  1. TalkScope: 超モダン・グラスモーフィズム・丸み
-===============================================
-*/
+/* =========================================
+   TALKSCOPE: BUBBLE ARCHITECTURE
+   ========================================= */
 .app-card.talkscope {
-    width: 45%;
-    min-height: 250px;
-    font-family: 'Inter', sans-serif;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50px 10px 50px 10px;
-    padding: 3rem 2rem;
-    box-shadow: 0 15px 35px rgba(0, 0, 50, 0.5);
-    overflow: hidden;
-    transform: translateY(-20px) rotate(-1deg);
-    cursor: crosshair;
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s;
-}
-
-.app-card.talkscope::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transform: skewX(-20deg);
-    transition: 0.5s;
-}
-
-.app-card.talkscope:hover::before {
-    left: 150%;
-}
-
-.app-card:hover {
-    transform: translateY(-30px) rotate(1deg) scale(1.05);
-    box-shadow: 0 0 50px rgba(0, 150, 255, 0.6);
-}
-
-/* TalkScope 内部装飾 */
-.ts-live-text {
-    font-size: 0.65rem;
-    color: #00ffcc;
-    font-style: italic;
-    margin-top: 8px;
-    opacity: 0.8;
-    height: 1.2em;
-    overflow: hidden;
-}
-
-.ts-waveform {
+    background: transparent;
+    border: none;
+    box-shadow: none;
     display: flex;
     align-items: center;
-    gap: 2px;
-    height: 10px;
-    margin-top: 5px;
+    justify-content: center;
+    min-height: 400px;
+    transform: none;
+    cursor: pointer;
 }
 
-.ts-wave-bar {
-    flex: 1;
-    background: #00ffcc;
+.bubble-layout {
+    position: relative;
+    width: 300px;
+    height: 300px;
+}
+
+.main-bubble {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    background: rgba(0, 150, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #fff;
+    font-size: 1.2rem;
+    z-index: 10;
+    box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
+    animation: pulse 4s infinite ease-in-out;
+}
+
+.sub-bubble {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+}
+
+.sub-bubble.info {
+    bottom: 10%;
+    right: -20px;
+    width: 120px;
+    height: 120px;
+    font-size: 0.7rem;
+    z-index: 5;
+}
+
+.sub-bubble.icon {
+    top: 0;
+    left: -10px;
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+    z-index: 5;
+}
+
+.ts-bubble-cloud {
+    position: absolute;
+    width: 100%;
     height: 100%;
-    animation: wavePulse 1s infinite ease-in-out;
 }
 
-@keyframes wavePulse {
+.ts-bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.6rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: bubbleFloat 8s infinite ease-in-out;
+}
+
+@keyframes bubbleFloat {
 
     0%,
     100% {
-        transform: scaleY(0.2);
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(10px, -20px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-15px, 10px) scale(0.9);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 0 0 20px rgba(0, 150, 255, 0.2);
     }
 
     50% {
-        transform: scaleY(1);
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 0 0 40px rgba(0, 150, 255, 0.4);
     }
 }
 
-/* 
-===============================================
-  2. RealYou: 暴力的なイエロー/ピンクネオブルータリズム
-===============================================
-*/
+/* =========================================
+   REALYOU: CHAT UI ARCHITECTURE
+   ========================================= */
 .app-card.realyou {
-    width: 45%;
-    min-height: 220px;
-    font-family: 'M PLUS Rounded 1c', sans-serif;
-    background-color: #ffe600;
+    background: #fff;
     border: 8px solid #000;
-    padding: 2rem;
+    border-radius: 40px;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 15px 15px 0 #ff0055;
+    transform: rotate(2deg) translateY(20px);
+}
+
+.chat-header {
+    background: #f0f0f0;
+    padding: 0.8rem 1.5rem;
+    border-bottom: 5px solid #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 900;
     color: #000;
-    box-shadow: 15px 15px 0 #ff0055, 15px 15px 0 8px #000;
-    transform: rotate(4deg) translateY(30px);
-    z-index: 5;
-    cursor: grab;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.app-card.realyou:hover {
-    transform: rotate(-2deg) translateY(10px) scale(1.1);
-    box-shadow: 30px 30px 0 #ff0055, 30px 30px 0 8px #000;
-}
-
-.app-card.realyou .card-title {
-    font-size: 3rem;
-    font-weight: 800;
-    letter-spacing: -2px;
+.chat-status {
+    font-size: 0.6rem;
+    color: #555;
     text-transform: uppercase;
-    background: #000;
-    color: #ffe600;
-    display: inline-block;
-    padding: 0 10px;
-    transform: skewX(-15deg);
 }
 
-/* 
-===============================================
-  3. GrowTree: ゴツゴツしたドット絵＆古びたRPG枠
-===============================================
-*/
+.chat-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    flex: 1;
+    background: #e5ddd5;
+    background-image: radial-gradient(#d3c9bf 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.chat-bubble {
+    max-width: 85%;
+    padding: 0.8rem 1.2rem;
+    border-radius: 25px;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #000;
+    border: 3px solid #000;
+    position: relative;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.chat-bubble.app {
+    align-self: flex-start;
+    background: #fff;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-bubble.user {
+    align-self: flex-end;
+    background: #dcf8c6;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-bubble.emoji {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    font-size: 2.5rem;
+    align-self: center;
+}
+
+/* =========================================
+   GROWTREE: TREE ARCHITECTURE
+   ========================================= */
 .app-card.growtree {
-    width: 35%;
-    min-height: 280px;
-    font-family: 'DotGothic16', sans-serif;
-    background-color: #0a0f08;
-    border: 6px ridge #b45309;
-    padding: 2rem;
-    color: #fcd34d;
-    box-shadow: 5px 5px 15px #000;
-    image-rendering: pixelated;
-    transform: rotate(-3deg) translateY(-10px);
-    cursor: help;
+    background: #0d1b0d;
+    border: 5px solid #2C5F2D;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    padding: 3rem;
+    color: #559C71;
+    box-shadow: inset 0 0 60px #000, 0 15px 40px rgba(0, 0, 0, 0.7);
+    transform: rotate(-2deg);
+    min-height: 380px;
 }
 
-.app-card.growtree:hover {
-    background-color: #1a1f18;
-    border-color: #d97706;
-    transform: rotate(0deg) scale(1.1);
-    box-shadow: 0 0 40px rgba(0, 255, 0, 0.4);
+.tree-layout {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.tree-svg {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    color: rgba(44, 95, 45, 0.4);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.tree-content {
+    position: relative;
+    z-index: 2;
 }
 
 .app-card.growtree .card-title {
-    font-size: 2.2rem;
-    margin-bottom: 1rem;
-    text-shadow: 3px 3px 0 #000;
-    border-bottom: 4px double #b45309;
-    padding-bottom: 0.5rem;
+    font-family: 'DotGothic16', sans-serif;
+    font-size: 3rem;
+    color: #bbf7d0;
+    margin-bottom: 0.8rem;
+    text-shadow: 0 0 20px rgba(187, 247, 208, 0.5);
 }
 
-.gt-xp-bar {
-    width: 100%;
-    height: 8px;
-    background: #000;
-    border: 1px solid #050;
-    margin-top: 10px;
-    position: relative;
+.app-card.growtree .card-desc {
+    font-family: 'DotGothic16', sans-serif;
+    color: #559C71;
 }
 
-.gt-xp-fill {
-    width: 85%;
+.app-card.growtree .gt-xp-bar {
+    margin-top: 2rem;
+    height: 15px;
+    background: #050a05;
+    border: 2px solid #559C71;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(85, 156, 113, 0.3);
+}
+
+.app-card.growtree .gt-xp-fill {
     height: 100%;
-    background: #0f0;
-    box-shadow: 0 0 5px #0f0;
+    width: 70%;
+    background: repeating-linear-gradient(45deg,
+            #559C71,
+            #559C71 10px,
+            #2C5F2D 10px,
+            #2C5F2D 20px);
+    animation: xpFlow 3s infinite linear;
 }
 
-/* 
+/* =========================================
+   TIMEFAKER: CLOCK ARCHITECTURE
+   ========================================= */
+.app-card.timefaker {
+    background: #000;
+    border: 4px solid #ff4400;
+    border-radius: 10px;
+    padding: 2.5rem;
+    color: #ff4400;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2rem;
+    box-shadow: 0 0 40px rgba(255, 68, 0, 0.3), inset 0 0 30px rgba(255, 68, 0, 0.15);
+    transform: rotate(1deg);
+    min-height: 350px;
+}
+
+.digital-clock {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 4rem;
+    font-weight: 900;
+    text-align: center;
+    background: rgba(255, 68, 0, 0.08);
+    padding: 1.5rem;
+    border: 2px dashed #ff4400;
+    letter-spacing: 0.2rem;
+    text-shadow: 0 0 20px rgba(255, 68, 0, 0.6);
+}
+
+.clock-details {
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.app-card.timefaker .card-title {
+    font-size: 2.2rem;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    letter-spacing: 4px;
+}
+
+.app-card.timefaker .card-desc {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/*
 ===============================================
   4. SysConfig: 完全なエラー・グリッチターミナル
 ===============================================

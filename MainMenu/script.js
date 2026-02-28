@@ -1,36 +1,39 @@
 const APPS = [
   {
     id: 'talkscope',
-    name: 'TalkScope_v3.1.4',
-    icon: '🗣️',
-    description: 'Real-time Terminology AI. Clean, Glassmorphic, Perfection.',
-    url: 'http://localhost:3000', 
-    className: 'talkscope'
+    name: 'TalkScope',
+    description: 'AI-Powered Terminology Mapping.',
+    url: '../TalkScope/Frontend/dist/index.html',
+    icon: '🫧',
+    className: 'talkscope',
+    whisper: 'EXTRACTING INTENT FROM PACKET:%ID%...'
   },
   {
     id: 'realyou',
-    name: 'REAL YOU!!!',
-    icon: '🎭',
-    description: 'POP! BRUTAL! DETECT YOUR SOCIAL SKILLS NOW!',
-    url: 'http://localhost:3001',
-    className: 'realyou'
+    name: 'RealYou',
+    description: 'Your true self, visualized.',
+    url: '../RealYou/frontend/out/index.html',
+    icon: '💬',
+    className: 'realyou',
+    whisper: 'DETECTING EMOTIONAL DISSONANCE IN %ID%...'
   },
   {
     id: 'growtree',
-    name: 'GrowTree - Quest Log',
+    name: 'GrowTree',
+    description: 'Climb the tree of growth.',
+    url: '../GrowTree/frontend/out/index.html',
     icon: '🌳',
-    description: '[Lv.99] A visualization of your Github grinding history. Retro vibes only.',
-    url: 'http://localhost:3002',
-    className: 'growtree'
+    className: 'growtree',
+    whisper: 'SYNTHESIZING EXPERIENTIAL DATA %ID%...'
   },
   {
-    id: 'settings',
-    name: 'sys_config.exe',
-    icon: '⚙️',
-    description: 'WARN: UNSTABLE MODULE. ACCESS AT OWN RISK. \n root@chimera:~# _',
-    url: '#',
-    className: 'settings',
-    whisper: 'Kernel access granted. Trace ID: %ID%'
+    id: 'timefaker',
+    name: 'TimeFacker',
+    description: 'Manipulate the temporal flow.',
+    url: '#', // Placeholder or real URL if known
+    icon: '🕒',
+    className: 'timefaker',
+    whisper: 'TEMPORAL DRIFT DETECTED IN SESSION %ID%...'
   }
 ];
 
@@ -102,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     talkscope: document.querySelector('.bg-talkscope'),
     realyou: document.querySelector('.bg-realyou'),
     growtree: document.querySelector('.bg-growtree'),
-    settings: document.querySelector('.bg-settings'),
+    timefaker: document.querySelector('.bg-timefaker'),
   };
 
   const stitch1 = document.createElement('div');
@@ -128,27 +131,84 @@ document.addEventListener('DOMContentLoaded', () => {
       card.appendChild(tape);
     }
 
-    const content = document.createElement('div');
-    content.className = 'card-inner';
+    // --- Radical Card Architecture Generation ---
+    let cardHTML = '';
     
-    // アプリ固有の装飾HTML
-    let extraHTML = '';
-    if(app.id === 'talkscope') {
-        extraHTML = `<div class="ts-live-text">Live: Processing audio...</div>
-                     <div class="ts-waveform">${'<div class="ts-wave-bar"></div>'.repeat(12)}</div>`;
-    } else if(app.id === 'growtree') {
-        extraHTML = `<div class="gt-xp-bar"><div class="gt-xp-fill"></div></div>`;
-    } else if(app.id === 'settings') {
-        extraHTML = `<div class="sys-log">TRACING KERNEL... <span class="blink">_</span></div>`;
+    if (app.id === 'talkscope') {
+      // BUBBLE ARCHITECTURE
+      cardHTML = `
+        <div class="bubble-layout">
+          <div class="main-bubble">${app.name}</div>
+          <div class="sub-bubble info">${app.description}</div>
+          <div class="sub-bubble icon">${app.icon}</div>
+          <div class="ts-bubble-cloud"></div>
+        </div>
+      `;
+    } else if (app.id === 'realyou') {
+      // CHAT UI ARCHITECTURE
+      cardHTML = `
+        <div class="chat-layout">
+          <div class="chat-header"><span>RealYou Messenger</span><span class="chat-status"></span></div>
+          <div class="chat-body">
+            <div class="chat-bubble app">${app.name}</div>
+            <div class="chat-bubble user">${app.description} ${app.icon}</div>
+            <div class="chat-bubble app emoji">✨🌈💖</div>
+          </div>
+        </div>
+      `;
+    } else if (app.id === 'growtree') {
+      // TREE ARCHITECTURE
+      cardHTML = `
+        <div class="tree-layout">
+          <svg class="tree-svg" viewBox="0 0 100 100">
+            <path d="M50,80 Q50,50 50,20 M50,50 Q30,40 20,30 M50,40 Q70,30 80,20" stroke="currentColor" fill="none" stroke-width="2"/>
+          </svg>
+          <div class="tree-content">
+            <h2 class="card-title">${app.name}</h2>
+            <p class="card-desc">${app.description}</p>
+            <div class="gt-xp-bar"><div class="gt-xp-fill"></div></div>
+          </div>
+        </div>
+      `;
+    } else if (app.id === 'timefaker') {
+      // CLOCK ARCHITECTURE
+      cardHTML = `
+        <div class="clock-layout">
+          <div class="digital-clock">00:00:00</div>
+          <div class="clock-details">
+            <h2 class="card-title">${app.name}</h2>
+            <p class="card-desc">${app.description}</p>
+          </div>
+        </div>
+      `;
     }
 
-    content.innerHTML = `
-      <span class="card-icon">${app.icon}</span>
-      <h2 class="card-title">${app.name}</h2>
-      <p class="card-desc">${app.id === 'settings' ? app.description : app.description}</p>
-      ${extraHTML}
-    `;
-    card.appendChild(content);
+    card.innerHTML = cardHTML;
+
+    // --- Dynamic Behaviors ---
+    if (app.id === 'talkscope') {
+      const tsCloud = card.querySelector('.ts-bubble-cloud');
+      const TS_KEYWORDS = ['AI', 'Intent', 'Vector', 'Context', 'Graph'];
+      TS_KEYWORDS.forEach((word, i) => {
+          const b = document.createElement('div');
+          b.className = 'ts-bubble';
+          b.textContent = word;
+          b.style.width = (30 + Math.random() * 20) + 'px';
+          b.style.height = b.style.width;
+          b.style.left = (Math.random() * 80 + 10) + '%';
+          b.style.top = (Math.random() * 80 + 10) + '%';
+          b.style.animationDelay = (i * 0.8) + 's';
+          tsCloud.appendChild(b);
+      });
+    }
+
+    if (app.id === 'timefaker') {
+       const clock = card.querySelector('.digital-clock');
+       app.timer = setInterval(() => { // Store interval ID on app object
+         const now = new Date();
+         clock.textContent = now.toTimeString().split(' ')[0];
+       }, 1000);
+    }
 
     // ======== ホバー時の背景変化イベント ========
     card.addEventListener('mouseenter', () => {
@@ -157,18 +217,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if(bgElements[key]) bgElements[key].classList.remove('active');
       });
       // 該当アプリの背景をアクティブ化
-      if(bgElements[app.id]) {
-        bgElements[app.id].classList.add('active');
+      if(bgElements[app.id === 'timefaker' ? 'settings' : app.id]) {
+        bgElements[app.id === 'timefaker' ? 'settings' : app.id].classList.add('active');
       }
 
       // 囁きの個別化
       if(app.whisper && whisperBar) {
           whisperBar.textContent = app.whisper.replace('%ID%', Math.random().toString(16).substring(2, 8).toUpperCase());
       }
+      
+      if(app.id === 'realyou') {
+          const status = card.querySelector('.chat-status');
+          if(status) status.textContent = 'Typing...';
+      }
 
-      // 動的タイマー開始
+      // 動的タイマー開始 (moved from original)
       if(app.id === 'talkscope') {
-          app.timer = setInterval(() => {
+          app.liveTextTimer = setInterval(() => { // Renamed to avoid conflict with timefaker's app.timer
               const liveText = card.querySelector('.ts-live-text');
               if(liveText) liveText.textContent = `Live: "${['Terminology...', 'AI mapping...', 'Data stream...', 'Packet capture...'][Math.floor(Math.random()*4)]}"`;
           }, 1000);
@@ -183,11 +248,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     card.addEventListener('mouseleave', () => {
       // マウスが外れたら背景を元に戻す
-      if(bgElements[app.id]) {
-        bgElements[app.id].classList.remove('active');
+      const bgId = app.id === 'timefaker' ? 'settings' : app.id;
+      if(bgElements[bgId]) {
+        bgElements[bgId].classList.remove('active');
       }
       updateStatus();
-      if(app.timer) clearInterval(app.timer);
+      if(app.id === 'realyou') {
+        const status = card.querySelector('.chat-status');
+        if(status) status.textContent = 'Online';
+      }
+      // Clear dynamic timers
+      if(app.liveTextTimer) clearInterval(app.liveTextTimer);
       if(app.logTimer) clearInterval(app.logTimer);
     });
     // ===========================================
