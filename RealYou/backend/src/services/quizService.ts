@@ -1,13 +1,15 @@
 // /Users/ryu/58/58hack-team-kakinoha/RealYou/backend/src/services/quizService.ts
 import { QuizSubmitRequestDTO, QuizSubmitResponseDTO } from '../schemas/quizSchema';
-import { scoreAnswers } from './expService';
 import { analyzeGap } from '../analysis/gapAnalyzer';
 import { quizRepository } from '../repositories/quizRepository';
 
 export const quizService = {
-    async submitQuiz(quizId: string, request: QuizSubmitRequestDTO): Promise<QuizSubmitResponseDTO> {
-        // 1. 解答の採点 (実際の点数算出)
-        const { correctCount, totalQuestions } = await scoreAnswers(quizId, request.answers);
+    async submitQuiz(
+        correctCount: number,
+        totalQuestions: number,
+        request: QuizSubmitRequestDTO
+    ): Promise<QuizSubmitResponseDTO> {
+        // 1. 解答の採点 (呢び出し元で計算済みのためscoreAnswersは呼ばない)
         const actualScore = Math.round((correctCount / totalQuestions) * 100);
 
         // 2. ギャップ分析とフィードバックの生成

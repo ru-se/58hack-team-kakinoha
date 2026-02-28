@@ -5,7 +5,7 @@ import { quizService } from '../services/quizService';
 import { QuizSubmitRequestSchema } from '../schemas/quizSchema';
 import { quizRepository } from '../repositories/quizRepository';
 import { generateQuizFromPresentation, saveQuizToDb } from '../services/aiGenerationService';
-import { processExpGrant } from '../services/expService';
+import { processExpGrant, scoreAnswers } from '../services/expService';
 
 const router = Router();
 
@@ -101,14 +101,18 @@ router.post('/:quiz_id/submit', async (req: Request, res: Response, next: NextFu
         // 1. Request Validation (Zod)
         const parsedRequest = QuizSubmitRequestSchema.parse(req.body);
 
-        // 2. Execute Service (既存ギャップ分析)
-        const responseDto = await quizService.submitQuiz(quizId, parsedRequest);
+        // 2. 採点（1回のみDBクエリ）
+        const { correctCount, totalQuestions } = await scoreAnswers(quizId, parsedRequest.answers);
 
-        // 3. 経験値計算・履歴保存（新規）
+        // 3. Execute Service (既存ギャップ分析): 採点結果を渡す
+        const responseDto = await quizService.submitQuiz(correctCount, totalQuestions, parsedRequest);
+
+        // 4. 経験値計算・履歴保存（新規）: 採点結果を渡す
         const { earned_points, total_exp } = await processExpGrant(
             parsedRequest.user_id,
             quizId,
-            parsedRequest.answers
+            correctCount,
+            totalQuestions,
         );
 
         // 4. Send Response（結合）
