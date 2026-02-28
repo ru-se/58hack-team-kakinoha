@@ -43,5 +43,5 @@ export const quizService = {
             created_at: q.created_at,
             answered: answeredSet.has(q.id),
         }));
-    }
+    },
 };
