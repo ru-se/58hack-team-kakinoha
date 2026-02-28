@@ -208,3 +208,132 @@ QuizSubmitRequestSchema // 既存のギャップ分析用
 - **earned_pointsは初回プレイのみ加算（UNIQUE制約で2回目以降はスキップ）**
 - **genres の割合はバックエンドで合計1.0に正規化して返す**
 - **採点はバックエンドで実施（correct_indexとの照合はサーバー側）**
+
+## 追加タスク①: クイズ一覧API の実装
+
+### 対象ファイル
+`src/routes/quizzes.ts` の既存モックを本実装に差し替える（他のファイルは触らない）
+
+### エンドポイント
+GET /api/quizzes?user_id=xxx
+
+### バリデーション
+- user_id が未指定 or 空文字の場合は 400 を返す
+- user_id は UUID 形式であること（既存の Zod スキーマがあれば流用）
+
+### レスポンス形式
+```json
+{
+  "quizzes": [
+    {
+      "quiz_id": "uuid",
+      "title": "タイトル",
+      "genres": { "web": 0.8, "ai": 0.2 },
+      "max_points": 60,
+      "answered": true
+    }
+  ]
+}
+```
+
+### 実装方針
+```typescript
+// 1. quizzes を全件取得
+const { data: quizzes } = await supabase.from('quizzes').select('id, title, genres, max_points');
+
+// 2. user_id で quiz_results を絞り込み、回答済み quiz_id の Set を作る
+const { data: results } = await supabase
+  .from('quiz_results')
+  .select('quiz_id')
+  .eq('user_id', userId);
+
+const answeredSet = new Set(results?.map(r => r.quiz_id) ?? []);
+
+// 3. answered フラグを付けてレスポンスを返す
+const response = quizzes?.map(q => ({
+  quiz_id: q.id,
+  title: q.title,
+  genres: q.genres,
+  max_points: q.max_points,
+  answered: answeredSet.has(q.id),
+})) ?? [];
+```
+
+### エラーハンドリング
+- Supabase エラーは 500 で返す
+- quizzes が0件の場合は空配列 `{ "quizzes": [] }` を返す（エラーにしない）
+
+---
+
+## 追加タスク②: 経験値付与ロジックの変更
+
+### 対象ファイル
+submit エンドポイントの実装箇所（`src/routes/quizzes.ts` または `src/services/` 以下）
+
+### 変更内容
+経験値付与を「初回回答時のみ」に変更する。
+
+### 実装方針
+```typescript
+// 初回判定を関数に切り出す（将来の差し替えを容易にするため）
+async function shouldGrantExp(userId: string, quizId: string): Promise<boolean> {
+  // TODO: 将来的に「最高スコア更新時のみ加算」に変更予定
+  // 現在は初回回答のみ付与
+  const { data } = await supabase
+    .from('quiz_results')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('quiz_id', quizId)
+    .limit(1);
+
+  return !data || data.length === 0; // レコードなし = 初回
+}
+
+// submit 処理内での使い方
+const isFirst = await shouldGrantExp(userId, quizId);
+const earnedPoints = isFirst ? calculatePoints(correctCount, totalQuestions, maxPoints) : 0;
+
+// exp 加算は isFirst の場合のみ
+if (isFirst) {
+  // genres の按分で各 exp_〇〇 に加算
+  for (const [genre, ratio] of Object.entries(genres)) {
+    const expColumn = `exp_${genre}`;
+    await supabase.rpc('increment_exp', { user_id: userId, column: expColumn, amount: Math.floor(earnedPoints * ratio) });
+  }
+}
+
+// quiz_results には毎回 INSERT（復習記録として残す）
+await supabase.from('quiz_results').insert({
+  user_id: userId,
+  quiz_id: quizId,
+  correct_count: correctCount,
+  total_questions: totalQuestions,
+  earned_points: earnedPoints, // 2回目以降は 0
+});
+```
+
+### exp 加算の実装注意
+Supabase で `exp_web` などのカラムをインクリメントする場合、
+直接 `update` だと競合が起きる可能性があるため `rpc` を使うか、
+以下のように現在値を取得してから加算する：
+```typescript
+// rpc が使えない場合の代替
+const { data: user } = await supabase
+  .from('users')
+  .select('exp_web, exp_ai, exp_security, exp_infrastructure, exp_design, exp_game')
+  .eq('id', userId)
+  .single();
+
+const updates: Record<string, number> = {};
+for (const [genre, ratio] of Object.entries(genres)) {
+  const col = `exp_${genre}` as keyof typeof user;
+  updates[col] = (user?.[col] ?? 0) + Math.floor(earnedPoints * ratio);
+}
+
+await supabase.from('users').update(updates).eq('id', userId);
+```
+
+### 注意事項
+- `shouldGrantExp` 関数は必ず切り出すこと（インライン実装禁止）
+- `// TODO: 将来的に最高スコア更新時のみ加算に変更予定` コメントを関数内に残すこと
+- 既存のギャップ分析・chimera_parameters の計算ロジックは一切触らないこと

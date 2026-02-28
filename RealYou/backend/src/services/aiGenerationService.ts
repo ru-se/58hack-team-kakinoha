@@ -107,6 +107,9 @@ function validate(data: unknown): asserts data is GeneratedQuizData {
     }
 
     // genres
+    if (typeof d.genres !== 'object' || d.genres === null) {
+        throw new Error('AI生成データが不正です: genresが存在しません');
+    }
     const genres = d.genres as Record<string, number>;
     const genreKeys = Object.keys(genres);
     if (genreKeys.length < 1 || genreKeys.length > 2) {
@@ -129,7 +132,7 @@ function normalizeGenres(genres: Record<string, number>): Record<string, number>
     );
 }
 
-// --- メイン関数 ---
+// --- AI クイズ生成 ---
 export async function generateQuizFromPresentation(
     presentationText: string
 ): Promise<GeneratedQuizData> {
@@ -149,4 +152,51 @@ export async function generateQuizFromPresentation(
     parsed.genres = normalizeGenres(parsed.genres);
 
     return parsed;
+}
+
+// --- DB保存（quizzes → questions の順でINSERT、失敗時は手動ロールバック）---
+export async function saveQuizToDb(
+    createdBy: string,
+    data: GeneratedQuizData
+): Promise<{ quiz_id: string }> {
+    const { supabase } = await import('../db/client');
+
+    // 1. quizzes に INSERT
+    const { data: quiz, error: quizError } = await supabase
+        .from('quizzes')
+        .insert({
+            created_by: createdBy,
+            title: data.title,
+            max_points: data.max_points,
+            genres: data.genres,
+        })
+        .select('id')
+        .single();
+
+    if (quizError || !quiz) {
+        throw new Error(`クイズの保存に失敗しました: ${quizError?.message}`);
+    }
+
+    const quizId = quiz.id;
+
+    // 2. questions に INSERT（quizzes が成功した場合のみ、bulk INSERTで1回）
+    const questions = data.questions.map(q => ({
+        quiz_id: quizId,
+        order_num: q.order_num,
+        question_text: q.question_text,
+        options: q.options,
+        correct_index: q.correct_index,
+    }));
+
+    const { error: questionsError } = await supabase
+        .from('questions')
+        .insert(questions);
+
+    if (questionsError) {
+        // questions の INSERT 失敗時のみ quizzes を手動ロールバック
+        await supabase.from('quizzes').delete().eq('id', quizId);
+        throw new Error(`問題の保存に失敗しました: ${questionsError.message}`);
+    }
+
+    return { quiz_id: quizId };
 }
