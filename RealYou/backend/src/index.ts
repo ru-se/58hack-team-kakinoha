@@ -11,6 +11,7 @@ import quizzesRouter from './routes/quizzes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
+app.disable('x-powered-by');
 const PORT = process.env.PORT || 3001;
 const allowedOriginsStr = process.env.FRONTEND_URL || 'http://localhost:3000,http://localhost:3001,http://localhost:5173';
 const allowedOrigins = allowedOriginsStr.split(',');
@@ -27,7 +28,6 @@ app.use(cors({
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-    credentials: true,
 }));
 app.use(express.json());
 
