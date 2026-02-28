@@ -1,0 +1,1207 @@
+:root {
+    --bg-color: #0a0515;
+    /* より深い夜の青へ変更 */
+    --text-primary: #fff;
+    --text-glitch: #ff0055;
+    --whisper-text: #0f0;
+
+    /* Semantic Grid Setup */
+    --grid-left-width: 1.2fr;
+    --grid-right-realyou-width: 1fr;
+    --grid-right-growtree-width: 1fr;
+    --grid-top-height: 1.5fr;
+    --grid-bottom-height: 0.8fr;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-default);
+    overflow: hidden;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #0a0515;
+    /* 深みのある暗紫・ミッドナイトブルー */
+}
+
+/* =========================================
+   IMMERSIVE DYNAMIC BACKGROUNDS (HOVER EFFECT)
+   ========================================= */
+#dynamic-bg-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    /* ベース背景よりは上、コンテンツよりは下 */
+    pointer-events: none;
+}
+
+.dynamic-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.8, 0, 0.2, 1);
+    /* アグレッシブにパキッと切り替え */
+    mask-image: radial-gradient(circle at center, transparent 10%, black 80%);
+    -webkit-mask-image: radial-gradient(circle at center, transparent 10%, black 80%);
+}
+
+.dynamic-bg.active {
+    opacity: 1;
+    /* 完全不透明でオーバーライド */
+}
+
+/* 1. TalkScope: 電脳空間マトリックスグリッド */
+.bg-talkscope {
+    background-color: #001233;
+    background-image:
+        linear-gradient(rgba(0, 150, 255, 0.8) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(0, 150, 255, 0.8) 2px, transparent 2px);
+    background-size: 50px 50px;
+    animation: gridBreathe 2s infinite alternate;
+}
+
+@keyframes gridBreathe {
+    0% {
+        filter: brightness(1) contrast(1.2);
+    }
+
+    100% {
+        filter: brightness(1.8) contrast(1.5) drop-shadow(0 0 10px #0096ff);
+    }
+}
+
+/* 2. RealYou: 警戒色ストライプ（ショッキングピンク＆ヴィヴィッドイエロー） */
+.bg-realyou {
+    background: repeating-linear-gradient(-45deg,
+            #ff0055,
+            #ff0055 60px,
+            #ffe600 60px,
+            #ffe600 120px);
+    animation: popStripeScroll 0.5s linear infinite;
+}
+
+@keyframes popStripeScroll {
+    100% {
+        background-position: -170px 0;
+    }
+}
+
+/* 3. GrowTree: ダンジョン風格子＆スキャンライン */
+.bg-growtree {
+    background-color: #051005;
+    background-image:
+        linear-gradient(rgba(44, 150, 45, 0.4) 4px, transparent 4px),
+        linear-gradient(90deg, rgba(44, 150, 45, 0.4) 4px, transparent 4px);
+    background-size: 40px 40px;
+    box-shadow: inset 0 0 200px #000;
+}
+
+.bg-growtree::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.8) 2px, rgba(0, 0, 0, 0.8) 4px);
+    pointer-events: none;
+}
+
+/* 4. TimeFacker: 警告ストライプ＆ノイズ（致命的エラー空間） */
+.bg-timefaker {
+    background-color: #000;
+    background-image: repeating-linear-gradient(45deg,
+            #000,
+            #000 40px,
+            #b30000 40px,
+            #b30000 80px);
+    animation: errorStripe 0.2s linear infinite;
+}
+
+.bg-timefaker::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/White-noise-mv2-520x245.png');
+    opacity: 0.3;
+    animation: noiseJitter 0.05s steps(2) infinite;
+    mix-blend-mode: overlay;
+}
+
+@keyframes errorStripe {
+    100% {
+        background-position: 113px 0;
+    }
+}
+
+/* デジタル・ノイズ / 血管 */
+#digital-noise {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/76/White-noise-mv2-520x245.png');
+    opacity: 0.15;
+    /* 常時背景用に濃厚に */
+    z-index: -2;
+    pointer-events: none;
+    animation: noiseJitter 0.1s steps(2) infinite;
+}
+
+@keyframes noiseJitter {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(10px, 10px);
+    }
+}
+
+#visceral-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    pointer-events: none;
+    background: radial-gradient(circle at center, transparent 30%, rgba(80, 0, 40, 0.3) 100%);
+    /* より濃く、やや紫寄りに */
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
+    mix-blend-mode: multiply;
+}
+
+#static-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    opacity: 0;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.flash-active #static-flash {
+    animation: flashAnim 0.15s ease-out;
+}
+
+@keyframes flashAnim {
+    0% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.nerve-trail {
+    position: fixed;
+    width: 2px;
+    height: 15px;
+    background: var(--nerve);
+    box-shadow: 0 0 10px var(--nerve);
+    pointer-events: none;
+    z-index: 1000;
+}
+
+
+/* =========================================
+   BASE LAYERS AND OVERLAYS
+   ========================================= */
+
+/* 流体マーブル背景（復活・強化） */
+#marble-overlay {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    z-index: -5;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 30% 30%, rgba(0, 150, 255, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 70% 30%, rgba(255, 0, 85, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 30% 70%, rgba(85, 156, 113, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(255, 230, 0, 0.25) 0%, transparent 50%);
+    filter: blur(60px) contrast(1.5) saturate(1.5);
+    animation: marbleFloat 25s infinite alternate ease-in-out;
+}
+
+@keyframes marbleFloat {
+    0% {
+        transform: scale(1) translate(0, 0) rotate(0deg);
+    }
+
+    100% {
+        transform: scale(1.3) translate(5%, 5%) rotate(10deg);
+    }
+}
+
+/* つぎはぎ感（パッチワーク）を出す背景 */
+.patchwork-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -4;
+    background:
+        linear-gradient(45deg, rgba(5, 5, 8, 0.2) 25%, transparent 25%, transparent 75%, rgba(5, 5, 8, 0.2) 75%),
+        linear-gradient(-45deg, rgba(5, 5, 8, 0.2) 25%, transparent 25%, transparent 75%, rgba(5, 5, 8, 0.2) 75%);
+    background-size: 60px 60px;
+    animation: bgShift 40s infinite linear;
+    pointer-events: none;
+}
+
+/* 乱雑なワイヤー */
+.wires-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.wire {
+    position: absolute;
+    border: 2px solid var(--wire-color);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+.wire-1 {
+    top: 20%;
+    left: -5%;
+    width: 110%;
+    height: 60%;
+    border-radius: 50%;
+    transform: rotate(5deg);
+    border-top: none;
+}
+
+.wire-2 {
+    bottom: 10%;
+    right: -5%;
+    width: 50%;
+    height: 30%;
+    border-radius: 40%;
+    transform: rotate(-15deg);
+    border-bottom: none;
+}
+
+.wire-3 {
+    top: -10%;
+    left: 30%;
+    width: 40%;
+    height: 50%;
+    border-radius: 45%;
+    transform: rotate(80deg);
+    border-right: none;
+}
+
+.staple {
+    position: absolute;
+    width: 15px;
+    height: 3px;
+    background: #444;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    z-index: 25;
+}
+
+.staple-t1 {
+    top: 5px;
+    left: 20px;
+    transform: rotate(-30deg);
+}
+
+.staple-t2 {
+    bottom: 5px;
+    right: 30px;
+    transform: rotate(15deg);
+}
+
+/* ブラウン管（CRT）ノイズのエフェクト */
+.scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    pointer-events: none;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
+    background-size: 100% 4px, 6px 100%;
+    animation: scanline 10s linear infinite;
+}
+
+@keyframes bgShift {
+    100% {
+        background-position: 60px 60px;
+    }
+}
+
+@keyframes scanline {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(4px);
+    }
+}
+
+/* ガムテープ（物理的なつぎはぎ） */
+.duct-tape {
+    position: absolute;
+    height: 35px;
+    background-color: var(--tape-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    opacity: 0.9;
+    z-index: 20;
+    backdrop-filter: blur(2px);
+    border-left: 2px dashed rgba(0, 0, 0, 0.2);
+    border-right: 2px dashed rgba(0, 0, 0, 0.2);
+}
+
+.tape-title {
+    top: -10px;
+    left: 45%;
+    width: 120px;
+    transform: rotate(-5deg);
+    height: 45px;
+}
+
+.tape-header {
+    top: 10px;
+    left: 20px;
+    width: 80px;
+    transform: rotate(15deg);
+    height: 25px;
+    z-index: 105;
+}
+
+.card-tape {
+    top: -15px;
+    right: -15px;
+    width: 100px;
+    transform: rotate(45deg);
+}
+
+.title-container {
+    text-align: center;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* タイトル文字のアソートセット */
+.title {
+    font-size: 6rem;
+    line-height: 1;
+    text-shadow: 5px 5px 0 #000;
+    word-spacing: -1rem;
+    display: flex;
+    gap: 2px;
+}
+
+.title span {
+    display: inline-block;
+}
+
+.t1 {
+    font-family: 'Creepster', cursive;
+    color: #ff0055;
+    transform: rotate(-5deg);
+    text-shadow: -2px 0 0 #0ff;
+    animation: shake 2s infinite;
+}
+
+.t2 {
+    font-family: 'Share Tech Mono', monospace;
+    color: #0f0;
+    transform: translateY(-10px);
+}
+
+.t3 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    color: #fff;
+    font-style: italic;
+    transform: scaleX(1.5);
+}
+
+.t4 {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    color: #ffe600;
+    text-shadow: 4px 4px 0 #ff0055;
+    transform: rotate(10deg);
+}
+
+.t5 {
+    font-family: 'Rubik Glitch', sans-serif;
+    color: #aaa;
+    font-size: 8rem;
+    margin-top: -1rem;
+    animation: glitchFont 0.5s infinite;
+    /* タイトルのみ若干の収差 */
+    filter: url(#chromatic);
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: rotate(-5deg) translateX(0);
+    }
+
+    50% {
+        transform: rotate(-8deg) translateX(-2px);
+    }
+}
+
+@keyframes glitchFont {
+    0% {
+        transform: skewX(0deg);
+        opacity: 1;
+    }
+
+    20% {
+        transform: skewX(-20deg);
+        opacity: 0.8;
+        color: #f0f;
+    }
+
+    21% {
+        transform: skewX(0deg);
+        opacity: 1;
+        color: #aaa;
+    }
+
+    80% {
+        transform: skewX(10deg) translate(5px, -5px);
+    }
+
+    81% {
+        transform: skewX(0deg) translate(0, 0);
+    }
+}
+
+.subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    color: #ff0055;
+    background: #000;
+    padding: 0.5rem 2rem;
+    border: 2px solid #ff0055;
+    margin-top: 1rem;
+    text-transform: uppercase;
+    animation: bgLink 0.1s infinite;
+}
+
+@keyframes bgLink {
+    0% {
+        background: #000;
+    }
+
+    50% {
+        background: #200;
+    }
+}
+
+/* 囁きバー */
+#whisper-bar {
+    position: fixed;
+    bottom: 10px;
+    left: 15px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--whisper-text);
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* 階層順序を明確にした Semantic Split Grid レイアウト */
+.chaos-grid {
+    display: grid;
+    grid-template-columns: var(--grid-left-width) var(--grid-right-realyou-width) var(--grid-right-growtree-width);
+    grid-template-rows: var(--grid-top-height) var(--grid-bottom-height);
+    grid-template-areas:
+        "talkscope realyou growtree"
+        "timefaker realyou growtree";
+    gap: 2rem;
+    /* 再び適度な隙間を持たせる */
+    max-width: 1400px;
+    height: clamp(500px, 90vh, 1000px);
+    /* タイトルが無い分、画面を極限まで縦に使う */
+    width: 95vw;
+    margin: 3vh auto 0;
+    /* 上に少しだけ隙間を開ける */
+    padding: 0 1rem 1rem;
+    position: relative;
+}
+
+.app-card {
+    position: relative;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    color: inherit;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    /* Gridセルを完全に充填させるため以前のFlex制約をリセット */
+}
+
+/* ホバーされていないカードをボカして沈ませる（Focus効果） */
+.chaos-grid:hover .app-card:not(:hover) {
+    opacity: 0.85;
+    filter: blur(2px) brightness(0.6) grayscale(30%);
+    transform: scale(0.95);
+}
+
+.app-card:hover {
+    z-index: 50;
+}
+
+/* =========================================
+   TALKSCOPE: BUBBLE ARCHITECTURE
+   ========================================= */
+.app-card.talkscope {
+    grid-area: talkscope;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: none;
+    cursor: default;
+    pointer-events: none;
+    /* 透明な親要素全体の判定を消す */
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bubble-layout {
+    pointer-events: none;
+    /* 外枠の判定は持たない */
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.app-card.talkscope:hover {
+    transform: scale(1.05) translateY(-10px);
+}
+
+.app-card.talkscope:hover .main-bubble {
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 150, 255, 0.8), inset 0 0 30px rgba(255, 255, 255, 0.5);
+    background: rgba(0, 30, 80, 0.85);
+    /* 濃く不透明に */
+    border-color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px #0096ff;
+}
+
+.app-card.talkscope:hover .ts-bubble {
+    animation-duration: 2s;
+    /* ホバー時に加速 */
+}
+
+.bubble-layout {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* 外枠の判定は持たない */
+}
+
+.main-bubble {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 220px;
+    /* 圧倒的な大サイズへ */
+    height: 220px;
+    background: rgba(0, 20, 50, 0.65);
+    backdrop-filter: blur(25px);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #fff;
+    font-size: 1.8rem;
+    /* さらに見やすく巨大化 */
+    z-index: 10;
+    box-shadow: 0 0 40px rgba(0, 150, 255, 0.4);
+    animation: pulse 4s infinite ease-in-out;
+    transition: all 0.4s ease;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    pointer-events: auto;
+    /* バブルだけ当たり判定を持つ */
+    cursor: pointer;
+}
+
+.sub-bubble {
+    position: absolute;
+    background: rgba(0, 10, 30, 0.6);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    padding: 1rem;
+    /* ゆとりあるパディング復活 */
+    text-align: center;
+    transition: all 0.4s ease;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    pointer-events: auto;
+    /* サブバブルも当たり判定をもつ */
+    cursor: pointer;
+}
+
+.app-card.talkscope:hover .sub-bubble {
+    background: rgba(0, 30, 80, 0.85);
+    /* 濃く不透明に */
+    border-color: rgba(0, 150, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 150, 255, 0.6);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.sub-bubble.info {
+    bottom: -15px;
+    right: 5%;
+    width: 160px;
+    /* 存在感をさらにアップ */
+    height: 160px;
+    font-size: 0.9rem;
+    z-index: 5;
+}
+
+.sub-bubble.icon {
+    top: -15px;
+    left: 5%;
+    width: 110px;
+    /* かなり大きく */
+    height: 110px;
+    font-size: 2.5rem;
+    z-index: 5;
+}
+
+.ts-bubble-cloud {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.ts-bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.6rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: bubbleFloat 8s infinite ease-in-out;
+}
+
+@keyframes bubbleFloat {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(10px, -20px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-15px, 10px) scale(0.9);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 0 0 20px rgba(0, 150, 255, 0.2);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 0 0 40px rgba(0, 150, 255, 0.4);
+    }
+}
+
+/* =========================================
+   REALYOU: CHAT UI ARCHITECTURE
+   ========================================= */
+.app-card.realyou {
+    grid-area: realyou;
+    background: #fff;
+    border: 12px solid #222;
+    /* よりスマホらしい太枠に */
+    border-radius: 40px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 15px 15px 0 #ff0055;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.app-card.realyou:hover {
+    animation: joyfulShake 0.4s infinite;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.8), 25px 25px 0 #00ffff;
+    transform: rotate(0deg) translateY(0px) scale(1.05);
+}
+
+@keyframes joyfulShake {
+
+    0%,
+    100% {
+        transform: rotate(0deg) translateY(0px) scale(1.05);
+    }
+
+    25% {
+        transform: rotate(-2deg) translateY(-2px) scale(1.05);
+    }
+
+    75% {
+        transform: rotate(2deg) translateY(2px) scale(1.05);
+    }
+}
+
+.app-card.realyou:hover .chat-bubble.emoji {
+    transform: scale(1.5) rotate(15deg);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.chat-header {
+    background: #f0f0f0;
+    padding: 0.8rem 1.5rem;
+    /* 読みやすいパディング復元 */
+    border-bottom: 5px solid #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 900;
+    color: #000;
+}
+
+.chat-status {
+    font-size: 0.6rem;
+    color: #555;
+    text-transform: uppercase;
+}
+
+.chat-body {
+    padding: 1.5rem;
+    /* 豪華なゆとり復活 */
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    /* 文字が詰まらないように */
+    flex: 1;
+    background: #e5ddd5;
+    background-image: radial-gradient(#d3c9bf 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.chat-bubble {
+    max-width: 85%;
+    padding: 0.8rem 1.2rem;
+    border-radius: 25px;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 0.95rem;
+    /* 綺麗に読めるサイズへ */
+    font-weight: 500;
+    color: #000;
+    border: 3px solid #000;
+    position: relative;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.chat-bubble.app {
+    align-self: flex-start;
+    background: #fff;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-bubble.user {
+    align-self: flex-end;
+    background: #dcf8c6;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-bubble.emoji {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    font-size: 3rem;
+    /* 感情豊かに巨大化 */
+    align-self: center;
+}
+
+/* =========================================
+   GROWTREE: TREE ARCHITECTURE
+   ========================================= */
+.app-card.growtree {
+    grid-area: growtree;
+    background: #0d1b0d;
+    border: 5px solid #2C5F2D;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    padding: 2.5rem;
+    /* 美しい余白 */
+    color: #559C71;
+    box-shadow: inset 0 0 60px #000, 0 15px 40px rgba(0, 0, 0, 0.7);
+    transform: rotate(-2deg);
+    transition: all 0.4s ease;
+}
+
+.app-card.growtree:hover {
+    box-shadow: inset 0 0 40px #000, 0 0 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(85, 156, 113, 0.6);
+    border-color: #98fb98;
+    transform: rotate(0deg) scale(1.03);
+}
+
+.tree-layout {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* 縦長空間の下から上へ育つ配置 */
+}
+
+.tree-svg {
+    position: absolute;
+    bottom: -20%;
+    /* さらに深くから生やす */
+    right: -10%;
+    width: 130%;
+    /* 横幅もオーバーさせる */
+    height: 160%;
+    /* 天上の限界まで高く！ */
+    color: rgba(44, 95, 45, 0.5);
+    /* 少し濃く */
+    z-index: 0;
+    pointer-events: none;
+    transform-origin: bottom center;
+    transition: transform 0.6s ease;
+}
+
+.app-card.growtree:hover .tree-svg {
+    transform: scale(1.1) translateY(-10%);
+    fill: rgba(85, 156, 113, 0.6);
+}
+
+.tree-content {
+    position: relative;
+    z-index: 2;
+}
+
+.app-card.growtree .card-title {
+    font-family: 'DotGothic16', sans-serif;
+    font-size: 2.5rem;
+    /* ハッカーらしい巨大文字復元 */
+    color: #bbf7d0;
+    margin-bottom: 0.8rem;
+    text-shadow: 0 0 20px rgba(187, 247, 208, 0.5);
+    transition: all 0.3s;
+}
+
+.app-card.growtree:hover .card-title {
+    color: #fff;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 1);
+}
+
+.app-card.growtree .card-desc {
+    font-family: 'DotGothic16', sans-serif;
+    color: #559C71;
+}
+
+.app-card.growtree .gt-xp-bar {
+    margin-top: 1.5rem;
+    height: 15px;
+    background: #050a05;
+    border: 2px solid #559C71;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(85, 156, 113, 0.3);
+}
+
+.app-card.growtree .gt-xp-fill {
+    height: 100%;
+    width: 70%;
+    background: repeating-linear-gradient(45deg,
+            #559C71,
+            #559C71 10px,
+            #2C5F2D 10px,
+            #2C5F2D 20px);
+    animation: xpFlow 3s infinite linear;
+}
+
+.app-card.growtree:hover .gt-xp-fill {
+    animation: xpFlow 0.5s infinite linear;
+    /* XP一気に加速 */
+    background: repeating-linear-gradient(45deg, #98fb98, #98fb98 10px, #559C71 10px, #559C71 20px);
+}
+
+@keyframes xpFlow {
+    100% {
+        background-position: 40px 0;
+    }
+}
+
+/* =========================================
+   TIMEFAKER: CLOCK ARCHITECTURE
+   ========================================= */
+.app-card.timefaker {
+    grid-area: timefaker;
+    background: #000;
+    border: 4px solid #ff4400;
+    border-radius: 10px;
+    padding: 1.5rem 3rem;
+    /* 横方向の広がりを強調 */
+    color: #ff4400;
+    display: flex;
+    flex-direction: row;
+    /* 横長なので横並びに */
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    box-shadow: 0 0 40px rgba(255, 68, 0, 0.3), inset 0 0 30px rgba(255, 68, 0, 0.15);
+    transform: rotate(1deg);
+    transition: all 0.2s;
+}
+
+.app-card.timefaker:hover {
+    border-color: #ff0000;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(255, 0, 0, 0.8), inset 0 0 40px rgba(255, 0, 0, 0.4);
+    transform: scale(1.02) rotate(0deg);
+}
+
+.digital-clock {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 4.5rem;
+    /* 圧倒的サイバーパンク巨大時計 */
+    font-weight: 900;
+    text-align: center;
+    background: rgba(255, 68, 0, 0.08);
+    padding: 1.5rem 3rem;
+    /* ド迫力パディング */
+    border: 3px dashed #ff4400;
+    letter-spacing: 0.15rem;
+    text-shadow: 0 0 15px rgba(255, 68, 0, 0.6);
+    transition: all 0.2s;
+}
+
+.app-card.timefaker:hover .digital-clock {
+    animation: digitalGlitch 0.3s infinite;
+    color: #fff;
+    background: rgba(255, 0, 0, 0.3);
+    border-color: #f00;
+}
+
+@keyframes digitalGlitch {
+    0% {
+        transform: translate(2px, 0);
+        text-shadow: -3px 0 #0ff, 3px 0 #f00;
+    }
+
+    50% {
+        transform: translate(-2px, 2px);
+        text-shadow: 3px 0 #0ff, -3px 0 #f00;
+    }
+
+    100% {
+        transform: translate(0, -2px);
+        text-shadow: -2px 0 #0ff, 2px 0 #f00;
+    }
+}
+
+.clock-details {
+    text-align: right;
+    /* 右寄せに */
+    font-family: 'Share Tech Mono', monospace;
+    flex: 1;
+}
+
+.app-card.timefaker .card-title {
+    font-size: 1.8rem;
+    /* 少し大きく */
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+    letter-spacing: 2px;
+}
+
+.app-card.timefaker .card-desc {
+    display: block;
+    /* 横長スペースがあるため復活 */
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.sys-log {
+    font-size: 0.6rem;
+    color: #0f0;
+    opacity: 0.9;
+    border-top: 1px solid #222;
+    margin-top: 10px;
+    padding-top: 5px;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.sys-log .blink {
+    animation: cursorBlink 0.8s infinite;
+}
+
+@keyframes cursorBlink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes terminalShake {
+    0% {
+        transform: translate(2px, 2px) rotate(2deg);
+    }
+
+    50% {
+        transform: translate(-2px, -2px) rotate(1deg);
+    }
+
+    100% {
+        transform: translate(2px, -2px) rotate(3deg);
+    }
+}
+
+.card-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+/* ======== App View (Iframe Wrapper) ======== */
+#app-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.5s cubic-bezier(0.2, 1, 0.3, 1), transform 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+#app-view.hidden {
+    opacity: 0;
+    transform: scale(1.1) rotate(2deg);
+    pointer-events: none;
+}
+
+.app-header {
+    height: 4rem;
+    background: #ff0055;
+    border-bottom: 5px solid #000;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    z-index: 101;
+    position: relative;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.5);
+}
+
+.glitch-btn {
+    font-family: 'Rubik Glitch', 'Creepster', cursive;
+    background: #ffe600;
+    color: #000;
+    border: 4px solid #000;
+    font-size: 1.5rem;
+    padding: 0.2rem 1.5rem;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #000;
+    transform: rotate(-3deg);
+    transition: 0.1s;
+}
+
+.glitch-btn:hover {
+    background: #000;
+    color: #0f0;
+    transform: rotate(2deg) scale(1.1);
+    box-shadow: -4px -4px 0 #ff0055;
+}
+
+.scroll-text {
+    font-family: 'DotGothic16', monospace;
+    font-size: 2rem;
+    color: #000;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-left: 2rem;
+    width: 60%;
+}
+
+#portal-view {
+    transition: opacity 0.4s ease, filter 0.4s ease;
+    width: 100%;
+    min-height: 100vh;
+}
+
+#portal-view.fade-out {
+    opacity: 0;
+    filter: blur(30px) contrast(300%) grayscale(100%);
+    pointer-events: none;
+    position: absolute;
+}
+
+#app-frame {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: #000;
+    box-shadow: inset 0 0 50px #000;
+}

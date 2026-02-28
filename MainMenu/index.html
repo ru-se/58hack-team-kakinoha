@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C H I M E R A - P O R T A L</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Inter:wght@300;400;700&family=M+PLUS+Rounded+1c:wght@700;800&family=Share+Tech+Mono&family=Creepster&family=Rubik+Glitch&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="chimera-active">
+
+    <!-- 有機的な歪みフィルター (SVG) -->
+    <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true" focusable="false">
+        <filter id="organic-distortion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" seed="1" result="noise">
+                <animate attributeName="baseFrequency" values="0.01;0.015;0.01" dur="10s" repeatCount="indefinite" />
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+
+        <!-- 色収差フィルター -->
+        <filter id="chromatic">
+            <feOffset in="SourceGraphic" dx="-2" dy="0" result="red" />
+            <feOffset in="SourceGraphic" dx="2" dy="0" result="blue" />
+            <feComposite in="red" in2="blue" operator="xor" />
+        </filter>
+    </svg>
+
+    <!-- 背景・演出用レイヤー（文字を歪ませないよう独立） -->
+    <div id="marble-overlay"></div>
+    <div id="digital-noise"></div>
+    <div id="visceral-overlay"></div>
+    <div id="whisper-bar"></div>
+    <div id="static-flash"></div>
+
+    <!-- 乱雑なワイヤー（つぎはぎ演出） -->
+    <div class="wires-container">
+        <div class="wire wire-1"></div>
+        <div class="wire wire-2"></div>
+        <div class="wire wire-3"></div>
+    </div>
+
+    <!-- 動的背景コンテナ -->
+    <div id="dynamic-bg-container">
+        <div class="dynamic-bg bg-talkscope"></div>
+        <div class="dynamic-bg bg-realyou"></div>
+        <div class="dynamic-bg bg-growtree"></div>
+        <div class="dynamic-bg bg-timefaker"></div> <!-- settings -> timefaker -->
+    </div>
+
+    <!-- CRTスキャンラインとベース背景のオーバーレイ -->
+    <div class="patchwork-bg"></div>
+    <div class="scanlines"></div>
+
+    <main id="portal-view">
+        <!-- メニューカード (タイトル削除に伴い最上部から全画面展開) -->
+        <div class="chaos-grid" id="app-grid"></div>
+    </main>
+
+    <div id="app-view" class="hidden">
+        <div class="app-header">
+            <button id="back-button" class="back-btn glitch-btn">
+                <span class="back-icon">✕</span> EJECT TO TIMEFACKER
+            </button>
+            <div class="duct-tape tape-header"></div>
+            <marquee id="current-app-title" class="app-title scroll-text" scrollamount="15">...</marquee>
+        </div>
+        <iframe id="app-frame" src="" frameborder="0"></iframe>
+    </div>
+
+    <script type="module" src="./script.js"></script>
+</body>
+
+</html>
