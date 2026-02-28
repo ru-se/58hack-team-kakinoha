@@ -1,6 +1,8 @@
 // src/services/expService.ts
 // 採点・経験値計算・履歴保存サービス (#40)
 
+import { supabase } from '../db/client';
+
 export type SubmitAnswers = {
     question_id: string;
     selected_index: number;
@@ -25,8 +27,6 @@ export async function scoreAnswers(
     quizId: string,
     answers: SubmitAnswers
 ): Promise<{ correctCount: number; totalQuestions: number }> {
-    const { supabase } = await import('../db/client');
-
     const { data: questions, error } = await supabase
         .from('questions')
         .select('id, correct_index')
@@ -47,8 +47,6 @@ export async function scoreAnswers(
 // TODO: 将来的に「最高スコア更新時のみ加算」に変更予定
 // =========================================================
 async function isFirstAttempt(userId: string, quizId: string): Promise<boolean> {
-    const { supabase } = await import('../db/client');
-
     const { data } = await supabase
         .from('quiz_results')
         .select('id')
@@ -79,8 +77,6 @@ export async function processExpGrant(
     quizId: string,
     answers: SubmitAnswers
 ): Promise<ExpGrantResult> {
-    const { supabase } = await import('../db/client');
-
     // 1. クイズ情報取得（max_points, genres）
     const { data: quiz, error: quizError } = await supabase
         .from('quizzes')
