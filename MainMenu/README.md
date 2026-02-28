@@ -6,6 +6,7 @@ CHIMERA_OS（メインメニュー）は、チームで開発した4つの異な
 - 📱 **意味的分割グリッド (Semantic Split Grid)**: CSS変数による左・右、上・下の分割。スマホ（RealYou）、大樹（GrowTree）、横長時計（TimeFaker）、空間（TalkScope）の固有プロポーションを尊重。
 - 📺 **シームレスなiframe連携**: アプリ起動時の軽量な Vanilla JS によるアニメーション付き `iframe` 遷移。
 - 🧬 **ディープな没入感 (Deep Context UI)**: ホバー時に枠の限界まで拡大する固有のUIパーツ群とアプリごとの特殊背景（Vibrant Marble）。
+- ⏳ **高度な時間操作UI (Temporal Override Modal)**: `TimeFaker`カードクリック時、専用のアラーム設定モーダルが展開。サイバーテイストなスロット型時間入力レイアウト（分は「00」固定）と、ワンタップで現在時刻や数日後に飛べるクイックアクションを搭載。
 
 ## 🛠 前提条件
 

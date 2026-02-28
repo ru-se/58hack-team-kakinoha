@@ -1205,3 +1205,343 @@ body {
     background: #000;
     box-shadow: inset 0 0 50px #000;
 }
+
+/* =========================================
+   TIMEFAKER MODAL ARCHITECTURE
+   ========================================= */
+.tf-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.tf-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tf-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+}
+
+.tf-modal-content {
+    position: relative;
+    width: 400px;
+    background: #050000;
+    border: 2px solid #ff0055;
+    box-shadow: 0 0 30px rgba(255, 0, 85, 0.5), inset 0 0 20px rgba(255, 0, 85, 0.2);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    color: #fff;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+.tf-modal.active .tf-modal-content {
+    transform: scale(1) translateY(0);
+}
+
+.tf-modal-header {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.5rem;
+    color: #ff0055;
+    text-align: center;
+    text-shadow: 2px 2px 0px #0ff;
+    border-bottom: 1px dashed #ff0055;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.tf-input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-family: 'Share Tech Mono', monospace;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.tf-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.tf-slot-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #ff0055;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.tf-slot-btn:hover {
+    color: #fff;
+    text-shadow: 0 0 10px #ff0055;
+    background: rgba(255, 0, 85, 0.2);
+}
+
+.tf-time-input {
+    background: transparent;
+    border: none;
+    border-top: 1px solid #ff0055;
+    border-bottom: 1px solid #ff0055;
+    color: #0ff;
+    font-size: 3rem;
+    font-family: 'Share Tech Mono', monospace;
+    width: 80px;
+    text-align: center;
+    outline: none;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    transition: all 0.2s;
+}
+
+.tf-time-input:focus {
+    border-color: #0ff;
+    box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+.tf-time-input::-webkit-outer-spin-button,
+.tf-time-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.tf-time-input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.tf-colon {
+    font-size: 3rem;
+    color: #ff0055;
+    animation: blink 1s step-end infinite;
+    margin-top: -5px;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.tf-message {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: #fff;
+    text-align: center;
+    opacity: 0.7;
+    height: 1.2rem;
+}
+
+.tf-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.tf-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid currentColor;
+    color: currentColor;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 0.75rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.tf-btn:hover {
+    background: currentColor;
+    color: #000;
+    box-shadow: 0 0 15px currentColor;
+}
+
+.tf-btn-cancel {
+    color: #aaa;
+}
+
+.tf-btn-set {
+    color: #0ff;
+    border-color: #0ff;
+}
+
+.glitch-text {
+    position: relative;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+}
+
+.glitch-text::before {
+    left: 2px;
+    text-shadow: -1px 0 rgba(255, 0, 85, 0.7);
+    clip: rect(24px, 550px, 90px, 0);
+    animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+
+.glitch-text::after {
+    left: -2px;
+    text-shadow: -1px 0 rgba(0, 255, 255, 0.7);
+    clip: rect(85px, 550px, 140px, 0);
+    animation: glitch-anim 2.5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+    0% {
+        clip: rect(10px, 9999px, 86px, 0);
+    }
+
+    20% {
+        clip: rect(69px, 9999px, 19px, 0);
+    }
+
+    40% {
+        clip: rect(3px, 9999px, 20px, 0);
+    }
+
+    60% {
+        clip: rect(15px, 9999px, 46px, 0);
+    }
+
+    80% {
+        clip: rect(4px, 9999px, 32px, 0);
+    }
+
+    100% {
+        clip: rect(31px, 9999px, 99px, 0);
+    }
+}
+
+@keyframes glitch-anim-2 {
+    0% {
+        clip: rect(65px, 9999px, 100px, 0);
+    }
+
+    20% {
+        clip: rect(3px, 9999px, 60px, 0);
+    }
+
+    40% {
+        clip: rect(80px, 9999px, 24px, 0);
+    }
+
+    60% {
+        clip: rect(15px, 9999px, 80px, 0);
+    }
+
+    80% {
+        clip: rect(50px, 9999px, 10px, 0);
+    }
+
+    100% {
+        clip: rect(90px, 9999px, 50px, 0);
+    }
+}
+
+/* QUICK ACTIONS */
+.tf-quick-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.tf-quick-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid #ff0055;
+    color: #ff0055;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.2;
+    transition: all 0.2s;
+}
+
+.tf-quick-btn:hover {
+    background: #ff0055;
+    color: #000;
+    box-shadow: 0 0 10px #ff0055;
+}
+
+/* DATE GROUP */
+.tf-date-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px dashed #ff0055;
+    padding: 0.5rem;
+    background: rgba(255, 0, 85, 0.05);
+}
+
+.tf-arrow-btn {
+    background: transparent;
+    border: none;
+    color: #0ff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s, text-shadow 0.2s;
+    outline: none;
+}
+
+.tf-arrow-btn:hover {
+    color: #fff;
+    text-shadow: 0 0 10px #0ff;
+}
+
+.tf-date-input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.2rem;
+    text-align: center;
+    outline: none;
+    color-scheme: dark;
+}
+
+.tf-date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) drop-shadow(0 0 5px #ff0055);
+    cursor: pointer;
+}
