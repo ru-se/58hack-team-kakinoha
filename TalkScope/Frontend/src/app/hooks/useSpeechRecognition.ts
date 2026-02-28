@@ -14,8 +14,18 @@ export const useSpeechRecognition = (): UseSpeechRecognitionReturn => {
   const [transcript, setTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
   const recognitionRef = useRef<any>(null);
   const listeningRef = useRef(false);
+
+  // 過去のセッションで「確定」したテキストを保持し続けるためのRef
+  const finalTranscriptRef = useRef('');
+
+  // 外部（App.tsxなど）から setTranscript が呼ばれた時にRefも同期する
+  const handleSetTranscript = useCallback((text: string) => {
+    finalTranscriptRef.current = text;
+    setTranscript(text);
+  }, []);
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -31,20 +41,28 @@ export const useSpeechRecognition = (): UseSpeechRecognitionReturn => {
     recognition.lang = 'ja-JP';
 
     recognition.onresult = (event: any) => {
-      let currentTranscript = '';
+      let interimTranscript = '';
+      let newlyFinalized = '';
 
-      for (let i = 0; i < event.results.length; i++) {
+      // 今回新しく認識された部分（resultIndex以降）だけをループする
+      for (let i = event.resultIndex; i < event.results.length; i++) {
         const text: string = event.results[i][0].transcript;
         const isFinal: boolean = event.results[i].isFinal;
 
-        // If it's a final result, it's a natural break
         if (isFinal) {
-          currentTranscript += text + '。\n';
+          newlyFinalized += text + '。\n';
         } else {
-          currentTranscript += text;
+          interimTranscript += text;
         }
       }
-      setTranscript(currentTranscript);
+
+      // 確定したテキストがあれば、蓄積用Refに追記する
+      if (newlyFinalized) {
+        finalTranscriptRef.current += newlyFinalized;
+      }
+
+      // 画面表示用には「過去の確定分 ＋ 今回の確定分 ＋ 認識途中のテキスト」をセット
+      setTranscript(finalTranscriptRef.current + interimTranscript);
     };
 
     recognition.onerror = (event: any) => {
@@ -89,12 +107,12 @@ export const useSpeechRecognition = (): UseSpeechRecognitionReturn => {
   }, []);
 
   const resetTranscript = useCallback(() => {
-    setTranscript('');
-  }, []);
+    handleSetTranscript('');
+  }, [handleSetTranscript]);
 
   return {
     transcript,
-    setTranscript,
+    setTranscript: handleSetTranscript, // ラップした関数を返す
     isListening,
     startListening,
     stopListening,
