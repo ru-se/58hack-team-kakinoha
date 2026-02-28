@@ -107,6 +107,9 @@ function validate(data: unknown): asserts data is GeneratedQuizData {
     }
 
     // genres
+    if (typeof d.genres !== 'object' || d.genres === null) {
+        throw new Error('AI生成データが不正です: genresが存在しません');
+    }
     const genres = d.genres as Record<string, number>;
     const genreKeys = Object.keys(genres);
     if (genreKeys.length < 1 || genreKeys.length > 2) {
