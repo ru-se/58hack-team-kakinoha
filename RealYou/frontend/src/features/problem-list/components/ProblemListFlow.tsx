@@ -4,12 +4,24 @@ import { useRouter } from 'next/navigation';
 import { useState, useMemo } from 'react';
 import { MOCK_PROBLEMS, ProblemStatus } from '../data/mockProblems';
 
-type FilterType = 'all' | 'unanswered' | 'not-perfect' | 'date';
+type FilterType = 'all' | 'unanswered' | 'not-perfect' | 'week';
+
+const getWeekString = (dateString: string) => {
+  // ISO-8601 (Monday start) Week Calculation
+  const date = new Date(dateString);
+  const day = (date.getDay() + 6) % 7; // Monday = 0, Sunday = 6
+  date.setDate(date.getDate() - day + 3); // Nearest Thursday
+  const firstThursday = new Date(date.getFullYear(), 0, 4);
+  firstThursday.setDate(firstThursday.getDate() - ((firstThursday.getDay() + 6) % 7) + 3);
+  const weekNumber = Math.round(((date.getTime() - firstThursday.getTime()) / 86400000) / 7) + 1;
+  const weekStr = weekNumber.toString().padStart(2, '0');
+  return `${date.getFullYear()}-W${weekStr}`;
+};
 
 export default function ProblemListFlow() {
   const router = useRouter();
   const [filterType, setFilterType] = useState<FilterType>('all');
-  const [filterDate, setFilterDate] = useState<string>('2026-02-28'); // Default to today
+  const [filterWeek, setFilterWeek] = useState<string>('2026-W09'); // Default to current week
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
 
   // オペレーターのセリフ
@@ -22,21 +34,19 @@ export default function ProblemListFlow() {
       if (filterType === 'all') return true;
       if (filterType === 'unanswered') return problem.status === 'unanswered';
       if (filterType === 'not-perfect') return problem.status !== 'perfect';
-      if (filterType === 'date') return problem.date === filterDate;
+      if (filterType === 'week') return getWeekString(problem.date) === filterWeek;
       return true;
     });
-  }, [filterType, filterDate]);
+  }, [filterType, filterWeek]);
 
   const handleSelectProblem = (id: string) => {
     if (selectedProblemId) return; // 既に選択済みなら何もしない
     
-    // SEがあればここで鳴らす
     const audio = new Audio('/sounds/general-button-se.mp3');
     audio.play().catch(() => {});
 
     setSelectedProblemId(id);
 
-    // 2秒後にクイズページへ遷移
     setTimeout(() => {
       router.push('/quiz');
     }, 2500);
@@ -83,7 +93,7 @@ export default function ProblemListFlow() {
                 <option value="all">デフォルト</option>
                 <option value="unanswered">未回答</option>
                 <option value="not-perfect">満点以外</option>
-                <option value="date">日付指定</option>
+                <option value="week">週指定</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black">
                 <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -93,14 +103,14 @@ export default function ProblemListFlow() {
             </div>
           </div>
           
-          {filterType === 'date' && (
+          {filterType === 'week' && (
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-xs font-bold">日付:</span>
+              <span className="text-xs font-bold">週:</span>
               <input
-                type="date"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                className="flex-1 rounded border-2 border-black p-1 text-sm font-bold bg-white"
+                type="week"
+                value={filterWeek}
+                onChange={(e) => setFilterWeek(e.target.value)}
+                className="flex-1 rounded border-2 border-black p-1 text-sm font-bold bg-white leading-none"
               />
             </div>
           )}
