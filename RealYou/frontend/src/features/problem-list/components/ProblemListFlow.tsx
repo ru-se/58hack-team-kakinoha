@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useMemo, useEffect } from 'react';
-import { MOCK_PROBLEMS, ProblemStatus } from '../data/mockProblems';
 import { getQuizList, ApiQuiz } from '@/lib/api';
 import Spinner from '@/components/ui/Spinner';
 
