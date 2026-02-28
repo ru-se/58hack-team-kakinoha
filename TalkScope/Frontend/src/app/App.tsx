@@ -20,6 +20,7 @@ import { Toaster, toast } from 'sonner';
 import { LayoutEngine } from './layout/LayoutEngine';
 import { LayoutNode, PanelId } from './layout/types';
 import { cosineSimilarity, getMockThemeVector, MOCK_DIM } from './utils/mockVectors';
+import { sendFullTranscript } from './utils/externalApi';
 import {
   makeDefaultLayout,
   make2x2Layout,
@@ -471,10 +472,30 @@ const App: React.FC = () => {
         demoStream={demoStream}
         darkMode={dk}
         apiTerms={apiTerms}
-        onPresentationEnd={() => {
+        onPresentationEnd={async () => {
           if (isListening) stopListening();
           demoStream.stopStream();
-          toast.success('🏁 発表が終了しました');
+
+          if (transcript.trim().length === 0) {
+            toast.info('送信するテキストがありません');
+            return;
+          }
+
+          try {
+            // TODO: 実際のユーザーIDを取得するロジックに置き換えてください
+            const currentUserId = 'user-12345'; 
+            
+            // API呼び出し（awaitで完了を待つ）
+            await sendFullTranscript({
+              userId: currentUserId,
+              transcript: transcript,
+            });
+            
+            toast.success('🏁 発表を終了し、全文データを送信しました');
+          } catch (err) {
+            console.error('送信エラー:', err);
+            toast.error('データの送信に失敗しましたが、発表は終了しました');
+          }
         }}
       />
     ),
