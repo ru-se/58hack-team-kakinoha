@@ -284,30 +284,50 @@ def send_discord_message(content: str) -> tuple[str, Optional[str]]:
         return "failed", str(e)
 
 
-def process_due_review_notifications():
-    now = datetime.utcnow()
+def process_daily_discord_notification():
+    """
+    AppSetting(review_notify_hour_24)の時間になったら、
+    DISCORD_NOTIFY_URLをDiscordに通知する。
+    1日1回だけ送信するように制御する。
+    """
+    now_tokyo = datetime.now(TOKYO_TZ)
+    current_hour = now_tokyo.hour
+    today_str = now_tokyo.strftime("%Y-%m-%d")
+
     db = SessionLocal()
     try:
-        rows = (
-            db.query(models.ReviewNotification)
-            .filter(models.ReviewNotification.status == "pending")
-            .filter(models.ReviewNotification.scheduled_for <= now)
-            .order_by(models.ReviewNotification.scheduled_for.asc())
-            .limit(100)
-            .all()
-        )
-
-        for row in rows:
-            lines = [
-                "知識の定着度を自己採点する",
-                f"🔗 {row.source_problem_url}",
-            ]
-            status, error = send_discord_message("\n".join(lines))
-            row.status = status
-            row.sent_at = datetime.utcnow()
-            row.error_message = error
-
-        db.commit()
+        # 設定された通知時間を取得
+        _, notify_hour_24 = get_review_delay_config_values(db)
+        
+        # 通知時間になっていない場合はスキップ
+        if current_hour != notify_hour_24:
+            return
+            
+        # 今日の送信履歴があるか確認
+        last_sent_date = get_setting_value(db, "last_daily_notify_date")
+        if last_sent_date == today_str:
+            return  # 今日は既に送信済み
+            
+        # 通知先URLを取得
+        notify_url = os.getenv("DISCORD_NOTIFY_URL")
+        if not notify_url:
+            print("⚠️ DISCORD_NOTIFY_URLが設定されていません")
+            return
+            
+        lines = [
+            "知識の定着度を自己採点する",
+            f"🔗 {notify_url}",
+        ]
+        status, error = send_discord_message("\\n".join(lines))
+        
+        if status == "sent":
+            # 送信成功したら日付を記録
+            set_setting_value(db, "last_daily_notify_date", today_str)
+            db.commit()
+            print(f"✅ 毎日のDiscord通知を送信しました ({today_str})")
+        else:
+            print(f"⚠️ 毎日のDiscord通知に失敗しました: {error}")
+            
     except Exception as e:
         db.rollback()
         print(f"⚠️ 復習通知ジョブでエラー: {e}")
@@ -325,7 +345,7 @@ async def lifespan(app: FastAPI):
     # スケジューラー起動（タイムゾーンを明示指定。Windowsのシステムタイムゾーンが書き換えられても動くように）
     scheduler = AsyncIOScheduler(timezone="Asia/Tokyo")
     scheduler.add_job(midnight_attack, 'cron', minute='*') # テスト用（本番は hour=0, minute=0）
-    scheduler.add_job(process_due_review_notifications, 'cron', minute='*')
+    scheduler.add_job(process_daily_discord_notification, 'cron', minute='*')
     scheduler.start()
     print("⏰ スケジューラーが起動しました")
 
