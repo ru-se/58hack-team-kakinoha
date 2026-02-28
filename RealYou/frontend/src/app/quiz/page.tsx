@@ -2,9 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { useAtomValue } from 'jotai';
-import { selectedQuizIdAtom } from '@/store/quizAtoms';
-import { getQuizQuestions, ApiQuestion } from '@/lib/api';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { selectedQuizIdAtom, quizSubmitResultAtom } from '@/store/quizAtoms';
+import { getQuizQuestions, ApiQuestion, submitQuizAnswers } from '@/lib/api';
 import Spinner from '@/components/ui/Spinner';
 import {
   UNDERSTANDING_INTRO,
@@ -18,7 +18,8 @@ type Phase =
   | 'understanding'
   | 'review-intro'
   | 'review'
-  | 'completed';
+  | 'completed'
+  | 'submit-error';
 
 export default function QuizPage() {
   const router = useRouter();
@@ -30,9 +31,12 @@ export default function QuizPage() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
 
+  const [answers, setAnswers] = useState<{ question_id: string; selected_index: number }[]>([]);
   const [questions, setQuestions] = useState<ApiQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [submitErrorMsg, setSubmitErrorMsg] = useState<string | null>(null);
+  const setQuizSubmitResult = useSetAtom(quizSubmitResultAtom);
 
   useEffect(() => {
     if (quizId === null) {
@@ -68,12 +72,31 @@ export default function QuizPage() {
     if (isAnswered) return;
     setSelectedAnswer(idx);
     setIsAnswered(true);
+    setAnswers((prev) => [...prev, { question_id: currentReviewQ.id, selected_index: idx }]);
+  };
+
+  const DEV_USER_ID = '46f441c6-cc35-4bd3-ab49-953f5a287c83';
+
+  const handleSubmit = async () => {
+    setPhase('completed');
+    try {
+      const userId = localStorage.getItem('user_id') ?? DEV_USER_ID;
+      const result = await submitQuizAnswers(quizId!, {
+        user_id: userId,
+        self_evaluation_level: understandingValue ?? 3,
+        answers,
+      });
+      setQuizSubmitResult(result);
+      router.push('/result');
+    } catch (err: unknown) {
+      setPhase('submit-error');
+      setSubmitErrorMsg(err instanceof Error ? err.message : '送信に失敗しました');
+    }
   };
 
   const handleNextReview = () => {
     if (reviewIndex + 1 >= questions.length) {
-      setPhase('completed');
-      setTimeout(() => router.push('/result'), 1500);
+      handleSubmit();
     } else {
       setReviewIndex((i) => i + 1);
       setSelectedAnswer(null);
@@ -293,9 +316,28 @@ export default function QuizPage() {
               {/* ─── 完了 ─── */}
               {phase === 'completed' && (
                 <div className="flex flex-col items-center gap-4 text-center">
-                  <span className="text-6xl animate-bounce">🎉</span>
-                  <p className="text-2xl font-black text-black">お疲れ様でした！</p>
-                  <p className="text-sm font-bold text-black/60">結果画面へ移動します...</p>
+                  <Spinner />
+                  <p className="text-xl font-black text-black">採点中...</p>
+                </div>
+              )}
+
+              {/* ─── 送信エラー ─── */}
+              {phase === 'submit-error' && (
+                <div className="flex flex-col gap-4 items-center justify-center h-full w-full">
+                  <span className="text-4xl">⚠️</span>
+                  <p className="font-bold text-center text-black mb-4">{submitErrorMsg}</p>
+                  <button
+                    onClick={handleSubmit}
+                    className="w-full py-4 bg-[#e17a78] border-[4px] border-black rounded-2xl text-base font-black text-white shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 active:scale-95"
+                  >
+                    もう一度送信する
+                  </button>
+                  <button
+                    onClick={() => router.push('/problems')}
+                    className="w-full py-4 bg-white border-[4px] border-black rounded-2xl text-base font-black text-black shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 active:scale-95"
+                  >
+                    問題一覧に戻る
+                  </button>
                 </div>
               )}
             </>
