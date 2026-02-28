@@ -1,0 +1,58 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-growtree:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy GrowTree
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_GROWTREE }}
+          working-directory: ./GrowTree/frontend
+          vercel-args: "--prod"
+
+  deploy-realyou:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy RealYou
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_REALYOU }}
+          working-directory: ./RealYou/frontend
+          vercel-args: "--prod"
+
+  deploy-talkscope:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy TalkScope
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_TALKSCOPE }}
+          working-directory: ./TalkScope/Frontend
+          vercel-args: "--prod"
+
+  deploy-mainmenu:
+    needs: [deploy-growtree, deploy-realyou, deploy-talkscope]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy MainMenu
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_MAINMENU }}
+          working-directory: ./MainMenu
+          vercel-args: "--prod"

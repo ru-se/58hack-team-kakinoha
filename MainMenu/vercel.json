@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/growtree/:path*",
+      "destination": "https://grow-tree.vercel.app/:path*"
+    },
+    {
+      "source": "/realyou/:path*",
+      "destination": "https://real-you.vercel.app/:path*"
+    },
+    {
+      "source": "/talkscope/:path*",
+      "destination": "https://talk-scope.vercel.app/:path*"
+    }
+  ]
+}
