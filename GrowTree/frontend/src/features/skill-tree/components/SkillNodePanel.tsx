@@ -1,13 +1,12 @@
 "use client";
 
 import type { SkillNode } from "../types/data";
-import type { GenreKey } from "./DebugPanel";
 
 interface Props {
   node: SkillNode;
-  userPoints: number; // The user's current points for this category
+  userPoints?: number; // ? をつけて任意にする
   onClose: () => void;
-  onUnlock: (nodeId: string, cost: number, cat: GenreKey) => void;
+  onUnlock?: () => void; // ? をつけて任意にする
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -45,7 +44,7 @@ const CAT_COLORS: Record<string, string> = {
 export function SkillNodePanel({ node, userPoints, onClose, onUnlock }: Props) {
   const catColor = CAT_COLORS[node.category] || "#888";
   const statusColor = STATUS_COLORS[node.status];
-  const canUnlock = node.status === "available" && userPoints >= node.requiredPoints;
+  const canUnlock = node.status === "available" && (userPoints ?? 0) >= node.requiredPoints;
 
   return (
     <div
@@ -111,11 +110,11 @@ export function SkillNodePanel({ node, userPoints, onClose, onUnlock }: Props) {
         <div className="mt-2 text-center flex flex-col items-center gap-2">
           <div className="text-xs font-bold" style={{ color: "#a5b4fc" }}>
             必要ポイント: <span className="text-lg text-white">{node.requiredPoints}pt</span> 
-            <span className="text-gray-400 ml-1">(所持: {userPoints}pt)</span>
+            <span className="text-gray-400 ml-1">(所持: {userPoints ?? 0}pt)</span>
           </div>
           
           <button
-            onClick={() => onUnlock(node.id, node.requiredPoints, node.category as GenreKey)}
+            onClick={() => onUnlock?.()}
             disabled={!canUnlock}
             className="w-full py-2 text-sm font-bold tracking-widest transition-all mt-1 uppercase"
             style={{
