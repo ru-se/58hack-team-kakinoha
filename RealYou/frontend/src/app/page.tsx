@@ -102,7 +102,7 @@ export default function TopPage() {
     }
 
     setTimeout(() => {
-      router.push('/quiz');
+      router.push('/problems');
     }, 800);
 
     setTimeout(() => {
