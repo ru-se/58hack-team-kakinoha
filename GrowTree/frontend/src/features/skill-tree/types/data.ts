@@ -119,35 +119,35 @@ export const SKILL_NODES: SkillNode[] = [
   { id: "game-7", label: "ゲームディレクター", category: "game", status: "locked", x: X.game, y: -1300, tier: 7, description: "ゲーム全体の設計・開発・ローンチを主導する。", children: ["game-8"], requiredPoints: 7, importance: 70 },
   { id: "game-8", label: "マスタークリエイター", category: "game", status: "locked", x: X.game, y: -1600, tier: 8, description: "世界を熱狂させるAAAゲームタイトルの創造神。", children: ["mixed-dg-4"], requiredPoints: 8, importance: 80 },
 
-  // === Mixed Nodes ===
+  // === Mixed Nodes (Achievements / Epithets) ===
 
-  // Tier 2.5 (Req 2)
-  { id: "mixed-is-1", label: "セキュアクラウド", category: "mixed", status: "locked", x: (X.infra + X.security) / 2, y: -80, tier: 3, description: "クラウド環境の安全な構築。", children: [], requiredPoints: 0, requiredPointsMap: { infra: 2, security: 2 }, importance: 35 },
-  { id: "mixed-sa-1", label: "AI攻撃検知", category: "mixed", status: "locked", x: (X.security + X.ai) / 2, y: -80, tier: 3, description: "機械学習を用いた異常検知と防御。", children: [], requiredPoints: 0, requiredPointsMap: { security: 2, ai: 2 }, importance: 35 },
-  { id: "mixed-aw-1", label: "AI-API連携", category: "mixed", status: "locked", x: (X.ai + X.web) / 2, y: -80, tier: 3, description: "推論APIを組み込んだフロントエンド。", children: [], requiredPoints: 0, requiredPointsMap: { ai: 2, web: 2 }, importance: 35 },
-  { id: "mixed-wd-1", label: "UI実装力", category: "mixed", status: "locked", x: (X.web + X.design) / 2, y: -80, tier: 3, description: "Figmaデザインを完璧なコードに落とし込む力。", children: [], requiredPoints: 0, requiredPointsMap: { web: 2, design: 2 }, importance: 35 },
-  { id: "mixed-dg-1", label: "UIアニメーション", category: "mixed", status: "locked", x: (X.design + X.game) / 2, y: -80, tier: 3, description: "ゲームライクで心地よい画面遷移とフィードバック。", children: [], requiredPoints: 0, requiredPointsMap: { design: 2, game: 2 }, importance: 35 },
+  // Tier 2.5 (Req 3, Imp 100)
+  { id: "mixed-is-1", label: "【鉄壁の雲守】 セキュア・ガーディアン", category: "mixed", status: "locked", x: (X.infra + X.security) / 2, y: -80, tier: 3, description: "クラウド環境の安全な構築。", children: [], requiredPoints: 0, requiredPointsMap: { infra: 3, security: 3 }, importance: 100 },
+  { id: "mixed-sa-1", label: "【機械の瞳】 アノマリー・ウォッチャー", category: "mixed", status: "locked", x: (X.security + X.ai) / 2, y: -80, tier: 3, description: "機械学習を用いた異常検知と防御。", children: [], requiredPoints: 0, requiredPointsMap: { security: 3, ai: 3 }, importance: 100 },
+  { id: "mixed-aw-1", label: "【知能の橋渡】 AI・インテグレーター", category: "mixed", status: "locked", x: (X.ai + X.web) / 2, y: -80, tier: 3, description: "推論APIを組み込んだフロントエンド。", children: [], requiredPoints: 0, requiredPointsMap: { ai: 3, web: 3 }, importance: 100 },
+  { id: "mixed-wd-1", label: "【美を刻む者】 ピクセル・メイカー", category: "mixed", status: "locked", x: (X.web + X.design) / 2, y: -80, tier: 3, description: "Figmaデザインを完璧なコードに落とし込む力。", children: [], requiredPoints: 0, requiredPointsMap: { web: 3, design: 3 }, importance: 100 },
+  { id: "mixed-dg-1", label: "【魂の設計者】 モーション・ウィーバー", category: "mixed", status: "locked", x: (X.design + X.game) / 2, y: -80, tier: 3, description: "ゲームライクで心地よい画面遷移とフィードバック。", children: [], requiredPoints: 0, requiredPointsMap: { design: 3, game: 3 }, importance: 100 },
 
-  // Tier 4.5 (Req 4)
-  { id: "mixed-is-2", label: "DevSecOps", category: "mixed", status: "locked", x: (X.infra + X.security) / 2, y: -590, tier: 5, description: "CI/CDパイプライン全体へのセキュリティ統合。", children: [], requiredPoints: 0, requiredPointsMap: { infra: 4, security: 4 }, importance: 55 },
-  { id: "mixed-sa-2", label: "AIセキュリティ", category: "mixed", status: "locked", x: (X.security + X.ai) / 2, y: -590, tier: 5, description: "プロンプトインジェクションに対する堅牢な防御。", children: [], requiredPoints: 0, requiredPointsMap: { security: 4, ai: 4 }, importance: 55 },
-  { id: "mixed-aw-2", label: "AI駆動Webアプリ", category: "mixed", status: "locked", x: (X.ai + X.web) / 2, y: -590, tier: 5, description: "LLMを密接に組み込んだ次世代のサービス提供。", children: [], requiredPoints: 0, requiredPointsMap: { ai: 4, web: 4 }, importance: 55 },
-  { id: "mixed-wd-2", label: "UXエンジニア", category: "mixed", status: "locked", x: (X.web + X.design) / 2, y: -590, tier: 5, description: "ユーザー体験と実装技術の最高レベルの融合。", children: [], requiredPoints: 0, requiredPointsMap: { web: 4, design: 4 }, importance: 55 },
-  { id: "mixed-dg-2", label: "テクニカルアート", category: "mixed", status: "locked", x: (X.design + X.game) / 2, y: -590, tier: 5, description: "デザイナーのビジョンをプログラムとシェーダーで実現する。", children: [], requiredPoints: 0, requiredPointsMap: { design: 4, game: 4 }, importance: 55 },
+  // Tier 4.5 (Req 5, Imp 200)
+  { id: "mixed-is-2", label: "【守護の自動化】 DevSecOpsマスター", category: "mixed", status: "locked", x: (X.infra + X.security) / 2, y: -590, tier: 5, description: "CI/CDパイプライン全体へのセキュリティ統合。", children: [], requiredPoints: 0, requiredPointsMap: { infra: 5, security: 5 }, importance: 200 },
+  { id: "mixed-sa-2", label: "【深層の盾】 プロンプト・シールド", category: "mixed", status: "locked", x: (X.security + X.ai) / 2, y: -590, tier: 5, description: "プロンプトインジェクションに対する堅牢な防御。", children: [], requiredPoints: 0, requiredPointsMap: { security: 5, ai: 5 }, importance: 200 },
+  { id: "mixed-aw-2", label: "【次代の喚起者】 コグニティブ・クリエイター", category: "mixed", status: "locked", x: (X.ai + X.web) / 2, y: -590, tier: 5, description: "LLMを密接に組み込んだ次世代のサービス提供。", children: [], requiredPoints: 0, requiredPointsMap: { ai: 5, web: 5 }, importance: 200 },
+  { id: "mixed-wd-2", label: "【体験を統べる者】 UX・アーキテクト", category: "mixed", status: "locked", x: (X.web + X.design) / 2, y: -590, tier: 5, description: "ユーザー体験と実装技術の最高レベルの融合。", children: [], requiredPoints: 0, requiredPointsMap: { web: 5, design: 5 }, importance: 200 },
+  { id: "mixed-dg-2", label: "【魔術的描画】 テクニカル・アルケミスト", category: "mixed", status: "locked", x: (X.design + X.game) / 2, y: -590, tier: 5, description: "デザイナーのビジョンをプログラムとシェーダーで実現する。", children: [], requiredPoints: 0, requiredPointsMap: { design: 5, game: 5 }, importance: 200 },
 
-  // Tier 6.5 (Req 6)
-  { id: "mixed-is-3", label: "ゼロトラストSRE", category: "mixed", status: "locked", x: (X.infra + X.security) / 2, y: -1150, tier: 7, description: "すべての通信を検証する堅牢かつ高可用なインフラ運用。", children: [], requiredPoints: 0, requiredPointsMap: { infra: 6, security: 6 }, importance: 75 },
-  { id: "mixed-sa-3", label: "Adversarial ML", category: "mixed", status: "locked", x: (X.security + X.ai) / 2, y: -1150, tier: 7, description: "敵対的サンプルに対するAIモデルの堅牢化技術。", children: [], requiredPoints: 0, requiredPointsMap: { security: 6, ai: 6 }, importance: 75 },
-  { id: "mixed-aw-3", label: "MLOps on Web", category: "mixed", status: "locked", x: (X.ai + X.web) / 2, y: -1150, tier: 7, description: "Webシステム全体のメトリクスによるAIの自己改善ループ。", children: [], requiredPoints: 0, requiredPointsMap: { ai: 6, web: 6 }, importance: 75 },
-  { id: "mixed-wd-3", label: "デザインエンジニア", category: "mixed", status: "locked", x: (X.web + X.design) / 2, y: -1150, tier: 7, description: "デザインシステムとWebコンポーネントの完全な統括。", children: [], requiredPoints: 0, requiredPointsMap: { web: 6, design: 6 }, importance: 75 },
-  { id: "mixed-dg-3", label: "XRクリエイター", category: "mixed", status: "locked", x: (X.design + X.game) / 2, y: -1150, tier: 7, description: "VR/AR空間における没入感の高いユーザー体験設計。", children: [], requiredPoints: 0, requiredPointsMap: { design: 6, game: 6 }, importance: 75 },
+  // Tier 6.5 (Req 7, Imp 300)
+  { id: "mixed-is-3", label: "【絶対不可侵】 ゼロトラスト・ロード", category: "mixed", status: "locked", x: (X.infra + X.security) / 2, y: -1150, tier: 7, description: "すべての通信を検証する堅牢かつ高可用なインフラ運用。", children: [], requiredPoints: 0, requiredPointsMap: { infra: 7, security: 7 }, importance: 300 },
+  { id: "mixed-sa-3", label: "【欺瞞の看破者】 アンチ・アドバーサリアル", category: "mixed", status: "locked", x: (X.security + X.ai) / 2, y: -1150, tier: 7, description: "敵対的サンプルに対するAIモデルの堅牢化技術。", children: [], requiredPoints: 0, requiredPointsMap: { security: 7, ai: 7 }, importance: 300 },
+  { id: "mixed-aw-3", label: "【無限の適応】 メトリクス・ルーラー", category: "mixed", status: "locked", x: (X.ai + X.web) / 2, y: -1150, tier: 7, description: "Webシステム全体のメトリクスによるAIの自己改善ループ。", children: [], requiredPoints: 0, requiredPointsMap: { ai: 7, web: 7 }, importance: 300 },
+  { id: "mixed-wd-3", label: "【黄金の架け橋】 ビジュアル・エンジニア", category: "mixed", status: "locked", x: (X.web + X.design) / 2, y: -1150, tier: 7, description: "デザインシステムとWebコンポーネントの完全な統括。", children: [], requiredPoints: 0, requiredPointsMap: { web: 7, design: 7 }, importance: 300 },
+  { id: "mixed-dg-3", label: "【現実の拡張者】 イリュージョン・ダイバー", category: "mixed", status: "locked", x: (X.design + X.game) / 2, y: -1150, tier: 7, description: "VR/AR空間における没入感の高いユーザー体験設計。", children: [], requiredPoints: 0, requiredPointsMap: { design: 7, game: 7 }, importance: 300 },
 
-  // Tier 8.5 (Req 8)
-  { id: "mixed-is-4", label: "サイバー要塞", category: "mixed", status: "locked", x: (X.infra + X.security) / 2, y: -1750, tier: 9, description: "国家レベルの攻撃すら防ぐ無敵のインフラ基盤。", children: [], requiredPoints: 0, requiredPointsMap: { infra: 8, security: 8 }, importance: 95 },
-  { id: "mixed-sa-4", label: "AGI防衛機構", category: "mixed", status: "locked", x: (X.security + X.ai) / 2, y: -1750, tier: 9, description: "汎用人工知能のリスクをコントロールする究極の防御網。", children: [], requiredPoints: 0, requiredPointsMap: { security: 8, ai: 8 }, importance: 95 },
-  { id: "mixed-aw-4", label: "自律型Web帝国", category: "mixed", status: "locked", x: (X.ai + X.web) / 2, y: -1750, tier: 9, description: "AIが自ら設計・構築し拡張するWebシステムの創造。", children: [], requiredPoints: 0, requiredPointsMap: { ai: 8, web: 8 }, importance: 95 },
-  { id: "mixed-wd-4", label: "デジタルアート最高神", category: "mixed", status: "locked", x: (X.web + X.design) / 2, y: -1750, tier: 9, description: "Web技術を用いて人類の感性を拡張する究極の表現者。", children: [], requiredPoints: 0, requiredPointsMap: { web: 8, design: 8 }, importance: 95 },
-  { id: "mixed-dg-4", label: "メタバース創造主", category: "mixed", status: "locked", x: (X.design + X.game) / 2, y: -1750, tier: 9, description: "デザインとゲームエンジンの境地を超えた次なる現実の創造。", children: [], requiredPoints: 0, requiredPointsMap: { design: 8, game: 8 }, importance: 95 },
+  // Tier 8.5 (Req 8, Imp 400) - Max points possible is 8, so requiring 8 means completing both full paths
+  { id: "mixed-is-4", label: "【難攻不落の神盾】 サイバー・イージス", category: "mixed", status: "locked", x: (X.infra + X.security) / 2, y: -1750, tier: 9, description: "国家レベルの攻撃すら防ぐ無敵のインフラ基盤。", children: [], requiredPoints: 0, requiredPointsMap: { infra: 8, security: 8 }, importance: 400 },
+  { id: "mixed-sa-4", label: "【知の特異点監視者】 シンギュラリティ・ウォッチ", category: "mixed", status: "locked", x: (X.security + X.ai) / 2, y: -1750, tier: 9, description: "汎用人工知能のリスクをコントロールする究極の防御網。", children: [], requiredPoints: 0, requiredPointsMap: { security: 8, ai: 8 }, importance: 400 },
+  { id: "mixed-aw-4", label: "【帝国を創る者】 オートノマス・エンペラー", category: "mixed", status: "locked", x: (X.ai + X.web) / 2, y: -1750, tier: 9, description: "AIが自ら設計・構築し拡張するWebシステムの創造。", children: [], requiredPoints: 0, requiredPointsMap: { ai: 8, web: 8 }, importance: 400 },
+  { id: "mixed-wd-4", label: "【電脳の創造神】 デジタル・デミウルゴス", category: "mixed", status: "locked", x: (X.web + X.design) / 2, y: -1750, tier: 9, description: "Web技術を用いて人類の感性を拡張する究極の表現者。", children: [], requiredPoints: 0, requiredPointsMap: { web: 8, design: 8 }, importance: 400 },
+  { id: "mixed-dg-4", label: "【新世界の神】 メタバース・ジェネシス", category: "mixed", status: "locked", x: (X.design + X.game) / 2, y: -1750, tier: 9, description: "デザインとゲームエンジンの境地を超えた次なる現実の創造。", children: [], requiredPoints: 0, requiredPointsMap: { design: 8, game: 8 }, importance: 400 },
 ]
 
 export function getNodeById(id: string): SkillNode | undefined {
