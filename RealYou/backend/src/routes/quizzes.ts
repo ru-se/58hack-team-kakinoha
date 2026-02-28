@@ -3,21 +3,40 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { quizService } from '../services/quizService';
 import { QuizSubmitRequestSchema } from '../schemas/quizSchema';
+import { generateQuizFromPresentation, saveQuizToDb } from '../services/aiGenerationService';
 
 const router = Router();
 
 // =========================================================
-// モックAPI: 問題生成 (POST /generate)
-// フロントのローディングUIテスト用に3秒遅延させる
+// 問題生成 (POST /generate) ※AI生成 + DB保存の本実装
 // =========================================================
-router.post('/generate', async (req: Request, res: Response) => {
-    await new Promise(r => setTimeout(r, 3000));
-    res.status(200).json({
-        quiz_id: "dummy-quiz-1234-5678",
-        max_points: 50,
-        genres: { web: 1, ai: 0, security: 0, infrastructure: 0, design: 0, game: 0 },
-        message: "モック: 問題の生成が完了しました"
-    });
+router.post('/generate', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { user_id, presentation_text } = req.body;
+
+        // バリデーション
+        if (!user_id || !presentation_text) {
+            return res.status(400).json({ error: 'user_id と presentation_text は必須です' });
+        }
+        if (typeof presentation_text !== 'string' || presentation_text.trim().length === 0) {
+            return res.status(400).json({ error: 'presentation_text が空です' });
+        }
+
+        // AI生成
+        const generated = await generateQuizFromPresentation(presentation_text);
+
+        // DB保存
+        const { quiz_id } = await saveQuizToDb(user_id, generated);
+
+        res.status(201).json({
+            quiz_id,
+            max_points: generated.max_points,
+            genres: generated.genres,
+            message: 'クイズを生成しました',
+        });
+    } catch (err) {
+        next(err);
+    }
 });
 
 // =========================================================
