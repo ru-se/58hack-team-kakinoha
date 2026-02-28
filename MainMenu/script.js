@@ -417,17 +417,58 @@ document.addEventListener('DOMContentLoaded', () => {
       tfSetBtn.addEventListener('click', () => {
           const formattedDate = tfDateInput.value;
           const h = tfHoursInput.value;
-          
-          tfStatusMsg.textContent = `OVERRIDE ACCEPTED: ${formattedDate} ${h}:00`;
-          tfStatusMsg.style.color = '#0ff';
-          
-          triggerFlash();
-          document.body.style.animation = 'terminalShake 0.4s';
-          setTimeout(() => document.body.style.animation = '', 400);
 
-          setTimeout(() => {
-              tfModal.classList.remove('active');
-          }, 1500);
+          console.log("取得した日付:", formattedDate);
+          console.log("取得した時間:", h);
+          
+          const hour24 = Number(h); // 時間を文字列から数値に変換
+
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // 時間をリセットして日付のみで比較
+          const targetDate = new Date(formattedDate);
+          targetDate.setHours(0, 0, 0, 0);
+          
+          const diffTime = targetDate.getTime() - today.getTime();
+          const daysAfter = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+          const payload = {
+              "days_after": daysAfter,
+              "hour_24": hour24
+          };
+          console.log("送信するデータ:", payload);
+
+          fetch('http://127.0.0.1:8000/api/config/review-delay', {
+              method: 'PUT',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(payload)
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error(`HTTPエラー: ${response.status}`);
+              }
+              return response.json();
+          })
+          .then(data => {
+              console.log("API送信成功:", data);
+              
+              tfStatusMsg.textContent = `OVERRIDE ACCEPTED: ${formattedDate} ${h}:00`;
+              tfStatusMsg.style.color = '#0ff';
+              
+              triggerFlash();
+              document.body.style.animation = 'terminalShake 0.4s';
+              setTimeout(() => document.body.style.animation = '', 400);
+
+              setTimeout(() => {
+                  tfModal.classList.remove('active');
+              }, 1500);
+          })
+          .catch(error => {
+              console.error("API送信エラー:", error);
+              tfStatusMsg.textContent = `ERROR: CONNECTION FAILED`;
+              tfStatusMsg.style.color = '#f00';
+          });
       });
   }
 });

@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
@@ -329,7 +330,7 @@ async def lifespan(app: FastAPI):
     print("⏰ スケジューラーが起動しました")
 
     print("📡 BLEプロビジョニングサーバーを起動中...")
-    ble_task = asyncio.create_task(run_ble_server())
+    #ble_task = asyncio.create_task(run_ble_server())
     
     global button
     try:
@@ -343,12 +344,20 @@ async def lifespan(app: FastAPI):
     yield
     
     print("🛑 サーバー停止中。")
-    ble_task.cancel()
+    #ble_task.cancel()
 
 # ==========================
 # FastAPI アプリ定義
 # ==========================
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], # フロントエンドのURLを許可
+    allow_credentials=True,
+    allow_methods=["*"], # GET, POST, PUT, DELETEなど全て許可
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
