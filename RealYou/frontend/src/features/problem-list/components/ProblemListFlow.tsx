@@ -70,47 +70,27 @@ export default function ProblemListFlow() {
 
         {/* フィルターセクション */}
         <div className="flex flex-col gap-2 p-3 border-b-[4px] border-black bg-[#f0f0f0]">
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setFilterType('all')}
-              className={`py-2 px-1 text-xs font-bold border-[2px] border-black rounded-lg transition-transform active:scale-95 ${
-                filterType === 'all'
-                  ? 'bg-black text-white'
-                  : 'bg-white text-black shadow-[2px_2px_0_0_#000] hover:-translate-y-0.5'
-              }`}
-            >
-              デフォルト
-            </button>
-            <button
-              onClick={() => setFilterType('unanswered')}
-              className={`py-2 px-1 text-xs font-bold border-[2px] border-black rounded-lg transition-transform active:scale-95 ${
-                filterType === 'unanswered'
-                  ? 'bg-black text-white'
-                  : 'bg-white text-black shadow-[2px_2px_0_0_#000] hover:-translate-y-0.5'
-              }`}
-            >
-              未回答
-            </button>
-            <button
-              onClick={() => setFilterType('not-perfect')}
-              className={`py-2 px-1 text-xs font-bold border-[2px] border-black rounded-lg transition-transform active:scale-95 ${
-                filterType === 'not-perfect'
-                  ? 'bg-black text-white'
-                  : 'bg-white text-black shadow-[2px_2px_0_0_#000] hover:-translate-y-0.5'
-              }`}
-            >
-              満点以外
-            </button>
-            <button
-              onClick={() => setFilterType('date')}
-              className={`py-2 px-1 text-xs font-bold border-[2px] border-black rounded-lg transition-transform active:scale-95 ${
-                filterType === 'date'
-                  ? 'bg-black text-white'
-                  : 'bg-white text-black shadow-[2px_2px_0_0_#000] hover:-translate-y-0.5'
-              }`}
-            >
-              日付指定
-            </button>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-black text-black whitespace-nowrap">
+              表示絞り込み:
+            </span>
+            <div className="relative w-full">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value as FilterType)}
+                className="w-full appearance-none rounded-xl border-[3px] border-black bg-white px-3 py-2 pr-8 text-sm font-bold text-black shadow-[3px_3px_0_0_#000] focus:outline-none focus:ring-0 active:translate-y-0.5 active:shadow-[1px_1px_0_0_#000] transition-all"
+              >
+                <option value="all">デフォルト</option>
+                <option value="unanswered">未回答</option>
+                <option value="not-perfect">満点以外</option>
+                <option value="date">日付指定</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black">
+                <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
+              </div>
+            </div>
           </div>
           
           {filterType === 'date' && (
