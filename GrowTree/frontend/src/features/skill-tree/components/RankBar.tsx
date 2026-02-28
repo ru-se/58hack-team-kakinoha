@@ -24,7 +24,7 @@ export function RankBar({ nodes }: Props) {
 
   return (
     <div
-      className="absolute top-3 left-3 z-20 flex items-center gap-2 px-3 py-2 font-sans"
+      className="absolute top-4 right-4 z-20 flex items-center gap-2 px-3 py-2 font-sans"
       style={{
         background: "rgba(31, 41, 55, 0.95)",
         border: "2px solid #e8b849",
