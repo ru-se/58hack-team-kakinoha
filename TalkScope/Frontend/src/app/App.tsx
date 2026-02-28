@@ -573,12 +573,14 @@ const App: React.FC = () => {
 
             try {
               // TODO: 実際のユーザーIDを取得するロジックに置き換えてください
-              const currentUserId = "123e4567-e89b-12d3-a456-426614174000";
+              const currentUserId =
+                localStorage.getItem("chimera_user_id") ||
+                "123e4567-e89b-12d3-a456-426614174000";
 
               // API呼び出し（awaitで完了を待つ）
               await sendFullTranscript({
-                user_id: currentUserId, // 修正: userId -> user_id
-                presentation_text: transcript, // 修正: transcript -> presentation_text
+                user_id: currentUserId,
+                presentation_text: transcript,
               });
 
               toast.success("🏁 発表を終了し、全文データを送信しました");
