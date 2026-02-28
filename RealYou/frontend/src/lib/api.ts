@@ -83,3 +83,25 @@ export async function getResult(userId: string): Promise<ResultResponse> {
 
   return res.json();
 }
+
+export interface ApiQuiz {
+  quiz_id: string;
+  title: string;
+  genres: Record<string, number>;
+  max_points: number;
+  answered: boolean;
+  created_at: string;
+}
+
+export async function getQuizList(userId: string): Promise<{ quizzes: ApiQuiz[] }> {
+  const res = await fetch(`${API_BASE}/api/quizzes?user_id=${userId}`, {
+    method: 'GET',
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    throw new Error(errorData?.error || 'クイズの取得に失敗しました');
+  }
+
+  return res.json();
+}
