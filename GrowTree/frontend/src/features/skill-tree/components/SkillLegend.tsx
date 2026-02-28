@@ -24,7 +24,7 @@ const categoryEntries = [
 
 export function SkillLegend() {
   return (
-    <div className="absolute top-4 right-4 z-20 p-4 font-sans" style={rpgBoxStyle}>
+    <div className="absolute top-4 left-4 z-20 p-4 font-sans" style={rpgBoxStyle}>
       <div className="text-xs font-bold mb-3 uppercase tracking-widest text-[#e8b849] border-b border-[#e8b849]/30 pb-1">
         {"STATUS"}
       </div>
