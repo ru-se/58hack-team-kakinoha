@@ -2,9 +2,7 @@
 const IS_LOCAL =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1";
-const BACKEND_URL = IS_LOCAL
-  ? "http://localhost:8080"
-  : "https://your-production-backend.com"; //TODO: 本番URLに差し替え
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
 const APPS = [
   {
