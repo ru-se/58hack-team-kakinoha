@@ -118,32 +118,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (authConfirmBtn) {
       authConfirmBtn.addEventListener('click', () => {
-          const userVal = authUsernameInput.value.trim() || 'ANONYMOUS';
-          authOverlay.classList.add('hidden');
-          loadingOverlay.classList.remove('hidden');
-          
-          let progress = 0;
-          const interval = setInterval(() => {
-              progress += Math.random() * 15;
-              if (progress >= 100) {
-                  progress = 100;
-                  clearInterval(interval);
-                  loadingText.textContent = 'ACCESS GRANTED.';
-                  loadingText.style.color = '#0f0';
-                  mockStartBtn.classList.remove('hidden');
-              }
-              loadingProgress.style.width = progress + '%';
-          }, 200);
+        const userVal = authUsernameInput.value.trim() || 'ANONYMOUS';
 
-          mockStartBtn.onclick = () => {
-              localStorage.setItem('chimera_username', userVal);
-              loadingOverlay.classList.add('hidden');
-              portalView.classList.remove('hidden');
-              triggerFlash();
-              document.body.style.animation = 'terminalShake 0.4s';
-              setTimeout(() => document.body.style.animation = '', 400);
-          };
-      });
+        // APIへPOSTリクエスト
+        fetch('http://127.0.0.1:3001/api/register/chimera', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: userVal,
+                auth_type: 'dummy'
+            })
+        })
+        .then(response => {
+            // API仕様書通り、成功時は201が返る想定
+            if (response.ok) {
+                return response.json(); // JSONデータを抽出
+            } else {
+                // 400エラー等の場合
+                throw new Error(`APIエラー: ${response.status}`);
+            }
+        })
+        .then(data => {
+            // 仕様書にあるレスポンス { user_id: '...', message: '登録成功' } を処理
+            console.log('APIレスポンス:', data.message);
+            // ★発行された user_id をローカルストレージに保存
+            if (data.user_id) {
+                localStorage.setItem('chimera_user_id', data.user_id);
+            }
+        })
+        .catch(error => {
+            console.error('通信エラー:', error);
+        });
+
+        // --- ここから下は既存のUI演出 ---
+        authOverlay.classList.add('hidden');
+        loadingOverlay.classList.remove('hidden');
+        
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                loadingText.textContent = 'ACCESS GRANTED.';
+                loadingText.style.color = '#0f0';
+                mockStartBtn.classList.remove('hidden');
+            }
+            loadingProgress.style.width = progress + '%';
+        }, 200);
+
+        mockStartBtn.onclick = () => {
+            // 元々あったユーザー名の保存もそのまま活かします
+            localStorage.setItem('chimera_username', userVal);
+            loadingOverlay.classList.add('hidden');
+            portalView.classList.remove('hidden');
+            triggerFlash();
+            document.body.style.animation = 'terminalShake 0.4s';
+            setTimeout(() => document.body.style.animation = '', 400);
+        };
+    });
   }
   // ===================================
 
