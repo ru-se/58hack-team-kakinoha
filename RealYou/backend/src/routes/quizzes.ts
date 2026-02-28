@@ -3,6 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { quizService } from '../services/quizService';
 import { QuizSubmitRequestSchema } from '../schemas/quizSchema';
+import { quizRepository } from '../repositories/quizRepository';
 
 const router = Router();
 
@@ -25,33 +26,20 @@ router.post('/generate', async (req: Request, res: Response) => {
 // =========================================================
 router.get('/:quiz_id/questions', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { quiz_id } = req.params;
+        const quiz_id = req.params.quiz_id as string;
 
-        // バリデーション
         if (!quiz_id) {
             return res.status(400).json({ error: 'quiz_id は必須です' });
         }
 
-        const { supabase } = await import('../db/client');
-
         // quiz の存在確認
-        const { data: quiz, error: quizError } = await supabase
-            .from('quizzes')
-            .select('id')
-            .eq('id', quiz_id)
-            .single();
-
+        const { data: quiz, error: quizError } = await quizRepository.findById(quiz_id);
         if (quizError || !quiz) {
             return res.status(404).json({ error: '指定されたクイズが存在しません' });
         }
 
-        // questions を order_num 昇順で取得
-        const { data: questions, error: questionsError } = await supabase
-            .from('questions')
-            .select('id, quiz_id, order_num, question_text, options, correct_index')
-            .eq('quiz_id', quiz_id)
-            .order('order_num', { ascending: true });
-
+        // questions 取得
+        const { data: questions, error: questionsError } = await quizRepository.getQuestionsByQuizId(quiz_id);
         if (questionsError) {
             throw new Error(`問題の取得に失敗しました: ${questionsError.message}`);
         }
