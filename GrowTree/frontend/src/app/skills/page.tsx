@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { SkillTreeCanvas } from "../../features/skill-tree/components/SkillTreeCanvas";
 import { SkillNodePanel } from "../../features/skill-tree/components/SkillNodePanel";
 import { RankBar } from "../../features/skill-tree/components/RankBar";
@@ -32,6 +32,62 @@ export default function SkillTreePage() {
   const [zoomAction, setZoomAction] = useState<{ type: string; ts: number } | null>(null);
   const [mounted] = useState(true);
   const [debugPoints, setDebugPoints] = useState<DebugPoints>(INITIAL_POINTS);
+
+  useEffect(() => {
+    const userId =
+      localStorage.getItem("chimera_user_id") ||
+      localStorage.getItem("user_id");
+    if (!userId) return;
+
+    const baseUrl = "http://127.0.0.1:3001";
+    const endpoint = `${baseUrl}/api/results/${userId}/total-exp`;
+
+    const toPoint = (value: unknown): number => {
+      const n = Number(value);
+      return Number.isFinite(n) && n >= 0 ? n : 0;
+    };
+
+    const fetchTotalExp = async () => {
+      try {
+        console.log("[GrowTree] total-exp fetch start", { endpoint, userId });
+
+        const res = await fetch(endpoint, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        const totalExp = data?.total_exp ?? {};
+
+        console.log("[GrowTree] total-exp response", totalExp);
+
+        setDebugPoints({
+          web: toPoint(totalExp.web),
+          ai: toPoint(totalExp.ai),
+          security: toPoint(totalExp.security),
+          infrastructure: toPoint(totalExp.infrastructure),
+          design: toPoint(totalExp.design),
+          game: toPoint(totalExp.game),
+        });
+
+        console.log("[GrowTree] debugPoints mapped", {
+          web: toPoint(totalExp.web),
+          ai: toPoint(totalExp.ai),
+          security: toPoint(totalExp.security),
+          infrastructure: toPoint(totalExp.infrastructure),
+          design: toPoint(totalExp.design),
+          game: toPoint(totalExp.game),
+        });
+      } catch (err) {
+        console.warn("[GrowTree] total-exp fetch failed", err);
+      }
+    };
+
+    void fetchTotalExp();
+  }, []);
 
   const handleSelectNode = useCallback((node: SkillNode | null) => {
     setSelectedNodeId(node ? node.id : null);
