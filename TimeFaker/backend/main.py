@@ -318,7 +318,7 @@ def process_daily_discord_notification():
             "知識の定着度を自己採点する",
             f"🔗 {notify_url}",
         ]
-        status, error = send_discord_message("\\n".join(lines))
+        status, error = send_discord_message("\n".join(lines))
         
         if status == "sent":
             # 送信成功したら日付を記録
@@ -373,7 +373,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], # フロントエンドのURLを許可
+    allow_origins=["https://58-kakinoha.vercel.app/"], # フロントエンドのURLを許可
     allow_credentials=True,
     allow_methods=["*"], # GET, POST, PUT, DELETEなど全て許可
     allow_headers=["*"],
