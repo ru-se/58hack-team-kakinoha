@@ -20,10 +20,11 @@ export const quizRepository = {
     },
 
     // クイズ一覧取得
-    async getQuizList() {
+    async getQuizList(userId: string) {
         const { data, error } = await supabase
             .from('quizzes')
             .select('id, title, genres, max_points, created_at')
+            .eq('created_by', userId)
             .order('created_at', { ascending: false }); // デフォルト: 生成順（降順）
         return { data, error };
     },
