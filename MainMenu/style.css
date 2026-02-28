@@ -594,8 +594,10 @@ body {
 
 .app-card.talkscope:hover .main-bubble {
     box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 150, 255, 0.8), inset 0 0 30px rgba(255, 255, 255, 0.5);
-    background: rgba(0, 150, 255, 0.5);
+    background: rgba(0, 30, 80, 0.85);
+    /* 濃く不透明に */
     border-color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px #0096ff;
 }
 
 .app-card.talkscope:hover .ts-bubble {
@@ -616,9 +618,10 @@ body {
     transform: translate(-50%, -50%);
     width: 140px;
     height: 140px;
-    background: rgba(0, 150, 255, 0.1);
-    backdrop-filter: blur(20px);
-    border: 2px solid rgba(255, 255, 255, 0.4);
+    background: rgba(0, 20, 50, 0.65);
+    /* デフォルトも少し濃く */
+    backdrop-filter: blur(25px);
+    border: 2px solid rgba(255, 255, 255, 0.6);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -630,13 +633,14 @@ body {
     box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
     animation: pulse 4s infinite ease-in-out;
     transition: all 0.4s ease;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .sub-bubble {
     position: absolute;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 10, 30, 0.6);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -645,12 +649,15 @@ body {
     padding: 1rem;
     text-align: center;
     transition: all 0.4s ease;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .app-card.talkscope:hover .sub-bubble {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(0, 30, 80, 0.85);
+    /* 濃く不透明に */
     border-color: rgba(0, 150, 255, 0.8);
-    box-shadow: 0 0 20px rgba(0, 150, 255, 0.4);
+    box-shadow: 0 0 20px rgba(0, 150, 255, 0.6);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
 }
 
 .sub-bubble.info {
