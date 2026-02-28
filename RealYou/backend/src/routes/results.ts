@@ -3,6 +3,17 @@ import { resultService } from '../services/resultService';
 
 const router = Router();
 
+router.get('/:user_id/total-exp', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.params.user_id as string;
+        const totalExp = await resultService.getTotalExp(userId);
+
+        res.json(totalExp);
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.get('/:user_id', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.params.user_id as string;
