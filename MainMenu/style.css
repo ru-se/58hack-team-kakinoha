@@ -18,7 +18,8 @@ body {
     overflow: hidden;
     min-height: 100vh;
     margin: 0;
-    background-color: #020202;
+    background-color: #0a0515;
+    /* 深みのある暗紫・ミッドナイトブルー */
 }
 
 /* =========================================
@@ -30,8 +31,8 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -3;
-    /* 常に最背面 */
+    z-index: -1;
+    /* ベース背景よりは上、コンテンツよりは下 */
     pointer-events: none;
 }
 
@@ -42,40 +43,102 @@ body {
     width: 100%;
     height: 100%;
     opacity: 0;
-    transform: scale(1.05);
-    /* ズームアウトしながらフェードインする演出用 */
-    transition: opacity 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: opacity 0.4s cubic-bezier(0.8, 0, 0.2, 1);
+    /* アグレッシブにパキッと切り替え */
+    mask-image: radial-gradient(circle at center, transparent 10%, black 80%);
+    -webkit-mask-image: radial-gradient(circle at center, transparent 10%, black 80%);
 }
 
 .dynamic-bg.active {
     opacity: 1;
-    transform: scale(1);
+    /* 完全不透明でオーバーライド */
 }
 
-/* 1. TalkScope: 深海のネットワーク */
+/* 1. TalkScope: 電脳空間マトリックスグリッド */
 .bg-talkscope {
-    background: radial-gradient(circle at 50% 50%, rgba(0, 70, 180, 0.2), rgba(10, 0, 50, 0.4), #020202 80%);
-    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background-color: #001233;
+    background-image:
+        linear-gradient(rgba(0, 150, 255, 0.8) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(0, 150, 255, 0.8) 2px, transparent 2px);
+    background-size: 50px 50px;
+    animation: gridBreathe 2s infinite alternate;
 }
 
-/* 2. RealYou: ポップなネオンノイズ */
+@keyframes gridBreathe {
+    0% {
+        filter: brightness(1) contrast(1.2);
+    }
+
+    100% {
+        filter: brightness(1.8) contrast(1.5) drop-shadow(0 0 10px #0096ff);
+    }
+}
+
+/* 2. RealYou: 警戒色ストライプ（ショッキングピンク＆ヴィヴィッドイエロー） */
 .bg-realyou {
-    background: radial-gradient(circle at 70% 30%, rgba(255, 0, 85, 0.15), rgba(255, 230, 0, 0.05), #020202 80%);
-    background-image: radial-gradient(rgba(255, 0, 85, 0.1) 2px, transparent 2px);
-    background-size: 30px 30px;
+    background: repeating-linear-gradient(-45deg,
+            #ff0055,
+            #ff0055 60px,
+            #ffe600 60px,
+            #ffe600 120px);
+    animation: popStripeScroll 0.5s linear infinite;
 }
 
-/* 3. GrowTree: 漆黒の森の奥深く */
+@keyframes popStripeScroll {
+    100% {
+        background-position: -170px 0;
+    }
+}
+
+/* 3. GrowTree: ダンジョン風格子＆スキャンライン */
 .bg-growtree {
-    background: radial-gradient(circle at 30% 70%, rgba(44, 95, 45, 0.2), rgba(5, 15, 5, 0.8), #020202 90%);
-    box-shadow: inset 0 0 150px #000;
+    background-color: #051005;
+    background-image:
+        linear-gradient(rgba(44, 150, 45, 0.4) 4px, transparent 4px),
+        linear-gradient(90deg, rgba(44, 150, 45, 0.4) 4px, transparent 4px);
+    background-size: 40px 40px;
+    box-shadow: inset 0 0 200px #000;
 }
 
-/* 4. TimeFacker: 時を刻む深紅の歪み */
+.bg-growtree::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.8) 2px, rgba(0, 0, 0, 0.8) 4px);
+    pointer-events: none;
+}
+
+/* 4. TimeFacker: 警告ストライプ＆ノイズ（致命的エラー空間） */
 .bg-timefaker {
-    background: radial-gradient(circle at center, rgba(255, 68, 0, 0.15), rgba(40, 0, 0, 0.7), #020202 90%);
-    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 68, 0, 0.03) 2px, rgba(255, 68, 0, 0.03) 4px);
+    background-color: #000;
+    background-image: repeating-linear-gradient(45deg,
+            #000,
+            #000 40px,
+            #b30000 40px,
+            #b30000 80px);
+    animation: errorStripe 0.2s linear infinite;
+}
+
+.bg-timefaker::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/White-noise-mv2-520x245.png');
+    opacity: 0.3;
+    animation: noiseJitter 0.05s steps(2) infinite;
+    mix-blend-mode: overlay;
+}
+
+@keyframes errorStripe {
+    100% {
+        background-position: 113px 0;
+    }
 }
 
 /* デジタル・ノイズ / 血管 */
@@ -86,9 +149,9 @@ body {
     width: 200%;
     height: 200%;
     background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/76/White-noise-mv2-520x245.png');
-    opacity: 0.01;
-    /* 0.05から0.01へ大幅ダウン */
-    z-index: 1000;
+    opacity: 0.15;
+    /* 常時背景用に濃厚に */
+    z-index: -2;
     pointer-events: none;
     animation: noiseJitter 0.1s steps(2) infinite;
 }
@@ -109,10 +172,11 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 998;
+    z-index: -2;
     pointer-events: none;
-    background: radial-gradient(circle at center, transparent 60%, rgba(40, 0, 0, 0.05) 100%);
-    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+    background: radial-gradient(circle at center, transparent 30%, rgba(80, 0, 40, 0.3) 100%);
+    /* より濃く、やや紫寄りに */
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
     mix-blend-mode: multiply;
 }
 
@@ -157,6 +221,34 @@ body {
    BASE LAYERS AND OVERLAYS
    ========================================= */
 
+/* 流体マーブル背景（復活・強化） */
+#marble-overlay {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    z-index: -5;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 30% 30%, rgba(0, 150, 255, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 70% 30%, rgba(255, 0, 85, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 30% 70%, rgba(85, 156, 113, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(255, 230, 0, 0.25) 0%, transparent 50%);
+    filter: blur(60px) contrast(1.5) saturate(1.5);
+    animation: marbleFloat 25s infinite alternate ease-in-out;
+}
+
+@keyframes marbleFloat {
+    0% {
+        transform: scale(1) translate(0, 0) rotate(0deg);
+    }
+
+    100% {
+        transform: scale(1.3) translate(5%, 5%) rotate(10deg);
+    }
+}
+
 /* つぎはぎ感（パッチワーク）を出す背景 */
 .patchwork-bg {
     position: fixed;
@@ -164,13 +256,12 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -2;
+    z-index: -4;
     background:
-        linear-gradient(45deg, rgba(5, 5, 8, 0.1) 25%, transparent 25%, transparent 75%, rgba(5, 5, 8, 0.1) 75%),
-        linear-gradient(-45deg, rgba(5, 5, 8, 0.1) 25%, transparent 25%, transparent 75%, rgba(5, 5, 8, 0.1) 75%);
+        linear-gradient(45deg, rgba(5, 5, 8, 0.2) 25%, transparent 25%, transparent 75%, rgba(5, 5, 8, 0.2) 75%),
+        linear-gradient(-45deg, rgba(5, 5, 8, 0.2) 25%, transparent 25%, transparent 75%, rgba(5, 5, 8, 0.2) 75%);
     background-size: 60px 60px;
     animation: bgShift 40s infinite linear;
-    /* ゆっくり動かす */
     pointer-events: none;
 }
 
@@ -466,8 +557,19 @@ body {
     display: flex;
     flex-direction: column;
     color: inherit;
-    transition: all 0.2s;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
+}
+
+/* ホバーされていないカードをボカして沈ませる（Focus効果） */
+.chaos-grid:hover .app-card:not(:hover) {
+    opacity: 0.85;
+    filter: blur(2px) brightness(0.6) grayscale(30%);
+    transform: scale(0.95);
+}
+
+.app-card:hover {
+    z-index: 50;
 }
 
 /* =========================================
@@ -483,6 +585,22 @@ body {
     min-height: 400px;
     transform: none;
     cursor: pointer;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.app-card.talkscope:hover {
+    transform: scale(1.05) translateY(-10px);
+}
+
+.app-card.talkscope:hover .main-bubble {
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 150, 255, 0.8), inset 0 0 30px rgba(255, 255, 255, 0.5);
+    background: rgba(0, 150, 255, 0.5);
+    border-color: #fff;
+}
+
+.app-card.talkscope:hover .ts-bubble {
+    animation-duration: 2s;
+    /* ホバー時に加速 */
 }
 
 .bubble-layout {
@@ -511,6 +629,7 @@ body {
     z-index: 10;
     box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
     animation: pulse 4s infinite ease-in-out;
+    transition: all 0.4s ease;
 }
 
 .sub-bubble {
@@ -525,6 +644,13 @@ body {
     color: #fff;
     padding: 1rem;
     text-align: center;
+    transition: all 0.4s ease;
+}
+
+.app-card.talkscope:hover .sub-bubble {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(0, 150, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 150, 255, 0.4);
 }
 
 .sub-bubble.info {
@@ -607,6 +733,34 @@ body {
     flex-direction: column;
     box-shadow: 15px 15px 0 #ff0055;
     transform: rotate(2deg) translateY(20px);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.app-card.realyou:hover {
+    animation: joyfulShake 0.4s infinite;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.8), 25px 25px 0 #00ffff;
+    transform: rotate(0deg) translateY(0px) scale(1.05);
+}
+
+@keyframes joyfulShake {
+
+    0%,
+    100% {
+        transform: rotate(0deg) translateY(0px) scale(1.05);
+    }
+
+    25% {
+        transform: rotate(-2deg) translateY(-2px) scale(1.05);
+    }
+
+    75% {
+        transform: rotate(2deg) translateY(2px) scale(1.05);
+    }
+}
+
+.app-card.realyou:hover .chat-bubble.emoji {
+    transform: scale(1.5) rotate(15deg);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .chat-header {
@@ -685,6 +839,13 @@ body {
     box-shadow: inset 0 0 60px #000, 0 15px 40px rgba(0, 0, 0, 0.7);
     transform: rotate(-2deg);
     min-height: 380px;
+    transition: all 0.4s ease;
+}
+
+.app-card.growtree:hover {
+    box-shadow: inset 0 0 40px #000, 0 0 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(85, 156, 113, 0.6);
+    border-color: #98fb98;
+    transform: rotate(0deg) scale(1.03);
 }
 
 .tree-layout {
@@ -703,6 +864,12 @@ body {
     color: rgba(44, 95, 45, 0.4);
     z-index: 0;
     pointer-events: none;
+    transition: transform 0.6s ease;
+}
+
+.app-card.growtree:hover .tree-svg {
+    transform: scale(1.1) translateY(-5%);
+    fill: rgba(85, 156, 113, 0.6);
 }
 
 .tree-content {
@@ -716,6 +883,12 @@ body {
     color: #bbf7d0;
     margin-bottom: 0.8rem;
     text-shadow: 0 0 20px rgba(187, 247, 208, 0.5);
+    transition: all 0.3s;
+}
+
+.app-card.growtree:hover .card-title {
+    color: #fff;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 1);
 }
 
 .app-card.growtree .card-desc {
@@ -744,6 +917,18 @@ body {
     animation: xpFlow 3s infinite linear;
 }
 
+.app-card.growtree:hover .gt-xp-fill {
+    animation: xpFlow 0.5s infinite linear;
+    /* XP一気に加速 */
+    background: repeating-linear-gradient(45deg, #98fb98, #98fb98 10px, #559C71 10px, #559C71 20px);
+}
+
+@keyframes xpFlow {
+    100% {
+        background-position: 40px 0;
+    }
+}
+
 /* =========================================
    TIMEFAKER: CLOCK ARCHITECTURE
    ========================================= */
@@ -760,6 +945,13 @@ body {
     box-shadow: 0 0 40px rgba(255, 68, 0, 0.3), inset 0 0 30px rgba(255, 68, 0, 0.15);
     transform: rotate(1deg);
     min-height: 350px;
+    transition: all 0.2s;
+}
+
+.app-card.timefaker:hover {
+    border-color: #ff0000;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(255, 0, 0, 0.8), inset 0 0 40px rgba(255, 0, 0, 0.4);
+    transform: scale(1.02) rotate(0deg);
 }
 
 .digital-clock {
@@ -772,6 +964,31 @@ body {
     border: 2px dashed #ff4400;
     letter-spacing: 0.2rem;
     text-shadow: 0 0 20px rgba(255, 68, 0, 0.6);
+    transition: all 0.2s;
+}
+
+.app-card.timefaker:hover .digital-clock {
+    animation: digitalGlitch 0.3s infinite;
+    color: #fff;
+    background: rgba(255, 0, 0, 0.3);
+    border-color: #f00;
+}
+
+@keyframes digitalGlitch {
+    0% {
+        transform: translate(2px, 0);
+        text-shadow: -3px 0 #0ff, 3px 0 #f00;
+    }
+
+    50% {
+        transform: translate(-2px, 2px);
+        text-shadow: 3px 0 #0ff, -3px 0 #f00;
+    }
+
+    100% {
+        transform: translate(0, -2px);
+        text-shadow: -2px 0 #0ff, 2px 0 #f00;
+    }
 }
 
 .clock-details {
@@ -789,33 +1006,6 @@ body {
 .app-card.timefaker .card-desc {
     font-size: 0.9rem;
     opacity: 0.9;
-}
-
-/*
-===============================================
-  4. SysConfig: 完全なエラー・グリッチターミナル
-===============================================
-*/
-.app-card.settings {
-    width: 55%;
-    min-height: 200px;
-    font-family: 'Share Tech Mono', monospace;
-    background-color: rgba(0, 0, 0, 0.8);
-    border: 2px dashed #0f0;
-    padding: 2rem;
-    color: #0f0;
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), inset 0 0 20px rgba(0, 255, 0, 0.2);
-    transform: rotate(2deg) translateX(-20px);
-    z-index: 10;
-    cursor: text;
-}
-
-.app-card.settings:hover {
-    animation: terminalShake 0.1s infinite;
-    background: rgba(100, 0, 0, 0.9);
-    border-color: #f00;
-    color: #fff;
-    box-shadow: 0 0 30px rgba(255, 0, 0, 0.8), inset 0 0 20px rgba(255, 0, 0, 0.5);
 }
 
 .sys-log {
