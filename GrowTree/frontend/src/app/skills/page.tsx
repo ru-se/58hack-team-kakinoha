@@ -94,7 +94,7 @@ export default function SkillTreePage() {
   }, []);
 
   const handleAddPoint = useCallback((genre: GenreKey) => {
-    setDebugPoints(prev => ({ ...prev, [genre]: prev[genre] + 1 }));
+    setDebugPoints(prev => ({ ...prev, [genre]: prev[genre] + 50 }));
   }, []);
 
   const handleUnlock = useCallback((_nodeId: string, _cost: number, _rawCat: string) => {

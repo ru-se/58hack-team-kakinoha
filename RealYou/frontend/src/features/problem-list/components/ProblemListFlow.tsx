@@ -130,8 +130,9 @@ export default function ProblemListFlow() {
                 className="w-full appearance-none rounded-xl border-[3px] border-black bg-white px-3 py-2 pr-8 text-sm font-bold text-black shadow-[3px_3px_0_0_#000] focus:outline-none focus:ring-0 active:translate-y-0.5 active:shadow-[1px_1px_0_0_#000] transition-all"
               >
                 <option value="all">デフォルト</option>
+                {/* 完答稼働かの絞り込みUIを非表示 */}
                 <option value="unanswered">未回答</option>
-                <option value="not-perfect">満点以外</option>
+                {/* <option value="not-perfect">満点以外</option> */}
                 <option value="week">週指定</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black">
