@@ -7,8 +7,7 @@ const __dirname = dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 既存の設定
-  // root: __dirname, など
+  basePath: '/realyou',
 };
 
 export default nextConfig;

@@ -1,16 +1,29 @@
 {
+  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/growtree/:path*",
-      "destination": "https://grow-tree-psi.vercel.app/:path*"
+      "source": "/growtree",
+      "destination": "https://grow-tree-psi.vercel.app/growtree"
     },
     {
-      "source": "/realyou/:path*",
-      "destination": "https://real-you-jet.vercel.app/:path*"
+      "source": "/growtree/(.*)",
+      "destination": "https://grow-tree-psi.vercel.app/growtree/$1"
     },
     {
-      "source": "/talkscope/:path*",
-      "destination": "https://talk-scope.vercel.app/:path*"
+      "source": "/realyou",
+      "destination": "https://real-you-jet.vercel.app/realyou"
+    },
+    {
+      "source": "/realyou/(.*)",
+      "destination": "https://real-you-jet.vercel.app/realyou/$1"
+    },
+    {
+      "source": "/talkscope",
+      "destination": "https://talk-scope.vercel.app/talkscope"
+    },
+    {
+      "source": "/talkscope/(.*)",
+      "destination": "https://talk-scope.vercel.app/talkscope/$1"
     }
   ]
 }
