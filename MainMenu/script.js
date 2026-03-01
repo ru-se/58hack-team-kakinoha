@@ -30,7 +30,7 @@ const APPS = [
     name: "GrowTree",
     description: "Climb the tree of growth.",
     url: "/growtree/",
-    localUrl: "http://localhost:3000",
+    localUrl: "http://localhost:3000/growtree/",
     icon: "🌳",
     className: "growtree",
     whisper: "SYNTHESIZING EXPERIENTIAL DATA %ID%...",
