@@ -18,12 +18,12 @@
       "destination": "https://five8hack-team-kakinoha.onrender.com/api/results"
     },
     {
-      "source": "/analysis/(.*)",
-      "destination": "https://lexiflow-backend-1081512163952.asia-northeast1.run.app/analysis/$1"
+      "source": "/api/(.*)",
+      "destination": "https://five8hack-team-kakinoha.onrender.com/api/$1"
     },
     {
-      "source": "/analysis",
-      "destination": "https://lexiflow-backend-1081512163952.asia-northeast1.run.app/analysis"
+      "source": "/api",
+      "destination": "https://five8hack-team-kakinoha.onrender.com/api"
     },
     {
       "source": "/growtree/(.*)",

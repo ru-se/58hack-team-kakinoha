@@ -7,7 +7,8 @@ import type {
 } from '@/features/games/types';
 import type { ResultResponse } from '@/features/result/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// 環境変数が読み込めない場合でも強制的に '/api' を使うようにして undefined を防ぐ
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 type RegisterRequest = {
   mbti: string | null;
@@ -22,7 +23,8 @@ type RegisterResponse = {
 export async function postRegister(
   body: RegisterRequest
 ): Promise<RegisterResponse> {
-  const res = await fetch(`${API_BASE}/api/register`, {
+  // API_BASE に /api が入るため、パスから /api を削除
+  const res = await fetch(`${API_BASE}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -39,7 +41,8 @@ export async function postRegister(
 export async function submitGame(
   body: SubmitGameRequest
 ): Promise<SubmitGameResponse> {
-  const res = await fetch(`${API_BASE}/api/games/submit`, {
+  // API_BASE に /api が入るため、パスから /api を削除
+  const res = await fetch(`${API_BASE}/games/submit`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -57,7 +60,8 @@ export async function submitGame(
 export async function postVoiceRespond(
   body: VoiceRespondRequest
 ): Promise<VoiceRespondResponse> {
-  const res = await fetch(`${API_BASE}/api/voice/respond`, {
+  // API_BASE に /api が入るため、パスから /api を削除
+  const res = await fetch(`${API_BASE}/voice/respond`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -72,7 +76,8 @@ export async function postVoiceRespond(
 }
 
 export async function getResult(userId: string): Promise<ResultResponse> {
-  const res = await fetch(`${API_BASE}/api/results/${userId}`, {
+  // API_BASE に /api が入るため、パスから /api を削除
+  const res = await fetch(`${API_BASE}/results/${userId}`, {
     method: 'GET',
   });
 
@@ -93,8 +98,11 @@ export interface ApiQuiz {
   created_at: string;
 }
 
-export async function getQuizList(userId: string): Promise<{ quizzes: ApiQuiz[] }> {
-  const res = await fetch(`${API_BASE}/api/quizzes?user_id=${userId}`, {
+export async function getQuizList(
+  userId: string
+): Promise<{ quizzes: ApiQuiz[] }> {
+  // 元々 /api が入っていなかったので、そのまま API_BASE を連結
+  const res = await fetch(`${API_BASE}/quizzes?user_id=${userId}`, {
     method: 'GET',
   });
 
@@ -116,8 +124,10 @@ export interface ApiQuestion {
   explanation?: string;
 }
 
-export async function getQuizQuestions(quizId: string): Promise<{ questions: ApiQuestion[] }> {
-  const res = await fetch(`${API_BASE}/api/quizzes/${quizId}/questions`, {
+export async function getQuizQuestions(
+  quizId: string
+): Promise<{ questions: ApiQuestion[] }> {
+  const res = await fetch(`${API_BASE}/quizzes/${quizId}/questions`, {
     method: 'GET',
   });
 
@@ -161,7 +171,7 @@ export async function submitQuizAnswers(
   quizId: string,
   body: QuizSubmitRequest
 ): Promise<QuizSubmitResponse> {
-  const res = await fetch(`${API_BASE}/api/quizzes/${quizId}/submit`, {
+  const res = await fetch(`${API_BASE}/quizzes/${quizId}/submit`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
