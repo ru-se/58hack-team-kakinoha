@@ -4,7 +4,28 @@ on:
       - main
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      # どのディレクトリに変更があったかを判定
+      growtree: ${{ steps.filter.outputs.growtree }}
+      realyou: ${{ steps.filter.outputs.realyou }}
+      talkscope: ${{ steps.filter.outputs.talkscope }}
+      mainmenu: ${{ steps.filter.outputs.mainmenu }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            growtree: 'GrowTree/**'
+            realyou: 'RealYou/**'
+            talkscope: 'TalkScope/**'
+            mainmenu: 'MainMenu/**'
+
   deploy-growtree:
+    needs: changes
+    if: needs.changes.outputs.growtree == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,34 +38,15 @@ jobs:
           working-directory: ./GrowTree/frontend
           vercel-args: "--prod"
 
-  deploy-realyou:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy RealYou
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_REALYOU }}
-          working-directory: ./RealYou/frontend
-          vercel-args: "--prod"
-
-  deploy-talkscope:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy TalkScope
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_TALKSCOPE }}
-          working-directory: ./TalkScope/Frontend
-          vercel-args: "--prod"
+  # deploy-realyou, deploy-talkscope も同様に if: needs.changes.outputs.xxx == 'true' を設定
 
   deploy-mainmenu:
-    needs: [deploy-growtree, deploy-realyou, deploy-talkscope]
+    needs: [changes, deploy-growtree, deploy-realyou, deploy-talkscope]
+    # 他がスキップされても、MainMenu自身の変更があるか、他が成功していれば動くように制御
+    if: |
+      always() && 
+      needs.changes.outputs.mainmenu == 'true' && 
+      (needs.deploy-growtree.result == 'success' || needs.deploy-growtree.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
