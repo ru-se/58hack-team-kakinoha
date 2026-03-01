@@ -20,7 +20,7 @@ const APPS = [
     name: "RealYou",
     description: "自分の知識や認識を客観的に自己採点し、自己理解を深める。本当の自分に出会うための自己診断アプリ。",
     url: "/realyou/",
-    localUrl: "http://localhost:3001",
+    localUrl: "http://localhost:3001/realyou/",
     icon: "💬",
     className: "realyou",
     whisper: "DETECTING EMOTIONAL DISSONANCE IN %ID%...",
