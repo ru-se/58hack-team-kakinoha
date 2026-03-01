@@ -559,8 +559,8 @@ body {
     height: clamp(500px, 90vh, 1000px);
     /* タイトルが無い分、画面を極限まで縦に使う */
     width: 95vw;
-    margin: 3vh auto 0;
-    /* 上に少しだけ隙間を開ける */
+    margin: 6vh auto 0;
+    /* 上から6vh下げて中央付近にバランスよく配置 */
     padding: 0 1rem 1rem;
     position: relative;
 }
@@ -577,7 +577,8 @@ body {
 }
 
 /* ホバーされていないカードをボカして沈ませる（Focus効果） */
-.chaos-grid:hover .app-card:not(:hover) {
+/* JSで付与される .is-card-hovered がある時（＝いずれかのカードに直接ホバーしている時）のみ発動 */
+.chaos-grid.is-card-hovered .app-card:not(:hover) {
     opacity: 0.85;
     filter: blur(2px) brightness(0.6) grayscale(30%);
     transform: scale(0.95);
@@ -599,15 +600,15 @@ body {
     align-items: center;
     justify-content: center;
     transform: none;
-    cursor: default;
-    pointer-events: none;
-    /* 透明な親要素全体の判定を消す */
+    cursor: pointer;
+    pointer-events: auto;
+    /* 透明な親要素全体にも当たり判定を持たせる */
     transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .bubble-layout {
-    pointer-events: none;
-    /* 外枠の判定は持たない */
+    pointer-events: auto;
+    /* 外枠の判定も持たせる */
     position: relative;
     width: 100%;
     height: 100%;
@@ -630,13 +631,6 @@ body {
     /* ホバー時に加速 */
 }
 
-.bubble-layout {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    /* 外枠の判定は持たない */
-}
 
 .main-bubble {
     position: absolute;
@@ -724,14 +718,29 @@ body {
 .ts-bubble {
     position: absolute;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    /* 少し白みを強く */
+    backdrop-filter: blur(5px);
+    /* ガラスのような質感 */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    /* 輪郭をはっきり */
+    box-shadow: 0 4px 15px rgba(0, 150, 255, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.3);
+    /* 光沢と発光 */
     font-size: 0.6rem;
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     animation: bubbleFloat 8s infinite ease-in-out;
+}
+
+/* ホバー時にバブル全体が激しく動くように */
+.app-card.talkscope:hover .ts-bubble {
+    animation-duration: 3s;
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 6px 20px rgba(0, 150, 255, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
 @keyframes bubbleFloat {
@@ -807,6 +816,12 @@ body {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+.chat-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .chat-header {
     background: #f0f0f0;
     padding: 0.8rem 1.5rem;
@@ -851,6 +866,23 @@ body {
     border: 3px solid #000;
     position: relative;
     box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.chat-bubble.large {
+    font-size: 1.6rem !important;
+    font-weight: 900;
+    padding: 1rem 1.5rem;
+    border-width: 4px;
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.15);
+}
+
+.chat-bubble.emphasized {
+    font-size: 1.2rem !important;
+    line-height: 1.4;
+    background: #fff9c4 !important;
+    /* 薄い黄色で強調 */
+    border-color: #fbc02d;
+    box-shadow: 6px 6px 0 rgba(251, 192, 45, 0.2);
 }
 
 .chat-bubble.app {
@@ -908,24 +940,52 @@ body {
 
 .tree-svg {
     position: absolute;
-    bottom: -20%;
-    /* さらに深くから生やす */
-    right: -10%;
-    width: 130%;
-    /* 横幅もオーバーさせる */
-    height: 160%;
-    /* 天上の限界まで高く！ */
-    color: rgba(44, 95, 45, 0.5);
-    /* 少し濃く */
+    bottom: -15%;
+    right: -15%;
+    width: 140%;
+    height: 140%;
     z-index: 0;
     pointer-events: none;
     transform-origin: bottom center;
-    transition: transform 0.6s ease;
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 0 10px rgba(44, 150, 45, 0.3));
+}
+
+.tree-trunk {
+    color: #3e2723;
+    /* 濃い樹皮の色 */
+    transition: color 0.6s ease;
+}
+
+.tree-branch {
+    color: #4e342e;
+    transition: color 0.6s ease;
+}
+
+.tree-leaves {
+    color: #2e7d32;
+    /* 深みのある葉の緑 */
+    transition: all 0.6s ease;
 }
 
 .app-card.growtree:hover .tree-svg {
-    transform: scale(1.1) translateY(-10%);
-    fill: rgba(85, 156, 113, 0.6);
+    transform: scale(1.15) translateY(-5%);
+    filter: drop-shadow(0 0 25px rgba(152, 251, 152, 0.8)) drop-shadow(0 0 50px rgba(44, 150, 45, 0.5));
+}
+
+.app-card.growtree:hover .tree-trunk {
+    color: #5d4037;
+    /* ホバー時に少し明るく */
+}
+
+.app-card.growtree:hover .tree-branch {
+    color: #6d4c41;
+}
+
+.app-card.growtree:hover .tree-leaves {
+    color: #69f0ae;
+    /* サイバー感のあるエメラルド発光 */
+    opacity: 0.8;
 }
 
 .tree-content {
