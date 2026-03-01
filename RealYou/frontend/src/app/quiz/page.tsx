@@ -26,7 +26,9 @@ export default function QuizPage() {
   const quizId = useAtomValue(selectedQuizIdAtom);
 
   const [phase, setPhase] = useState<Phase>('understanding-intro');
-  const [understandingValue, setUnderstandingValue] = useState<number | null>(null);
+  const [understandingValue, setUnderstandingValue] = useState<number | null>(
+    null
+  );
   const [reviewIndex, setReviewIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -52,7 +54,9 @@ export default function QuizPage() {
     setError(null);
     try {
       const data = await getQuizQuestions(id);
-      const sorted = [...data.questions].sort((a, b) => a.order_num - b.order_num);
+      const sorted = [...data.questions].sort(
+        (a, b) => a.order_num - b.order_num
+      );
       setQuestions(sorted);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '問題の取得に失敗しました');
@@ -78,12 +82,15 @@ export default function QuizPage() {
     }));
   };
 
-  const DEV_USER_ID = '46f441c6-cc35-4bd3-ab49-953f5a287c83';
-
   const handleSubmit = async () => {
     setPhase('completed');
     try {
-      const userId = localStorage.getItem('user_id') ?? DEV_USER_ID;
+      const userId = localStorage.getItem('chimera_user_id');
+      if (!userId) {
+        throw new Error(
+          'ユーザーIDが見つかりません。トップページから診断をやり直してください。'
+        );
+      }
       const result = await submitQuizAnswers(quizId!, {
         user_id: userId,
         self_evaluation_level: understandingValue ?? 3,
@@ -93,7 +100,9 @@ export default function QuizPage() {
       router.push('/result');
     } catch (err: unknown) {
       setPhase('submit-error');
-      setSubmitErrorMsg(err instanceof Error ? err.message : '送信に失敗しました');
+      setSubmitErrorMsg(
+        err instanceof Error ? err.message : '送信に失敗しました'
+      );
     }
   };
 
@@ -140,7 +149,7 @@ export default function QuizPage() {
                 ? '📖 復習タイム'
                 : '✅ 完了'}
           </h1>
-          {(phase === 'review' && questions.length > 0) && (
+          {phase === 'review' && questions.length > 0 && (
             <span className="text-sm font-black text-white/80">
               {reviewIndex + 1} / {questions.length}
             </span>
@@ -149,7 +158,6 @@ export default function QuizPage() {
 
         {/* コンテンツエリア */}
         <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto p-6">
-
           {/* ─── ロード中・エラー ─── */}
           {isLoading ? (
             <div className="flex flex-col gap-4 items-center justify-center h-full text-black">
@@ -180,7 +188,9 @@ export default function QuizPage() {
                 <div className="flex flex-col items-center gap-6 text-center">
                   <span className="text-6xl">{UNDERSTANDING_INTRO.emoji}</span>
                   <div className="bg-[#e9eb7c] border-[4px] border-black rounded-2xl px-6 py-2 shadow-[4px_4px_0_0_#000]">
-                    <p className="text-xl font-black">{UNDERSTANDING_INTRO.title}</p>
+                    <p className="text-xl font-black">
+                      {UNDERSTANDING_INTRO.title}
+                    </p>
                   </div>
                   <p className="whitespace-pre-line text-base font-bold leading-relaxed text-black/80">
                     {UNDERSTANDING_INTRO.body}
@@ -209,9 +219,10 @@ export default function QuizPage() {
                           setTimeout(() => setPhase('review-intro'), 600);
                         }}
                         className={`flex items-center gap-4 w-full px-5 py-4 border-[4px] border-black rounded-2xl text-left font-bold transition-all
-                          ${understandingValue === opt.value
-                            ? 'bg-[#57d071] shadow-[2px_2px_0_0_#000] translate-y-1'
-                            : 'bg-white shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000]'
+                          ${
+                            understandingValue === opt.value
+                              ? 'bg-[#57d071] shadow-[2px_2px_0_0_#000] translate-y-1'
+                              : 'bg-white shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000]'
                           }`}
                       >
                         <span className="text-2xl">{opt.emoji}</span>
@@ -292,24 +303,28 @@ export default function QuizPage() {
                   {/* 解説 + 次へボタン */}
                   {isAnswered && (
                     <div className="flex flex-col gap-3 animate-[fadeInUp_0.3s_ease-out]">
-                      <div className={`border-[3px] border-black rounded-xl p-4 text-sm font-bold leading-relaxed whitespace-pre-line
+                      <div
+                        className={`border-[3px] border-black rounded-xl p-4 text-sm font-bold leading-relaxed whitespace-pre-line
                         ${isCorrect ? 'bg-[#57d071]/20 text-black' : 'bg-[#e17a78]/20 text-black'}`}
                       >
                         <p>
                           {isCorrect
                             ? '✅ 正解！'
-                            : `❌ 不正解...\n正解は「${currentReviewQ.options[currentReviewQ.correct_index]}」です。`
-                          }
+                            : `❌ 不正解...\n正解は「${currentReviewQ.options[currentReviewQ.correct_index]}」です。`}
                         </p>
                         {currentReviewQ.explanation && (
-                          <p className="mt-2 text-xs opacity-80">{currentReviewQ.explanation}</p>
+                          <p className="mt-2 text-xs opacity-80">
+                            {currentReviewQ.explanation}
+                          </p>
                         )}
                       </div>
                       <button
                         onClick={handleNextReview}
                         className="w-full py-4 bg-[#2d5be3] border-[4px] border-black rounded-2xl text-base font-black text-white shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 active:scale-95"
                       >
-                        {reviewIndex + 1 >= questions.length ? '結果を見る 🎉' : '次の問題へ →'}
+                        {reviewIndex + 1 >= questions.length
+                          ? '結果を見る 🎉'
+                          : '次の問題へ →'}
                       </button>
                     </div>
                   )}
@@ -328,7 +343,9 @@ export default function QuizPage() {
               {phase === 'submit-error' && (
                 <div className="flex flex-col gap-4 items-center justify-center h-full w-full">
                   <span className="text-4xl">⚠️</span>
-                  <p className="font-bold text-center text-black mb-4">{submitErrorMsg}</p>
+                  <p className="font-bold text-center text-black mb-4">
+                    {submitErrorMsg}
+                  </p>
                   <button
                     onClick={handleSubmit}
                     className="w-full py-4 bg-[#e17a78] border-[4px] border-black rounded-2xl text-base font-black text-white shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 active:scale-95"

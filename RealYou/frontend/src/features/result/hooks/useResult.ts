@@ -13,12 +13,21 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function fetchResult(): Promise<ResultResponse> {
-  const DEV_USER_ID = '46f441c6-cc35-4bd3-ab49-953f5a287c83';
+  // localStorage から user_id を取得
   const userId =
-    typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-  const targetId = userId ?? DEV_USER_ID;
-  if (!targetId) throw new Error('ユーザーが見つかりません');
-  return await getResult(targetId);
+    typeof window !== 'undefined'
+      ? localStorage.getItem('chimera_user_id')
+      : null;
+
+  // IDが見つからない場合はエラーを投げる（DEV_USER_IDは削除）
+  if (!userId) {
+    throw new Error(
+      'ユーザーIDが見つかりません。トップページから診断をやり直してください。'
+    );
+  }
+
+  // 取得した ID で API を叩く
+  return await getResult(userId);
 }
 
 export type ResultStatus = 'loading' | 'error' | 'success';
@@ -32,6 +41,7 @@ export function useResult() {
   useEffect(() => {
     let ignore = false;
 
+    // 最小待機時間(MIN_LOADING_MS)とデータ取得を並行実行
     Promise.all([fetchResult(), sleep(MIN_LOADING_MS)])
       .then(([data]) => {
         if (ignore) return;

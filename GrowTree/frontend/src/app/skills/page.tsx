@@ -6,8 +6,15 @@ import { SkillNodePanel } from "../../features/skill-tree/components/SkillNodePa
 import { RankBar } from "../../features/skill-tree/components/RankBar";
 import { SkillLegend } from "../../features/skill-tree/components/SkillLegend";
 import { ZoomControls } from "../../features/skill-tree/components/ZoomControls";
-import { DebugPanel, type DebugPoints, type GenreKey } from "../../features/skill-tree/components/DebugPanel";
-import { SKILL_NODES, type SkillNode } from "../../features/skill-tree/types/data";
+import {
+  DebugPanel,
+  type DebugPoints,
+  type GenreKey,
+} from "../../features/skill-tree/components/DebugPanel";
+import {
+  SKILL_NODES,
+  type SkillNode,
+} from "../../features/skill-tree/types/data";
 
 const INITIAL_POINTS: DebugPoints = {
   web: 0,
@@ -29,18 +36,19 @@ const CAT_TO_GENRE: Record<string, GenreKey> = {
 
 export default function SkillTreePage() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [zoomAction, setZoomAction] = useState<{ type: string; ts: number } | null>(null);
+  const [zoomAction, setZoomAction] = useState<{
+    type: string;
+    ts: number;
+  } | null>(null);
   const [mounted] = useState(true);
   const [debugPoints, setDebugPoints] = useState<DebugPoints>(INITIAL_POINTS);
 
   useEffect(() => {
-    const userId =
-      localStorage.getItem("chimera_user_id") ||
-      localStorage.getItem("user_id");
+    const userId = localStorage.getItem("chimera_user_id");
     if (!userId) return;
 
-    const baseUrl = "http://127.0.0.1:3001";
-    const endpoint = `${baseUrl}/api/results/${userId}/total-exp`;
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "/growtree";
+    const endpoint = `${baseUrl}/results/${userId}/total-exp`;
 
     const toPoint = (value: unknown): number => {
       const n = Number(value);
@@ -94,33 +102,40 @@ export default function SkillTreePage() {
   }, []);
 
   const handleAddPoint = useCallback((genre: GenreKey) => {
-    setDebugPoints(prev => ({ ...prev, [genre]: prev[genre] + 50 }));
+    setDebugPoints((prev) => ({ ...prev, [genre]: prev[genre] + 50 }));
   }, []);
 
-  const handleUnlock = useCallback((_nodeId: string, _cost: number, _rawCat: string) => {
-    // Unlocking is now automatic based on points, no manual point deduction needed.
-  }, []);
+  const handleUnlock = useCallback(
+    (_nodeId: string, _cost: number, _rawCat: string) => {
+      // Unlocking is now automatic based on points, no manual point deduction needed.
+    },
+    [],
+  );
 
-  const getPointsForCategory = useCallback((cat: string) => {
-    const genre = CAT_TO_GENRE[cat];
-    return genre ? debugPoints[genre] : 0;
-  }, [debugPoints]);
+  const getPointsForCategory = useCallback(
+    (cat: string) => {
+      const genre = CAT_TO_GENRE[cat];
+      return genre ? debugPoints[genre] : 0;
+    },
+    [debugPoints],
+  );
 
   const nodes = useMemo(() => {
     const currentNodes: SkillNode[] = JSON.parse(JSON.stringify(SKILL_NODES));
-    
+
     // Check points and mark completed
-    currentNodes.forEach(node => {
+    currentNodes.forEach((node) => {
       let canComplete = false;
 
       if (node.id === "egg") {
         canComplete = true; // Always unlocked
       } else if (node.category === "mixed" && node.requiredPointsMap) {
         canComplete = Object.entries(node.requiredPointsMap).every(
-          ([reqCat, reqPoints]) => getPointsForCategory(reqCat) >= reqPoints
+          ([reqCat, reqPoints]) => getPointsForCategory(reqCat) >= reqPoints,
         );
       } else {
-        canComplete = getPointsForCategory(node.category) >= node.requiredPoints;
+        canComplete =
+          getPointsForCategory(node.category) >= node.requiredPoints;
       }
 
       node.status = canComplete ? "completed" : "locked";
@@ -128,23 +143,27 @@ export default function SkillTreePage() {
 
     // Determine 'available' status via graph traversal starting from 'egg'
     const availableSet = new Set<string>();
-    const nodeMap = new Map(currentNodes.map(n => [n.id, n]));
+    const nodeMap = new Map(currentNodes.map((n) => [n.id, n]));
 
     const root = nodeMap.get("egg");
     if (root && root.status === "completed") {
-      root.children.forEach(childId => availableSet.add(childId));
+      root.children.forEach((childId) => availableSet.add(childId));
     }
 
     let changed = true;
     while (changed) {
       changed = false;
-      currentNodes.forEach(node => {
+      currentNodes.forEach((node) => {
         // Only consider a node really completed if it's reachable from an available/completed parent
         // For linear trees, this is naturally true but mixed nodes might be different.
         if (node.status === "completed") {
-          node.children.forEach(childId => {
+          node.children.forEach((childId) => {
             const child = nodeMap.get(childId);
-            if (child && child.status === "locked" && !availableSet.has(childId)) {
+            if (
+              child &&
+              child.status === "locked" &&
+              !availableSet.has(childId)
+            ) {
               availableSet.add(childId);
               changed = true;
             }
@@ -153,7 +172,7 @@ export default function SkillTreePage() {
       });
     }
 
-    currentNodes.forEach(node => {
+    currentNodes.forEach((node) => {
       // If node is locked but is a child of a completed node, it's available.
       // Exception: completed nodes remain completed.
       // For mixed nodes, we just check if it's locked. Currently no parent sets them as children.
@@ -161,8 +180,8 @@ export default function SkillTreePage() {
       if (node.status === "locked" && availableSet.has(node.id)) {
         node.status = "available";
       }
-      
-      // Additional safety for mixed nodes: if they are not in availableSet but their pre-requisites are fulfilled by point, 
+
+      // Additional safety for mixed nodes: if they are not in availableSet but their pre-requisites are fulfilled by point,
       // they might be "available". Though with 2 requirements, they become completed natively when points are enough.
       // E.g. mixed node needs infra: 4, security: 4. The tier 4 nodes must be completed.
     });
@@ -171,12 +190,16 @@ export default function SkillTreePage() {
   }, [getPointsForCategory]);
 
   const selectedNode = useMemo(() => {
-    return selectedNodeId ? nodes.find(n => n.id === selectedNodeId) || null : null;
+    return selectedNodeId
+      ? nodes.find((n) => n.id === selectedNodeId) || null
+      : null;
   }, [nodes, selectedNodeId]);
 
-
   return (
-    <div className="relative w-full h-[calc(100vh-4rem)] overflow-hidden" style={{ background: "#0a0f08" }}>
+    <div
+      className="relative w-full h-[calc(100vh-4rem)] overflow-hidden"
+      style={{ background: "#0a0f08" }}
+    >
       <SkillTreeCanvas
         nodes={nodes}
         onSelectNode={handleSelectNode}
@@ -187,20 +210,27 @@ export default function SkillTreePage() {
       <RankBar nodes={nodes} />
       <SkillLegend />
       <ZoomControls
-        onZoomIn={() => setZoomAction({ type: "in",    ts: Date.now() })}
-        onZoomOut={() => setZoomAction({ type: "out",  ts: Date.now() })}
-        onReset={() =>  setZoomAction({ type: "reset", ts: Date.now() })}
+        onZoomIn={() => setZoomAction({ type: "in", ts: Date.now() })}
+        onZoomOut={() => setZoomAction({ type: "out", ts: Date.now() })}
+        onReset={() => setZoomAction({ type: "reset", ts: Date.now() })}
       />
 
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 text-center pointer-events-none font-sans">
         <h1
           className="text-base font-bold tracking-widest"
-          style={{ color: "#e8b849", textShadow: "2px 2px 0 #7a5a10, -1px -1px 0 #0a0a0a" }}
+          style={{
+            color: "#e8b849",
+            textShadow: "2px 2px 0 #7a5a10, -1px -1px 0 #0a0a0a",
+          }}
         >
           SKILL TREE
         </h1>
         {mounted && (
-          <p className="text-[9px] mt-1" style={{ color: "#666680" }} suppressHydrationWarning>
+          <p
+            className="text-[9px] mt-1"
+            style={{ color: "#666680" }}
+            suppressHydrationWarning
+          >
             ドラッグで移動 / スクロールでズーム / ノードをクリックで詳細
           </p>
         )}
@@ -211,7 +241,11 @@ export default function SkillTreePage() {
       {selectedNode && (
         <SkillNodePanel
           node={selectedNode}
-          userPoints={selectedNode.category === "mixed" ? 0 : getPointsForCategory(selectedNode.category)}
+          userPoints={
+            selectedNode.category === "mixed"
+              ? 0
+              : getPointsForCategory(selectedNode.category)
+          }
           onClose={() => setSelectedNodeId(null)}
           onUnlock={handleUnlock}
         />
