@@ -559,8 +559,8 @@ body {
     height: clamp(500px, 90vh, 1000px);
     /* タイトルが無い分、画面を極限まで縦に使う */
     width: 95vw;
-    margin: 3vh auto 0;
-    /* 上に少しだけ隙間を開ける */
+    margin: 6vh auto 0;
+    /* 上から6vh下げて中央付近にバランスよく配置 */
     padding: 0 1rem 1rem;
     position: relative;
 }
