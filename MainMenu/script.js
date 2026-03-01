@@ -18,7 +18,7 @@ const APPS = [
   {
     id: "realyou",
     name: "RealYou",
-    description: "Your true self, visualized.",
+    description: "自分の知識や認識を客観的に自己採点し、自己理解を深める。本当の自分に出会うための自己診断アプリ。",
     url: "/realyou/",
     localUrl: "http://localhost:3001",
     icon: "💬",
@@ -255,13 +255,11 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="chat-layout">
           <div class="chat-header"><span>RealYou Messenger</span><span class="chat-status"></span></div>
           <div class="chat-body">
-            <div class="chat-bubble app">hey, connection is unstable again.</div>
-            <div class="chat-bubble user">I know... the glitching is getting worse.</div>
-            <div class="chat-bubble app">Did you see the new TimeFaker module?</div>
-            <div class="chat-bubble user">${app.description}</div>
-            <div class="chat-bubble app emoji">✨🌈💖</div>
-            <div class="chat-bubble user">We need to find the root node...</div>
-            <div class="chat-bubble app">${app.name} initialization complete.</div>
+            <div class="chat-bubble user">すごいアプリ見つけた！</div>
+            <div class="chat-bubble user large">${app.name}</div>
+            <div class="chat-bubble app">なにこれ</div>
+            <div class="chat-bubble user emphasized">${app.description}</div>
+            <div class="chat-bubble app">えー！めっちゃすごーい！！</div>
           </div>
         </div>
       `;
