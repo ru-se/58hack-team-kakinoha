@@ -34,12 +34,20 @@ export default function SkillTreePage() {
   const [debugPoints, setDebugPoints] = useState<DebugPoints>(INITIAL_POINTS);
 
   useEffect(() => {
+    // ======== URL Parameter Handling ========
+    const params = new URLSearchParams(window.location.search);
+    const queryUserId = params.get("user_id");
+    if (queryUserId) {
+      localStorage.setItem("chimera_user_id", queryUserId);
+      localStorage.setItem("user_id", queryUserId);
+    }
+
     const userId =
       localStorage.getItem("chimera_user_id") ||
       localStorage.getItem("user_id");
     if (!userId) return;
 
-    const baseUrl = "http://127.0.0.1:3001";
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001";
     const endpoint = `${baseUrl}/api/results/${userId}/total-exp`;
 
     const toPoint = (value: unknown): number => {
@@ -108,7 +116,7 @@ export default function SkillTreePage() {
 
   const nodes = useMemo(() => {
     const currentNodes: SkillNode[] = JSON.parse(JSON.stringify(SKILL_NODES));
-    
+
     // Check points and mark completed
     currentNodes.forEach(node => {
       let canComplete = false;
@@ -161,7 +169,7 @@ export default function SkillTreePage() {
       if (node.status === "locked" && availableSet.has(node.id)) {
         node.status = "available";
       }
-      
+
       // Additional safety for mixed nodes: if they are not in availableSet but their pre-requisites are fulfilled by point, 
       // they might be "available". Though with 2 requirements, they become completed natively when points are enough.
       // E.g. mixed node needs infra: 4, security: 4. The tier 4 nodes must be completed.
@@ -187,9 +195,9 @@ export default function SkillTreePage() {
       <RankBar nodes={nodes} />
       <SkillLegend />
       <ZoomControls
-        onZoomIn={() => setZoomAction({ type: "in",    ts: Date.now() })}
-        onZoomOut={() => setZoomAction({ type: "out",  ts: Date.now() })}
-        onReset={() =>  setZoomAction({ type: "reset", ts: Date.now() })}
+        onZoomIn={() => setZoomAction({ type: "in", ts: Date.now() })}
+        onZoomOut={() => setZoomAction({ type: "out", ts: Date.now() })}
+        onReset={() => setZoomAction({ type: "reset", ts: Date.now() })}
       />
 
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 text-center pointer-events-none font-sans">

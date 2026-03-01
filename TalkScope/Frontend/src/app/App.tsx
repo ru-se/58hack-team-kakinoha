@@ -118,8 +118,15 @@ const App: React.FC = () => {
     [],
   );
 
-  // 起動時に IndexedDB からピン留め一覧を復元
+  // 起動時に IndexedDB からピン留め一覧を復元 & user_id 取得
   useEffect(() => {
+    // ======== URL Parameter Handling ========
+    const params = new URLSearchParams(window.location.search);
+    const queryUserId = params.get("user_id");
+    if (queryUserId) {
+      localStorage.setItem("chimera_user_id", queryUserId);
+    }
+
     getAllPinnedTerms()
       .then((list) => {
         setPinnedTermsList(list);
@@ -140,10 +147,13 @@ const App: React.FC = () => {
   });
   // ──────────────────────────────────────────────────────────────
 
+  const talkScopeBackendUrl =
+    (import.meta.env.VITE_BACKEND_URL ?? "").trim() ||
+    (import.meta.env.VITE_VECTOR_API_URL ?? "").trim() ||
+    "https://lexiflow-backend-1081512163952.asia-northeast1.run.app";
+
   useVectorSend(transcript, {
-    baseUrl:
-      (import.meta.env.VITE_BACKEND_URL ?? "").trim() ||
-      (import.meta.env.VITE_VECTOR_API_URL ?? "").trim(),
+    baseUrl: talkScopeBackendUrl,
     overlapSentences:
       Number(import.meta.env.VITE_VECTOR_OVERLAP_SENTENCES) || 5,
     sendEveryNSentences:
@@ -173,7 +183,7 @@ const App: React.FC = () => {
   }, []);
 
   useReferDict(transcript, {
-    baseUrl: (import.meta.env.VITE_BACKEND_URL ?? "").trim(),
+    baseUrl: talkScopeBackendUrl,
     intervalSec: 5, // 5秒ごとのフォールバック送信
     trailingDebounceMs: 1000, // 入力が1秒止まったら末尾の未完了文も送信
     onResults: handleDictResults,
@@ -534,11 +544,11 @@ const App: React.FC = () => {
         : activeTerms.filter((t) => t.category === categoryFilter);
   const filteredTerms =
     isSimilarityFilterEnabled &&
-    categoryFilter !== "ピン中" &&
-    itReferenceVector?.length
+      categoryFilter !== "ピン中" &&
+      itReferenceVector?.length
       ? categoryFilteredTerms.filter(
-          (term) => (termSimilarities[term.id] ?? -1) >= similarityThreshold,
-        )
+        (term) => (termSimilarities[term.id] ?? -1) >= similarityThreshold,
+      )
       : categoryFilteredTerms;
   const termFrequencies = useMemo(
     () => countTermFrequencies(transcript, activeTerms),
@@ -555,7 +565,7 @@ const App: React.FC = () => {
           onToggleListening={toggleListening}
           onClearTranscript={clearAll}
           onTermClick={handleTermClick}
-          onTermHover={() => {}}
+          onTermHover={() => { }}
           isPinned={isPinned}
           onTogglePin={handleTogglePin}
           onLoadDemo={loadDemo}
@@ -744,11 +754,10 @@ const App: React.FC = () => {
 
             <button
               onClick={() => setIsDictionaryManagerOpen(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-                dk
-                  ? "text-slate-400 hover:text-slate-200 bg-slate-800/50 hover:bg-slate-800 border-slate-700/50"
-                  : "text-slate-500 hover:text-slate-700 bg-white border-slate-200 hover:bg-slate-50"
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${dk
+                ? "text-slate-400 hover:text-slate-200 bg-slate-800/50 hover:bg-slate-800 border-slate-700/50"
+                : "text-slate-500 hover:text-slate-700 bg-white border-slate-200 hover:bg-slate-50"
+                }`}
             >
               <LibraryBig size={13} />
               単語管理

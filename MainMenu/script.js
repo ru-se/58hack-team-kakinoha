@@ -393,7 +393,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (app.liveTextTimer) clearInterval(app.liveTextTimer);
       if (app.logTimer) clearInterval(app.logTimer);
     });
-    // ===========================================
+    // ======== URL Parameter Handling ========
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryUserId = urlParams.get("user_id");
+    if (queryUserId) {
+      localStorage.setItem("chimera_user_id", queryUserId);
+    }
 
     // クリックイベント
     card.addEventListener("click", () => {
@@ -420,7 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const targetUrl = getAppUrl(app);
+      let targetUrl = getAppUrl(app);
 
       if (targetUrl === "#") {
         triggerFlash();
@@ -428,6 +433,13 @@ document.addEventListener("DOMContentLoaded", () => {
           "CRITICAL ERROR 0x000F: CANNOT MOUNT VOLUME.\nSYSTEM INSTABILITY DETECTED.",
         );
         return;
+      }
+
+      // Appends user_id to targetUrl
+      const currentUserId = localStorage.getItem("chimera_user_id");
+      if (currentUserId && ["talkscope", "realyou", "growtree"].includes(app.id)) {
+        const connector = targetUrl.includes("?") ? "&" : "?";
+        targetUrl += `${connector}user_id=${currentUserId}`;
       }
 
       triggerFlash();

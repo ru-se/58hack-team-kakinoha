@@ -64,8 +64,16 @@ export default function TopPage() {
   // BGMを保持するための Ref
   const bgmRef = useRef<HTMLAudioElement | null>(null);
 
-  // BGMの初期化と再生管理
+  // BGMの初期化と再生管理、および user_id の取得
   useEffect(() => {
+    // ======== URL Parameter Handling ========
+    const params = new URLSearchParams(window.location.search);
+    const queryUserId = params.get('user_id');
+    if (queryUserId) {
+      localStorage.setItem('chimera_user_id', queryUserId);
+      localStorage.setItem('user_id', queryUserId);
+    }
+
     // パスは public/sounds/start-bgm.mp3 を想定
     const bgm = new Audio('/realyou/sounds/start-bgm.mp3');
     bgm.loop = true;
@@ -94,7 +102,7 @@ export default function TopPage() {
 
     // SEの再生（パスを修正）
     const audio = new Audio('/realyou/sounds/start-se.mp3');
-    audio.play().catch(() => {});
+    audio.play().catch(() => { });
 
     // ボタン押下時にBGMを停止
     if (bgmRef.current) {

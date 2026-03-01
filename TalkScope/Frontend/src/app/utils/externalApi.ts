@@ -7,7 +7,7 @@ export interface ExternalApiPayload {
 
 export function getExternalApiUrl(): string {
   // .env ファイルで VITE_EXTERNAL_API_URL を設定してください
-  const url = import.meta.env.VITE_EXTERNAL_API_URL;
+  const url = import.meta.env.VITE_EXTERNAL_API_URL || "https://five8hack-team-kakinoha.onrender.com/api/quizzes/generate";
   return typeof url === "string" ? url.trim() : "";
 }
 
