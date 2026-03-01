@@ -924,24 +924,52 @@ body {
 
 .tree-svg {
     position: absolute;
-    bottom: -20%;
-    /* さらに深くから生やす */
-    right: -10%;
-    width: 130%;
-    /* 横幅もオーバーさせる */
-    height: 160%;
-    /* 天上の限界まで高く！ */
-    color: rgba(44, 95, 45, 0.5);
-    /* 少し濃く */
+    bottom: -15%;
+    right: -15%;
+    width: 140%;
+    height: 140%;
     z-index: 0;
     pointer-events: none;
     transform-origin: bottom center;
-    transition: transform 0.6s ease;
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 0 10px rgba(44, 150, 45, 0.3));
+}
+
+.tree-trunk {
+    color: #3e2723;
+    /* 濃い樹皮の色 */
+    transition: color 0.6s ease;
+}
+
+.tree-branch {
+    color: #4e342e;
+    transition: color 0.6s ease;
+}
+
+.tree-leaves {
+    color: #2e7d32;
+    /* 深みのある葉の緑 */
+    transition: all 0.6s ease;
 }
 
 .app-card.growtree:hover .tree-svg {
-    transform: scale(1.1) translateY(-10%);
-    fill: rgba(85, 156, 113, 0.6);
+    transform: scale(1.15) translateY(-5%);
+    filter: drop-shadow(0 0 25px rgba(152, 251, 152, 0.8)) drop-shadow(0 0 50px rgba(44, 150, 45, 0.5));
+}
+
+.app-card.growtree:hover .tree-trunk {
+    color: #5d4037;
+    /* ホバー時に少し明るく */
+}
+
+.app-card.growtree:hover .tree-branch {
+    color: #6d4c41;
+}
+
+.app-card.growtree:hover .tree-leaves {
+    color: #69f0ae;
+    /* サイバー感のあるエメラルド発光 */
+    opacity: 0.8;
 }
 
 .tree-content {
