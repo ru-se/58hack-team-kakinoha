@@ -11,7 +11,7 @@ export interface Badge {
 }
 
 function getApiBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+  return process.env.NEXT_PUBLIC_API_URL ?? 'https://five8hack-team-kakinoha.onrender.com';
 }
 
 /**

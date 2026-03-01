@@ -35,7 +35,7 @@ export default function LoginPage() {
   const handleGitHubLogin = () => {
     // GitHub OAuth フローを直接開始（ADR 018に基づく）
     const apiBaseUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      process.env.NEXT_PUBLIC_API_URL || "https://five8hack-team-kakinoha.onrender.com";
     window.location.href = `${apiBaseUrl}/api/v1/auth/github/login`;
   };
 

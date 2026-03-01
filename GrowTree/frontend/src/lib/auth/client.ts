@@ -3,7 +3,7 @@
  * Cookie ベース認証（httpOnly Cookie）のため、認証状態は /users/me エンドポイントで確認
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://five8hack-team-kakinoha.onrender.com";
 
 /**
  * 認証状態確認

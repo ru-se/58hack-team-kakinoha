@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://five8hack-team-kakinoha.onrender.com";
 
 export interface RankAnalysisRequest {
   github_username: string;
