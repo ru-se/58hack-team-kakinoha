@@ -62,6 +62,7 @@ export default function SkillTreePage() {
         const res = await fetch(endpoint, {
           method: "GET",
           headers: { Accept: "application/json" },
+          cache: "no-store",
         });
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);

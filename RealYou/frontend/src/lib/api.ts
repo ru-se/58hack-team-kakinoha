@@ -74,6 +74,7 @@ export async function postVoiceRespond(
 export async function getResult(userId: string): Promise<ResultResponse> {
   const res = await fetch(`${API_BASE}/api/results/${userId}`, {
     method: 'GET',
+    cache: 'no-store',
   });
 
   if (!res.ok) {
@@ -96,6 +97,7 @@ export interface ApiQuiz {
 export async function getQuizList(userId: string): Promise<{ quizzes: ApiQuiz[] }> {
   const res = await fetch(`${API_BASE}/api/quizzes?user_id=${userId}`, {
     method: 'GET',
+    cache: 'no-store',
   });
 
   if (!res.ok) {
@@ -119,6 +121,7 @@ export interface ApiQuestion {
 export async function getQuizQuestions(quizId: string): Promise<{ questions: ApiQuestion[] }> {
   const res = await fetch(`${API_BASE}/api/quizzes/${quizId}/questions`, {
     method: 'GET',
+    cache: 'no-store',
   });
 
   if (!res.ok) {
