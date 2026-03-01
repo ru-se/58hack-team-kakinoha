@@ -373,9 +373,12 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://58-kakinoha.vercel.app/"], # フロントエンドのURLを許可
+    allow_origins=[
+        "https://58-kakinoha.vercel.app",
+        "http://localhost:5174",
+    ], # 本番・ローカル両方許可
     allow_credentials=True,
-    allow_methods=["*"], # GET, POST, PUT, DELETEなど全て許可
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
