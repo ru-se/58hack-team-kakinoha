@@ -267,8 +267,13 @@ document.addEventListener("DOMContentLoaded", () => {
       // TREE ARCHITECTURE
       cardHTML = `
         <div class="tree-layout">
-          <svg class="tree-svg" viewBox="0 0 100 100">
-            <path d="M50,80 Q50,50 50,20 M50,50 Q30,40 20,30 M50,40 Q70,30 80,20" stroke="currentColor" fill="none" stroke-width="2"/>
+          <svg class="tree-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMax meet">
+            <!-- 幹と枝 (Trunk & Branches) -->
+            <path class="tree-trunk" d="M100,200 C95,150 80,120 70,80 C80,100 95,95 100,120 C105,95 120,100 130,80 C120,120 105,150 100,200 Z" fill="currentColor" opacity="0.8"/>
+            <path class="tree-branch" d="M70,80 C60,60 40,50 20,40 M70,80 C65,55 50,30 35,20 M100,120 C110,90 130,60 145,35 M130,80 C140,60 160,50 180,40 M130,80 C135,55 150,30 165,20 M100,120 C95,90 85,60 70,35" stroke="currentColor" fill="none" stroke-width="4" stroke-linecap="round"/>
+            <!-- 葉の繁み (Foliage) -->
+            <path class="tree-leaves" d="M20,40 Q30,20 50,30 Q60,10 80,20 Q100,0 120,20 Q140,10 150,30 Q170,20 180,40 Q160,55 165,75 Q140,70 130,90 Q110,80 100,100 Q90,80 70,90 Q60,70 35,75 Q40,55 20,40 Z" fill="currentColor" opacity="0.3"/>
+            <path class="tree-leaves" d="M35,20 Q50,0 70,10 Q85,-5 100,10 Q115,-5 130,10 Q150,0 165,20 Q145,35 145,55 Q125,50 115,70 Q95,65 100,85 Q85,65 65,70 Q55,50 35,55 Q55,35 35,20 Z" fill="currentColor" opacity="0.4"/>
           </svg>
           <div class="tree-content">
             <h2 class="card-title">${app.name}</h2>
