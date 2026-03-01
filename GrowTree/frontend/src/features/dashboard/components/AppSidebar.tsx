@@ -1,42 +1,50 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { logout } from "@/lib/api/auth";
 
 export function AppSidebar() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [errorItem, setErrorItem] = useState<string | null>(null);
 
-  const handleLogout = async () => {
-    if (isLoggingOut) return;
-
-    setIsLoggingOut(true);
-    try {
-      await logout();
-      router.push("/login");
-    } catch (error) {
-      alert(
-        `ログアウトに失敗しました: ${error instanceof Error ? error.message : "不明なエラー"}`,
-      );
-      setIsLoggingOut(false);
-    }
+  const handleDisabledClick = (e: React.MouseEvent, item: string) => {
+    e.preventDefault();
+    setErrorItem(item);
+    setTimeout(() => setErrorItem(null), 400);
   };
 
-  const isActive = (path: string) => {
-    return pathname === path || pathname?.startsWith(`${path}/`);
+  const getDisabledClass = (item: string) => {
+    const isError = errorItem === item;
+    const baseClass = "relative w-full flex items-center p-3 transition-all duration-200 border-4 font-sans mb-3 rounded-none cursor-not-allowed overflow-hidden";
+    
+    return `${baseClass} bg-[#4a554a] border-[#1f291f] text-[#9ca3af] shadow-[inset_2px_2px_10px_rgba(0,0,0,0.5)] ${isError ? 'animate-shake' : ''}`;
   };
 
-  const getLinkClass = (path: string) => {
-    const baseClass =
-      "flex items-center p-3 transition-all duration-200 group border-4 font-sans mb-3 rounded-none";
+  const renderDisabledItem = (title: string, icon: string, path: string, asLi = true) => {
+    const isError = errorItem === path;
+    const content = (
+        <button
+          onClick={(e) => handleDisabledClick(e, path)}
+          className={getDisabledClass(path)}
+        >
+          {/* X mark overlay */}
+          <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <svg viewBox="0 0 24 24" className="w-16 h-16 text-[#ef4444] opacity-50 drop-shadow-md" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </div>
+          
+          <div className="flex h-8 w-8 items-center justify-center text-xl mr-3 bg-[#374137] border-2 border-[#1f291f] opacity-60 grayscale">
+            {icon}
+          </div>
+          <span className="text-lg font-bold tracking-widest opacity-60">{title}</span>
 
-    if (isActive(path)) {
-      return `${baseClass} bg-[#FCD34D] border-black text-black shadow-[inset_4px_4px_0_rgba(0,0,0,0.2)] font-bold tracking-widest`;
-    }
-    return `${baseClass} bg-[#4ADE80] border-black text-black hover:bg-[#86EFAC] shadow-[4px_4px_0_black] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] font-bold tracking-widest`;
+          {/* Red flash effect on click */}
+          {isError && (
+            <div className="absolute inset-0 bg-red-500/20 mix-blend-overlay pointer-events-none"></div>
+          )}
+        </button>
+    );
+    return asLi ? <li>{content}</li> : content;
   };
 
   return (
@@ -49,72 +57,17 @@ export function AppSidebar() {
           </h2>
         </div>
 
-        {/* Navigation Items */}
+        {/* Navigation Items (Disabled) */}
         <ul className="space-y-4 font-bold">
-          {/* Home */}
-          <li>
-            <Link href="/dashboard" className={getLinkClass("/dashboard")}>
-              <div className="flex h-8 w-8 items-center justify-center text-xl mr-3 bg-white border-2 border-black text-black">
-                🏠
-              </div>
-              <span className="text-lg">HOME</span>
-            </Link>
-          </li>
-
-          {/* Exercises */}
-          <li>
-            <Link href="/exercises" className={getLinkClass("/exercises")}>
-              <div className="flex h-8 w-8 items-center justify-center text-xl mr-3 bg-white border-2 border-black text-black">
-                ⚔️
-              </div>
-              <span className="text-lg">QUESTS</span>
-            </Link>
-          </li>
-
-          {/* Grades */}
-          <li>
-            <Link href="/grades" className={getLinkClass("/grades")}>
-              <div className="flex h-8 w-8 items-center justify-center text-xl mr-3 bg-white border-2 border-black text-black">
-                📜
-              </div>
-              <span className="text-lg">STATS</span>
-            </Link>
-          </li>
-
-          {/* Rank Measurement */}
-          <li>
-            <Link
-              href="/rank-measurement"
-              className={getLinkClass("/rank-measurement")}
-            >
-              <div className="flex h-8 w-8 items-center justify-center text-xl mr-3 bg-white border-2 border-black text-black">
-                🎯
-              </div>
-              <span className="text-lg">RANK</span>
-            </Link>
-          </li>
+          {renderDisabledItem("HOME", "🏠", "/dashboard")}
+          {renderDisabledItem("QUESTS", "⚔️", "/exercises")}
+          {renderDisabledItem("STATS", "📜", "/grades")}
+          {renderDisabledItem("RANK", "🎯", "/rank-measurement")}
         </ul>
 
-        {/* Logout Button */}
+        {/* Logout Button (Disabled) */}
         <div className="mt-auto mb-4">
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className={`
-              w-full flex items-center p-3 transition-all duration-200 
-              border-4 font-sans rounded-none font-bold tracking-widest text-lg
-              ${
-                isLoggingOut
-                  ? "bg-gray-400 border-gray-600 text-gray-700 cursor-not-allowed"
-                  : "bg-[#EF4444] border-black text-white hover:bg-[#DC2626] shadow-[4px_4px_0_black] active:shadow-none active:translate-x-1 active:translate-y-1"
-              }
-            `}
-          >
-            <div className="flex h-8 w-8 items-center justify-center text-xl mr-3 bg-white border-2 border-black text-black">
-              {isLoggingOut ? "⏳" : "🚪"}
-            </div>
-            <span>{isLoggingOut ? "LOGGING OUT..." : "LOGOUT"}</span>
-          </button>
+          {renderDisabledItem("LOGOUT", "🚪", "/logout", false)}
         </div>
 
         {/* System Info Box */}
