@@ -301,23 +301,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (app.id === "talkscope") {
       const tsCloud = card.querySelector(".ts-bubble-cloud");
       const TS_KEYWORDS = [
-        "AI",
-        "Intent",
-        "Vector",
-        "Context",
-        "Graph",
-        "Semantic",
-        "Node",
+        "AI", "Intent", "Vector", "Context", "Graph", "Semantic", "Node",
+        "Token", "LLM", "Data", "Retrieval", "Prompt", "Agent", "DB",
+        "Embedding", "Search", "Match", "Chunk", "Index", "Query",
+        "NLP", "Generate", "Model", "Train", "Weights"
       ];
       TS_KEYWORDS.forEach((word, i) => {
         const b = document.createElement("div");
         b.className = "ts-bubble";
         b.textContent = word;
-        b.style.width = 30 + Math.random() * 20 + "px";
-        b.style.height = b.style.width;
+        // バブルサイズをさらにランダム化 (大小まぜこぜ)
+        const size = 20 + Math.random() * 70;
+        b.style.width = size + "px";
+        b.style.height = size + "px";
         b.style.left = Math.random() * 80 + 10 + "%";
         b.style.top = Math.random() * 80 + 10 + "%";
-        b.style.animationDelay = i * 0.8 + "s";
+        b.style.animationDelay = (i * 0.4) + "s";
         tsCloud.appendChild(b);
       });
     }

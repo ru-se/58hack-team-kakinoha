@@ -717,14 +717,29 @@ body {
 .ts-bubble {
     position: absolute;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    /* 少し白みを強く */
+    backdrop-filter: blur(5px);
+    /* ガラスのような質感 */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    /* 輪郭をはっきり */
+    box-shadow: 0 4px 15px rgba(0, 150, 255, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.3);
+    /* 光沢と発光 */
     font-size: 0.6rem;
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     animation: bubbleFloat 8s infinite ease-in-out;
+}
+
+/* ホバー時にバブル全体が激しく動くように */
+.app-card.talkscope:hover .ts-bubble {
+    animation-duration: 3s;
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 6px 20px rgba(0, 150, 255, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
 @keyframes bubbleFloat {
