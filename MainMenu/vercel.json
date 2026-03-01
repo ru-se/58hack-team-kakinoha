@@ -2,12 +2,28 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/analysis/(.*)",
+      "source": "/quizzes/(.*)",
       "destination": "https://five8hack-team-kakinoha.onrender.com/api/quizzes/$1"
     },
     {
-      "source": "/analysis",
+      "source": "/quizzes",
       "destination": "https://five8hack-team-kakinoha.onrender.com/api/quizzes"
+    },
+    {
+      "source": "/results/(.*)",
+      "destination": "https://five8hack-team-kakinoha.onrender.com/api/results/$1"
+    },
+    {
+      "source": "/results",
+      "destination": "https://five8hack-team-kakinoha.onrender.com/api/results"
+    },
+    {
+      "source": "/analysis/(.*)",
+      "destination": "https://lexiflow-backend-1081512163952.asia-northeast1.run.app/analysis/$1"
+    },
+    {
+      "source": "/analysis",
+      "destination": "https://lexiflow-backend-1081512163952.asia-northeast1.run.app/analysis"
     },
     {
       "source": "/growtree/(.*)",
