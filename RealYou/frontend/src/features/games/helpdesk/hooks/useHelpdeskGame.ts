@@ -92,9 +92,9 @@ export function useHelpdeskGame(options: {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      callingAudioRef.current = new Audio('/sounds/電話の呼び出し音.mp3');
+      callingAudioRef.current = new Audio('/realyou/sounds/電話の呼び出し音.mp3');
       callingAudioRef.current.loop = true;
-      hangupAudioRef.current = new Audio('/sounds/電話が切れる1.mp3');
+      hangupAudioRef.current = new Audio('/realyou/sounds/電話が切れる1.mp3');
 
       // 非対応ブラウザならテキストモードへ強制
       if (!isSpeechSupported) {

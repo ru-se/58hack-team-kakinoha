@@ -32,7 +32,7 @@ export default function BaselineSurvey() {
 
   // BGMの初期化と再生管理
   useEffect(() => {
-    const bgm = new Audio('/sounds/start-bgm.mp3');
+    const bgm = new Audio('/realyou/sounds/start-bgm.mp3');
     bgm.loop = true;
     bgm.volume = 0.4;
     bgmRef.current = bgm;
@@ -95,7 +95,7 @@ export default function BaselineSurvey() {
   const handleAnswer = (value: AnswerOption) => {
     const newAnswers = { ...answers, [currentQuestion.key]: value };
     setAnswers(newAnswers);
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
 
     if (currentIndex < totalQuestions - 1) {
       setCurrentIndex((prev) => prev + 1);
@@ -105,7 +105,7 @@ export default function BaselineSurvey() {
   };
 
   const handleRetry = () => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     submitToApi(answers as BaselineAnswers);
   };
 

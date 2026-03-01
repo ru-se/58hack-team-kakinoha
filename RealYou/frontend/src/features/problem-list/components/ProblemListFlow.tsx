@@ -91,7 +91,7 @@ export default function ProblemListFlow() {
   const handleSelectProblem = (id: string) => {
     if (selectedProblemId) return; // 既に選択済みなら何もしない
 
-    const audio = new Audio('/sounds/general-button-se.mp3');
+    const audio = new Audio('/realyou/sounds/general-button-se.mp3');
     audio.play().catch(() => { });
 
     setSelectedProblemId(id);
@@ -105,7 +105,7 @@ export default function ProblemListFlow() {
   return (
     <div
       className="relative flex h-[100dvh] flex-col overflow-hidden bg-[#99c2ff] bg-cover bg-center items-center justify-center p-4"
-      style={{ backgroundImage: "url('/images/game2_backcground.png')" }}
+      style={{ backgroundImage: "url('/realyou/images/game2_backcground.png')" }}
     >
       {/* スマホUIフレーム (中央配置) */}
       <div

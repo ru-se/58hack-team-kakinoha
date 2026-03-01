@@ -50,7 +50,7 @@ export default function MbtiSelect() {
   // BGMの初期化と再生管理
   useEffect(() => {
     // TopPageと同じ start-bgm を使用
-    const bgm = new Audio('/sounds/start-bgm.mp3');
+    const bgm = new Audio('/realyou/sounds/start-bgm.mp3');
     bgm.loop = true;
     bgm.volume = 0.4;
     bgmRef.current = bgm;
@@ -84,7 +84,7 @@ export default function MbtiSelect() {
       flushSync(() => setTransitionVia('tab'));
       setGroupIndex(index);
       setSelected(null);
-      playSE('/sounds/general-button-se.mp3');
+      playSE('/realyou/sounds/general-button-se.mp3');
     },
     [groupIndex, playSE]
   );
@@ -93,30 +93,30 @@ export default function MbtiSelect() {
     setTransitionVia('arrow-right'); // コンテンツは右から入る
     setGroupIndex((i) => (i - 1 + MBTI_GROUPS.length) % MBTI_GROUPS.length);
     setSelected(null);
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
   }, [playSE]);
 
   const handleArrowNext = useCallback(() => {
     setTransitionVia('arrow-left'); // コンテンツは左から入る
     setGroupIndex((i) => (i + 1) % MBTI_GROUPS.length);
     setSelected(null);
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
   }, [playSE]);
 
   const handleConfirm = () => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     if (!selected) return;
     setMbti(selected);
     setStep('quiz');
   };
 
   const handleReselect = () => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     setSelected(null);
   };
 
   const handleSkip = () => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     setMbti(null);
     setStep('quiz');
   };
@@ -222,7 +222,7 @@ export default function MbtiSelect() {
                         type="button"
                         onClick={() => {
                           setSelected(type.code);
-                          playSE('/sounds/general-button-se.mp3');
+                          playSE('/realyou/sounds/general-button-se.mp3');
                         }}
                         className="relative z-0 flex flex-1 basis-0 flex-col cursor-pointer items-center justify-center overflow-hidden rounded-4xl border-2 border-gray-800 bg-white/80 outline-none ring-0 hover:z-50"
                         whileHover={{

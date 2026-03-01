@@ -35,7 +35,7 @@ export default function GroupChatGameFlow() {
   // BGMの初期化と再生管理
   useEffect(() => {
     // 指示はgame2でしたが、Game3の画面のためgame3-bgm.mp3を適用します
-    const bgm = new Audio('/sounds/game3-bgm.mp3');
+    const bgm = new Audio('/realyou/sounds/game3-bgm.mp3');
     bgm.loop = true;
     bgm.volume = 0.3;
     bgmRef.current = bgm;
@@ -85,7 +85,7 @@ export default function GroupChatGameFlow() {
   );
 
   const handleRetry = useCallback(async () => {
-    playSE('/sounds/general-button-se.mp3'); // リトライ音
+    playSE('/realyou/sounds/general-button-se.mp3'); // リトライ音
     const data = pendingDataRef.current;
     if (!data) return;
     setSubmitStatus('loading');
@@ -119,13 +119,13 @@ export default function GroupChatGameFlow() {
 
   // サウンドを鳴らすようにラップ
   const startGame = useCallback(() => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     originalStartGame();
   }, [originalStartGame, playSE]);
 
   const selectOption = useCallback(
     (optionId: number) => {
-      playSE('/sounds/general-button-se.mp3');
+      playSE('/realyou/sounds/general-button-se.mp3');
       originalSelectOption(optionId);
     },
     [originalSelectOption, playSE]

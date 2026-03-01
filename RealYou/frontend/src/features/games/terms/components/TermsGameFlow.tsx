@@ -68,7 +68,7 @@ export default function TermsGameFlow() {
   });
 
   useEffect(() => {
-    const bgm = new Audio('/sounds/start-bgm.mp3');
+    const bgm = new Audio('/realyou/sounds/start-bgm.mp3');
     bgm.loop = true;
     bgm.volume = 0.3;
     bgmRef.current = bgm;
@@ -129,7 +129,7 @@ export default function TermsGameFlow() {
       key: 'readConfirm' | 'mailMagazine' | 'thirdPartyShare',
       checked: boolean
     ) => {
-      const se = new Audio('/sounds/check-box-se.mp3');
+      const se = new Audio('/realyou/sounds/check-box-se.mp3');
       se.volume = 0.4;
       se.play().catch(() => {});
       checkboxChangedRef.current[key] = true;
@@ -199,7 +199,7 @@ export default function TermsGameFlow() {
 
   const handleAction = useCallback(
     (action: 'agree' | 'disagree') => {
-      const se = new Audio('/sounds/general-button-se.mp3');
+      const se = new Audio('/realyou/sounds/general-button-se.mp3');
       se.play().catch(() => {});
 
       const data = buildGame1Data(action);

@@ -27,7 +27,7 @@ export default function HelpdeskGameFlow() {
 
   // BGMの初期化と再生管理
   useEffect(() => {
-    const bgm = new Audio('/sounds/game2-bgm.mp3');
+    const bgm = new Audio('/realyou/sounds/game2-bgm.mp3');
     bgm.loop = true;
     bgm.volume = 0.2;
     bgmRef.current = bgm;
@@ -101,40 +101,40 @@ export default function HelpdeskGameFlow() {
 
   // --- アクションをラップしてSEを追加 ---
   const startInstruction = useCallback(() => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     originalStartInstruction();
   }, [originalStartInstruction, playSE]);
 
   const startGame = useCallback(() => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     originalStartGame();
   }, [originalStartGame, playSE]);
 
   const handleTextSubmit = useCallback(() => {
     if (!textInput.trim()) return;
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     submitTextTurn(textInput);
     setTextInput('');
     resetTyping();
   }, [textInput, submitTextTurn, resetTyping, playSE]);
 
   const endVoiceTurnManually = useCallback(() => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     originalEndVoiceTurnManually();
   }, [originalEndVoiceTurnManually, playSE]);
 
   const switchToText = useCallback(() => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     originalSwitchToText();
   }, [originalSwitchToText, playSE]);
 
   const retryVoiceApi = useCallback(() => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     originalRetryVoiceApi();
   }, [originalRetryVoiceApi, playSE]);
 
   const handleRetry = useCallback(async () => {
-    playSE('/sounds/general-button-se.mp3');
+    playSE('/realyou/sounds/general-button-se.mp3');
     const data = pendingDataRef.current;
     if (!data) return;
     setSubmitStatus('loading');
@@ -160,7 +160,7 @@ export default function HelpdeskGameFlow() {
   return (
     <div
       className="relative flex h-[100dvh] flex-col overflow-hidden bg-[#99c2ff] bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: "url('/images/game2_backcground.png')" }}
+      style={{ backgroundImage: "url('/realyou/images/game2_backcground.png')" }}
     >
       {/* 画面右上: キーボード入力 切替ボタン */}
       {inputMethod === 'voice' &&
@@ -334,7 +334,7 @@ export default function HelpdeskGameFlow() {
                       <button
                         type="button"
                         onClick={() => {
-                          playSE('/sounds/general-button-se.mp3');
+                          playSE('/realyou/sounds/general-button-se.mp3');
                           setHintIndex((prev) => (prev + 1) % hints.length);
                         }}
                         className="mt-0.5 shrink-0 rounded-full border-2 border-black bg-gray-100 p-1 hover:bg-gray-200 transition-colors"

@@ -11,7 +11,7 @@
 @utility bg-top-pattern {
   background-image:
     radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 4px),
-    url('/images/bg-pattern.svg');
+    url('/realyou/images/bg-pattern.svg');
   background-size: 16px 16px, cover;
   background-position: 0 0, center;
   background-repeat: repeat, no-repeat;

@@ -67,7 +67,7 @@ export default function TopPage() {
   // BGMの初期化と再生管理
   useEffect(() => {
     // パスは public/sounds/start-bgm.mp3 を想定
-    const bgm = new Audio('/sounds/start-bgm.mp3');
+    const bgm = new Audio('/realyou/sounds/start-bgm.mp3');
     bgm.loop = true;
     bgm.volume = 0.4;
     bgmRef.current = bgm;
@@ -93,7 +93,7 @@ export default function TopPage() {
     setShowExplosion(true);
 
     // SEの再生（パスを修正）
-    const audio = new Audio('/sounds/start-se.mp3');
+    const audio = new Audio('/realyou/sounds/start-se.mp3');
     audio.play().catch(() => {});
 
     // ボタン押下時にBGMを停止
@@ -116,7 +116,7 @@ export default function TopPage() {
       style={{
         backgroundImage: `
           radial-gradient(circle, rgba(255,255,255,0.8) 1.0px, transparent 4px),
-          url('/images/bg-pattern.svg')
+          url('/realyou/images/bg-pattern.svg')
         `,
         backgroundSize: '16px 16px, cover',
         backgroundPosition: '0 0, center',
@@ -125,7 +125,7 @@ export default function TopPage() {
     >
       <div className="flex flex-col items-center gap-[2vh] w-full">
         <Image
-          src="/images/RealYouLogo.png"
+          src="/realyou/images/RealYouLogo.png"
           alt="Real You -本当の私じゃだめですか？-"
           width={800}
           height={500}
@@ -138,7 +138,7 @@ export default function TopPage() {
             className="transition-all duration-100 ease-out hover:scale-110 active:scale-95 active:opacity-50"
           >
             <Image
-              src="/images/StartButton.png"
+              src="/realyou/images/StartButton.png"
               alt="診断スタート"
               width={320}
               height={120}

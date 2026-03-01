@@ -26,7 +26,7 @@ export default defineConfig(async ({ mode }) => {
   }
 
   return {
-    base: "/talkscope/",
+    base: "/talkscope/", // ← ここにトップレベルのプロパティとして追加！
     plugins,
     resolve: {
       alias: {

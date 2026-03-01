@@ -19,9 +19,9 @@ import SharePanel from './SharePanel';
 type TabId = 'overview' | 'game_1' | 'game_2' | 'game_3';
 
 const SOUNDS = {
-  BGM: '/sounds/result-bgm.mp3',
-  TAB_CLICK: '/sounds/general-button-se.mp3',
-  RETAKE: '/sounds/start-se.mp3',
+  BGM: '/realyou/sounds/result-bgm.mp3',
+  TAB_CLICK: '/realyou/sounds/general-button-se.mp3',
+  RETAKE: '/realyou/sounds/start-se.mp3',
 };
 
 const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
@@ -79,7 +79,7 @@ export default function ResultReport({ data }: ResultReportProps) {
 
   const handleTabChange = (tabId: TabId) => {
     // 1. SEをロードして再生
-    const se = new Audio('/sounds/general-button-se.mp3');
+    const se = new Audio('/realyou/sounds/general-button-se.mp3');
     se.volume = 0.5;
     se.play().catch(() => {
       /* 自動再生制限などで失敗してもエラーを出さない */
@@ -106,7 +106,7 @@ export default function ResultReport({ data }: ResultReportProps) {
       style={{
         backgroundImage: `
           radial-gradient(circle, rgba(255,255,255,0.8) 1.5px, transparent 4px),
-          url('/images/bg-pattern.svg')
+          url('/realyou/images/bg-pattern.svg')
         `,
         backgroundSize: '16px 16px, cover',
         backgroundPosition: '0 0, center',
