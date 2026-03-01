@@ -342,6 +342,8 @@ document.addEventListener("DOMContentLoaded", () => {
           "active",
         );
       }
+      // グリッド全体にカードホバー中であることを通知
+      gridContainer.classList.add("is-card-hovered");
 
       // 囁きの個別化
       if (app.whisper && whisperBar) {
@@ -380,6 +382,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (bgElements[bgId]) {
         bgElements[bgId].classList.remove("active");
       }
+      // グリッド全体のカードホバー状態を解除
+      gridContainer.classList.remove("is-card-hovered");
       updateStatus();
       if (app.id === "realyou") {
         const status = card.querySelector(".chat-status");
