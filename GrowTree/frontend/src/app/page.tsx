@@ -8,7 +8,8 @@ export default function Home() {
 
   useEffect(() => {
     // デモ版: 認証チェックをスキップしてスキルツリーへ直接遷移
-    router.replace("/skills");
+    const search = window.location.search;
+    router.replace(`/skills${search}`);
   }, [router]);
 
   return (

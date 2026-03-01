@@ -8,6 +8,7 @@ import type {
 import type { ResultResponse } from '@/features/result/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://five8hack-team-kakinoha.onrender.com';
+console.log("RealYou frontend API_BASE resolved to:", API_BASE);
 
 type RegisterRequest = {
   mbti: string | null;
