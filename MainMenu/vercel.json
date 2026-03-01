@@ -2,11 +2,11 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/quizzes/(.*)",
+      "source": "/analysis/(.*)",
       "destination": "https://five8hack-team-kakinoha.onrender.com/api/quizzes/$1"
     },
     {
-      "source": "/quizzes",
+      "source": "/analysis",
       "destination": "https://five8hack-team-kakinoha.onrender.com/api/quizzes"
     },
     {
