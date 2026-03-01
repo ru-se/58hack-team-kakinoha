@@ -27,27 +27,30 @@ const GENRE_LABELS: Record<string, string> = {
   game: 'Game',
 };
 
-
 const getWeekString = (dateString: string) => {
   // ISO-8601 (Monday start) Week Calculation
   const date = new Date(dateString);
   const day = (date.getDay() + 6) % 7; // Monday = 0, Sunday = 6
   date.setDate(date.getDate() - day + 3); // Nearest Thursday
   const firstThursday = new Date(date.getFullYear(), 0, 4);
-  firstThursday.setDate(firstThursday.getDate() - ((firstThursday.getDay() + 6) % 7) + 3);
-  const weekNumber = Math.round(((date.getTime() - firstThursday.getTime()) / 86400000) / 7) + 1;
+  firstThursday.setDate(
+    firstThursday.getDate() - ((firstThursday.getDay() + 6) % 7) + 3
+  );
+  const weekNumber =
+    Math.round((date.getTime() - firstThursday.getTime()) / 86400000 / 7) + 1;
   const weekStr = weekNumber.toString().padStart(2, '0');
   return `${date.getFullYear()}-W${weekStr}`;
 };
 
-// TODO: 本番では localStorage の user_id のみ使用。DEV_USER_IDは削除すること
-const DEV_USER_ID = '46f441c6-cc35-4bd3-ab49-953f5a287c83';
-
 export default function ProblemListFlow() {
   const router = useRouter();
   const [filterType, setFilterType] = useState<FilterType>('all');
-  const [filterWeek, setFilterWeek] = useState<string>(() => getWeekString(new Date().toISOString()));
-  const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
+  const [filterWeek, setFilterWeek] = useState<string>(() =>
+    getWeekString(new Date().toISOString())
+  );
+  const [selectedProblemId, setSelectedProblemId] = useState<string | null>(
+    null
+  );
   const setSelectedQuizId = useSetAtom(selectedQuizIdAtom);
 
   const [quizzes, setQuizzes] = useState<ApiQuiz[]>([]);
@@ -58,11 +61,22 @@ export default function ProblemListFlow() {
     setIsLoading(true);
     setError(null);
     try {
-      const userId = localStorage.getItem('user_id') ?? DEV_USER_ID;
+      // localStorage から user_id を取得
+      const userId = localStorage.getItem('chimera_user_id');
+
+      // user_id が存在しない場合はエラーを投げる
+      if (!userId) {
+        throw new Error(
+          'User IDが見つかりません。トップページからユーザー登録を行ってください。'
+        );
+      }
+
       const data = await getQuizList(userId);
       setQuizzes(data.quizzes);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'クイズの取得に失敗しました');
+      setError(
+        err instanceof Error ? err.message : 'クイズの取得に失敗しました'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +97,8 @@ export default function ProblemListFlow() {
       if (filterType === 'unanswered' || filterType === 'not-perfect') {
         return !quiz.answered;
       }
-      if (filterType === 'week') return getWeekString(quiz.created_at) === filterWeek;
+      if (filterType === 'week')
+        return getWeekString(quiz.created_at) === filterWeek;
       return true;
     });
   }, [quizzes, filterType, filterWeek]);
@@ -92,7 +107,7 @@ export default function ProblemListFlow() {
     if (selectedProblemId) return; // 既に選択済みなら何もしない
 
     const audio = new Audio('/realyou/sounds/general-button-se.mp3');
-    audio.play().catch(() => { });
+    audio.play().catch(() => {});
 
     setSelectedProblemId(id);
     setSelectedQuizId(id);
@@ -105,7 +120,9 @@ export default function ProblemListFlow() {
   return (
     <div
       className="relative flex h-[100dvh] flex-col overflow-hidden bg-[#99c2ff] bg-cover bg-center items-center justify-center p-4"
-      style={{ backgroundImage: "url('/realyou/images/game2_backcground.png')" }}
+      style={{
+        backgroundImage: "url('/realyou/images/game2_backcground.png')",
+      }}
     >
       {/* スマホUIフレーム (中央配置) */}
       <div
@@ -130,13 +147,15 @@ export default function ProblemListFlow() {
                 className="w-full appearance-none rounded-xl border-[3px] border-black bg-white px-3 py-2 pr-8 text-sm font-bold text-black shadow-[3px_3px_0_0_#000] focus:outline-none focus:ring-0 active:translate-y-0.5 active:shadow-[1px_1px_0_0_#000] transition-all"
               >
                 <option value="all">デフォルト</option>
-                {/* 完答稼働かの絞り込みUIを非表示 */}
                 <option value="unanswered">未回答</option>
-                {/* <option value="not-perfect">満点以外</option> */}
                 <option value="week">週指定</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black">
-                <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <svg
+                  className="h-4 w-4 fill-current"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                 </svg>
               </div>
@@ -166,10 +185,10 @@ export default function ProblemListFlow() {
           ) : error ? (
             <div className="flex flex-col gap-4 items-center justify-center h-full">
               <span className="text-4xl text-black">⚠️</span>
-              <p className="font-bold text-black text-center">{error}</p>
+              <p className="font-bold text-black text-center px-4">{error}</p>
               <button
                 onClick={fetchQuizzes}
-                className="rounded-xl border-[3px] border-black bg-[#e17a78] px-4 py-2 font-black tracking-widest text-white shadow-[4px_4px_0_0_#000] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000]"
+                className="mt-4 rounded-xl border-[3px] border-black bg-[#e17a78] px-4 py-2 font-black tracking-widest text-white shadow-[4px_4px_0_0_#000] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000]"
               >
                 もう一度試す
               </button>
@@ -183,17 +202,26 @@ export default function ProblemListFlow() {
             <div className="flex flex-col gap-3">
               {filteredProblems.map((quiz) => {
                 const isSelected = selectedProblemId === quiz.quiz_id;
-                const isOtherSelected = selectedProblemId && selectedProblemId !== quiz.quiz_id;
-                const dateString = new Date(quiz.created_at).toLocaleDateString('ja-JP');
+                const isOtherSelected =
+                  selectedProblemId && selectedProblemId !== quiz.quiz_id;
+                const dateString = new Date(quiz.created_at).toLocaleDateString(
+                  'ja-JP'
+                );
 
                 return (
                   <button
                     key={quiz.quiz_id}
                     onClick={() => handleSelectProblem(quiz.quiz_id)}
                     disabled={!!selectedProblemId}
-                    className={`flex flex-col w-full text-left bg-white border-[3px] border-black rounded-xl p-3 transition-all ${isSelected ? 'bg-[#e9eb7c] ring-4 ring-[#e9eb7c] ring-offset-2' : ''
-                      } ${isOtherSelected ? 'opacity-40 grayscale' : ''} ${!selectedProblemId ? 'shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000]' : ''
-                      }`}
+                    className={`flex flex-col w-full text-left bg-white border-[3px] border-black rounded-xl p-3 transition-all ${
+                      isSelected
+                        ? 'bg-[#e9eb7c] ring-4 ring-[#e9eb7c] ring-offset-2'
+                        : ''
+                    } ${isOtherSelected ? 'opacity-40 grayscale' : ''} ${
+                      !selectedProblemId
+                        ? 'shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000]'
+                        : ''
+                    }`}
                   >
                     <div className="flex justify-between items-start mb-2 gap-2">
                       <span className="font-bold text-sm leading-tight text-black line-clamp-2">
@@ -203,7 +231,10 @@ export default function ProblemListFlow() {
                     <div className="flex justify-between items-end w-full mt-2">
                       <div className="flex items-center gap-3 flex-wrap">
                         {Object.keys(quiz.genres).map((genreKey) => (
-                          <span key={genreKey} className="text-sm font-black text-black flex items-center gap-1">
+                          <span
+                            key={genreKey}
+                            className="text-sm font-black text-black flex items-center gap-1"
+                          >
                             {GENRE_ICONS[genreKey] || '❔'}
                             {GENRE_LABELS[genreKey] || genreKey}
                           </span>
@@ -212,8 +243,18 @@ export default function ProblemListFlow() {
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         {quiz.answered && (
                           <div className="flex items-center justify-center w-6 h-6 rounded bg-[#00c800] border-2 border-black rotate-[-5deg]">
-                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            <svg
+                              className="w-4 h-4 text-white"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={4}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
                             </svg>
                           </div>
                         )}

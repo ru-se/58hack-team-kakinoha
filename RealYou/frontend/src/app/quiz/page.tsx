@@ -1,352 +1,286 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { selectedQuizIdAtom, quizSubmitResultAtom } from '@/store/quizAtoms';
-import { getQuizQuestions, ApiQuestion, submitQuizAnswers } from '@/lib/api';
+import { useState, useMemo, useEffect } from 'react';
+import { useSetAtom } from 'jotai';
+import { getQuizList, ApiQuiz } from '@/lib/api';
 import Spinner from '@/components/ui/Spinner';
-import {
-  UNDERSTANDING_INTRO,
-  UNDERSTANDING_QUESTION,
-  UNDERSTANDING_OPTIONS,
-  REVIEW_INTRO,
-} from '@/features/quiz/data/quizContent';
+import { selectedQuizIdAtom } from '@/store/quizAtoms';
 
-type Phase =
-  | 'understanding-intro'
-  | 'understanding'
-  | 'review-intro'
-  | 'review'
-  | 'completed'
-  | 'submit-error';
+type FilterType = 'all' | 'unanswered' | 'not-perfect' | 'week';
 
-export default function QuizPage() {
+const GENRE_ICONS: Record<string, string> = {
+  web: '🌐',
+  ai: '🤖',
+  security: '🔒',
+  infrastructure: '⚙️',
+  design: '🎨',
+  game: '🎮',
+};
+
+const GENRE_LABELS: Record<string, string> = {
+  web: 'Web',
+  ai: 'AI',
+  security: 'Security',
+  infrastructure: 'Infra',
+  design: 'Design',
+  game: 'Game',
+};
+
+const getWeekString = (dateString: string) => {
+  const date = new Date(dateString);
+  const day = (date.getDay() + 6) % 7;
+  date.setDate(date.getDate() - day + 3);
+  const firstThursday = new Date(date.getFullYear(), 0, 4);
+  firstThursday.setDate(
+    firstThursday.getDate() - ((firstThursday.getDay() + 6) % 7) + 3
+  );
+  const weekNumber =
+    Math.round((date.getTime() - firstThursday.getTime()) / 86400000 / 7) + 1;
+  const weekStr = weekNumber.toString().padStart(2, '0');
+  return `${date.getFullYear()}-W${weekStr}`;
+};
+
+export default function ProblemListFlow() {
   const router = useRouter();
-  const quizId = useAtomValue(selectedQuizIdAtom);
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [filterWeek, setFilterWeek] = useState<string>(() =>
+    getWeekString(new Date().toISOString())
+  );
+  const [selectedProblemId, setSelectedProblemId] = useState<string | null>(
+    null
+  );
+  const setSelectedQuizId = useSetAtom(selectedQuizIdAtom);
 
-  const [phase, setPhase] = useState<Phase>('understanding-intro');
-  const [understandingValue, setUnderstandingValue] = useState<number | null>(null);
-  const [reviewIndex, setReviewIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [isAnswered, setIsAnswered] = useState(false);
-
-  const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [questions, setQuestions] = useState<ApiQuestion[]>([]);
+  const [quizzes, setQuizzes] = useState<ApiQuiz[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [submitErrorMsg, setSubmitErrorMsg] = useState<string | null>(null);
-  const setQuizSubmitResult = useSetAtom(quizSubmitResultAtom);
 
-  useEffect(() => {
-    if (quizId === null) {
-      router.replace('/problems');
-      return;
-    }
-
-    fetchQuestions(quizId);
-  }, [quizId, router]);
-
-  const fetchQuestions = async (id: string) => {
+  const fetchQuizzes = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await getQuizQuestions(id);
-      const sorted = [...data.questions].sort((a, b) => a.order_num - b.order_num);
-      setQuestions(sorted);
+      // localStorageから取得。取得できない場合はエラーとして扱う
+      const userId = localStorage.getItem('chimera_user_id');
+
+      if (!userId) {
+        throw new Error(
+          'User IDが見つかりません。トップページからユーザー登録を行ってください。'
+        );
+      }
+
+      const data = await getQuizList(userId);
+      setQuizzes(data.quizzes);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : '問題の取得に失敗しました');
+      setError(
+        err instanceof Error ? err.message : 'クイズの取得に失敗しました'
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleRetry = () => {
-    if (quizId) fetchQuestions(quizId);
+  useEffect(() => {
+    fetchQuizzes();
+  }, []);
+
+  const operatorMessage = selectedProblemId
+    ? '何言ってるかわからないので\nこちらで勝手に用意します'
+    : 'どの問題を解きますか？';
+
+  const filteredProblems = useMemo(() => {
+    return quizzes.filter((quiz) => {
+      if (filterType === 'all') return true;
+      if (filterType === 'unanswered' || filterType === 'not-perfect') {
+        return !quiz.answered;
+      }
+      if (filterType === 'week')
+        return getWeekString(quiz.created_at) === filterWeek;
+      return true;
+    });
+  }, [quizzes, filterType, filterWeek]);
+
+  const handleSelectProblem = (id: string) => {
+    if (selectedProblemId) return;
+
+    const audio = new Audio('/realyou/sounds/general-button-se.mp3');
+    audio.play().catch(() => {});
+
+    setSelectedProblemId(id);
+    setSelectedQuizId(id);
+
+    setTimeout(() => {
+      router.push('/quiz');
+    }, 2500);
   };
-
-  const currentReviewQ = questions[reviewIndex];
-  const isCorrect = selectedAnswer === currentReviewQ?.correct_index;
-
-  const handleSelectAnswer = (idx: number) => {
-    if (isAnswered) return;
-    setSelectedAnswer(idx);
-    setIsAnswered(true);
-    setAnswers((prev) => ({
-      ...prev,
-      [`q_${currentReviewQ.order_num}`]: idx + 1,
-    }));
-  };
-
-  const DEV_USER_ID = '46f441c6-cc35-4bd3-ab49-953f5a287c83';
-
-  const handleSubmit = async () => {
-    setPhase('completed');
-    try {
-      const userId = localStorage.getItem('user_id') ?? DEV_USER_ID;
-      const result = await submitQuizAnswers(quizId!, {
-        user_id: userId,
-        self_evaluation_level: understandingValue ?? 3,
-        answers,
-      });
-      setQuizSubmitResult(result);
-      router.push('/result');
-    } catch (err: unknown) {
-      setPhase('submit-error');
-      setSubmitErrorMsg(err instanceof Error ? err.message : '送信に失敗しました');
-    }
-  };
-
-  const handleNextReview = () => {
-    if (reviewIndex + 1 >= questions.length) {
-      handleSubmit();
-    } else {
-      setReviewIndex((i) => i + 1);
-      setSelectedAnswer(null);
-      setIsAnswered(false);
-    }
-  };
-
-  if (quizId === null) {
-    return null; // Redirecting
-  }
 
   return (
     <div
-      className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden p-4"
-      style={{ backgroundColor: '#F0D44A', height: '100dvh' }}
+      className="relative flex h-[100dvh] flex-col overflow-hidden bg-[#99c2ff] bg-cover bg-center items-center justify-center p-4"
+      style={{
+        backgroundImage: "url('/realyou/images/game2_backcground.png')",
+      }}
     >
-      {/* 背景ドット */}
       <div
-        className="absolute inset-0 z-0 opacity-40"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle, rgba(255,255,255,0.8) 1.0px, transparent 4px)',
-          backgroundSize: '16px 16px',
-        }}
-      />
-
-      {/* スマホフレーム */}
-      <div
-        className="relative z-10 flex w-full max-w-sm flex-col overflow-hidden rounded-[24px] border-[6px] border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,0.3)]"
-        style={{ height: 'min(90vh, 700px)' }}
+        className="relative z-10 flex w-full max-w-sm flex-col overflow-hidden rounded-[24px] border-[6px] border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,0.3)] mb-32"
+        style={{ height: 'min(75vh, 600px)' }}
       >
-        {/* ヘッダー */}
-        <header className="flex items-center justify-between border-b-[6px] border-black bg-[#2d5be3] px-4 py-3 text-white">
-          <h1 className="text-lg font-black tracking-widest">
-            {phase === 'understanding-intro' || phase === 'understanding'
-              ? '🧠 理解度チェック'
-              : phase === 'review-intro' || phase === 'review'
-                ? '📖 復習タイム'
-                : '✅ 完了'}
-          </h1>
-          {(phase === 'review' && questions.length > 0) && (
-            <span className="text-sm font-black text-white/80">
-              {reviewIndex + 1} / {questions.length}
-            </span>
-          )}
+        <header className="flex items-center justify-center border-b-[4px] border-black bg-[#2d5be3] px-4 py-3 text-white">
+          <h1 className="text-lg font-black tracking-widest">📋 問題リスト</h1>
         </header>
 
-        {/* コンテンツエリア */}
-        <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto p-6">
+        <div className="flex flex-col gap-2 p-3 border-b-[4px] border-black bg-[#f0f0f0]">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-black text-black whitespace-nowrap">
+              表示絞り込み:
+            </span>
+            <div className="relative w-full">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value as FilterType)}
+                className="w-full appearance-none rounded-xl border-[3px] border-black bg-white px-3 py-2 pr-8 text-sm font-bold text-black shadow-[3px_3px_0_0_#000] focus:outline-none focus:ring-0 active:translate-y-0.5 active:shadow-[1px_1px_0_0_#000] transition-all"
+              >
+                <option value="all">デフォルト</option>
+                <option value="unanswered">未回答</option>
+                <option value="week">週指定</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black">
+                <svg
+                  className="h-4 w-4 fill-current"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
+              </div>
+            </div>
+          </div>
 
-          {/* ─── ロード中・エラー ─── */}
+          {filterType === 'week' && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs font-bold">週:</span>
+              <input
+                type="week"
+                value={filterWeek}
+                onChange={(e) => setFilterWeek(e.target.value)}
+                className="flex-1 rounded border-2 border-black p-1 text-sm font-bold bg-white leading-none"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 bg-gray-50 pb-8">
           {isLoading ? (
             <div className="flex flex-col gap-4 items-center justify-center h-full text-black">
               <Spinner />
-              <p className="font-bold">問題を取得中...</p>
+              <p className="font-bold">読み込み中...</p>
             </div>
           ) : error ? (
-            <div className="flex flex-col gap-4 items-center justify-center h-full w-full">
-              <span className="text-4xl">⚠️</span>
-              <p className="font-bold text-center text-black mb-4">{error}</p>
+            <div className="flex flex-col gap-4 items-center justify-center h-full">
+              <span className="text-4xl text-black">⚠️</span>
+              <p className="font-bold text-black text-center px-4">{error}</p>
               <button
-                onClick={handleRetry}
-                className="w-full py-4 bg-[#e17a78] border-[4px] border-black rounded-2xl text-base font-black text-white shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 active:scale-95"
+                onClick={fetchQuizzes}
+                className="mt-4 rounded-xl border-[3px] border-black bg-[#e17a78] px-4 py-2 font-black tracking-widest text-white shadow-[4px_4px_0_0_#000] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000]"
               >
                 もう一度試す
               </button>
-              <button
-                onClick={() => router.push('/problems')}
-                className="w-full py-4 bg-white border-[4px] border-black rounded-2xl text-base font-black text-black shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 active:scale-95"
-              >
-                問題一覧に戻る
-              </button>
+            </div>
+          ) : filteredProblems.length === 0 ? (
+            <div className="flex flex-col gap-2 items-center justify-center h-full text-gray-500">
+              <span className="text-4xl text-black">🤔</span>
+              <p className="font-bold text-black">見つかりません</p>
             </div>
           ) : (
-            <>
-              {/* ─── フェーズ1: 理解度 説明 ─── */}
-              {phase === 'understanding-intro' && (
-                <div className="flex flex-col items-center gap-6 text-center">
-                  <span className="text-6xl">{UNDERSTANDING_INTRO.emoji}</span>
-                  <div className="bg-[#e9eb7c] border-[4px] border-black rounded-2xl px-6 py-2 shadow-[4px_4px_0_0_#000]">
-                    <p className="text-xl font-black">{UNDERSTANDING_INTRO.title}</p>
-                  </div>
-                  <p className="whitespace-pre-line text-base font-bold leading-relaxed text-black/80">
-                    {UNDERSTANDING_INTRO.body}
-                  </p>
+            <div className="flex flex-col gap-3">
+              {filteredProblems.map((quiz) => {
+                const isSelected = selectedProblemId === quiz.quiz_id;
+                const isOtherSelected =
+                  selectedProblemId && selectedProblemId !== quiz.quiz_id;
+                const dateString = new Date(quiz.created_at).toLocaleDateString(
+                  'ja-JP'
+                );
+
+                return (
                   <button
-                    onClick={() => setPhase('understanding')}
-                    className="mt-2 w-full py-4 bg-[#2d5be3] border-[4px] border-black rounded-2xl text-lg font-black text-white shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:scale-95"
+                    key={quiz.quiz_id}
+                    onClick={() => handleSelectProblem(quiz.quiz_id)}
+                    disabled={!!selectedProblemId}
+                    className={`flex flex-col w-full text-left bg-white border-[3px] border-black rounded-xl p-3 transition-all ${
+                      isSelected
+                        ? 'bg-[#e9eb7c] ring-4 ring-[#e9eb7c] ring-offset-2'
+                        : ''
+                    } ${isOtherSelected ? 'opacity-40 grayscale' : ''} ${
+                      !selectedProblemId
+                        ? 'shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000]'
+                        : ''
+                    }`}
                   >
-                    {UNDERSTANDING_INTRO.buttonLabel} →
-                  </button>
-                </div>
-              )}
-
-              {/* ─── フェーズ2: 理解度 回答 ─── */}
-              {phase === 'understanding' && (
-                <div className="flex flex-col items-center gap-5 w-full">
-                  <p className="whitespace-pre-line text-center text-lg font-black leading-relaxed text-black">
-                    {UNDERSTANDING_QUESTION}
-                  </p>
-                  <div className="flex flex-col gap-3 w-full mt-2">
-                    {UNDERSTANDING_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => {
-                          setUnderstandingValue(opt.value);
-                          setTimeout(() => setPhase('review-intro'), 600);
-                        }}
-                        className={`flex items-center gap-4 w-full px-5 py-4 border-[4px] border-black rounded-2xl text-left font-bold transition-all
-                          ${understandingValue === opt.value
-                            ? 'bg-[#57d071] shadow-[2px_2px_0_0_#000] translate-y-1'
-                            : 'bg-white shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000]'
-                          }`}
-                      >
-                        <span className="text-2xl">{opt.emoji}</span>
-                        <span className="text-sm text-black">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* ─── フェーズ3: 復習 説明 ─── */}
-              {phase === 'review-intro' && (
-                <div className="flex flex-col items-center gap-6 text-center">
-                  <span className="text-6xl">{REVIEW_INTRO.emoji}</span>
-                  <div className="bg-[#e9eb7c] border-[4px] border-black rounded-2xl px-6 py-2 shadow-[4px_4px_0_0_#000]">
-                    <p className="text-xl font-black">{REVIEW_INTRO.title}</p>
-                  </div>
-                  <p className="whitespace-pre-line text-base font-bold leading-relaxed text-black/80">
-                    {REVIEW_INTRO.body}
-                  </p>
-                  <button
-                    onClick={() => setPhase('review')}
-                    className="mt-2 w-full py-4 bg-[#e17a78] border-[4px] border-black rounded-2xl text-lg font-black text-white shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] active:scale-95"
-                  >
-                    {REVIEW_INTRO.buttonLabel} →
-                  </button>
-                </div>
-              )}
-
-              {/* ─── フェーズ4: 復習 問題 ─── */}
-              {phase === 'review' && currentReviewQ && (
-                <div className="flex flex-col gap-5 w-full">
-                  {/* 問題文 */}
-                  <div className="bg-[#f5f5f5] border-[4px] border-black rounded-2xl p-5 shadow-[4px_4px_0_0_#000]">
-                    <p className="text-xs font-black text-gray-400 mb-2 tracking-widest">
-                      問題 {reviewIndex + 1}
-                    </p>
-                    <p className="whitespace-pre-line text-base font-black leading-relaxed text-black">
-                      {currentReviewQ.question_text}
-                    </p>
-                  </div>
-
-                  {/* 選択肢 */}
-                  <div className="flex flex-col gap-3">
-                    {currentReviewQ.options.map((opt, idx) => {
-                      const isSelected = selectedAnswer === idx;
-                      const isRight = idx === currentReviewQ.correct_index;
-                      let bg = 'bg-white';
-                      if (isAnswered) {
-                        if (isRight) bg = 'bg-[#57d071]';
-                        else if (isSelected && !isRight) bg = 'bg-[#e17a78]';
-                      }
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => handleSelectAnswer(idx)}
-                          disabled={isAnswered}
-                          className={`flex items-center gap-3 w-full px-4 py-3.5 border-[3px] border-black rounded-xl text-left text-sm font-bold transition-all
-                            ${bg}
-                            ${!isAnswered ? 'shadow-[3px_3px_0_0_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#000]' : 'shadow-[2px_2px_0_0_#000]'}
-                          `}
-                        >
-                          <span className="flex-shrink-0 w-6 h-6 rounded-full border-[2px] border-black flex items-center justify-center text-xs font-black bg-[#F0D44A]">
-                            {String.fromCharCode(65 + idx)}
-                          </span>
-                          <span className="text-black">{opt}</span>
-                          {isAnswered && isRight && (
-                            <span className="ml-auto text-lg">✅</span>
-                          )}
-                          {isAnswered && isSelected && !isRight && (
-                            <span className="ml-auto text-lg">❌</span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* 解説 + 次へボタン */}
-                  {isAnswered && (
-                    <div className="flex flex-col gap-3 animate-[fadeInUp_0.3s_ease-out]">
-                      <div className={`border-[3px] border-black rounded-xl p-4 text-sm font-bold leading-relaxed whitespace-pre-line
-                        ${isCorrect ? 'bg-[#57d071]/20 text-black' : 'bg-[#e17a78]/20 text-black'}`}
-                      >
-                        <p>
-                          {isCorrect
-                            ? '✅ 正解！'
-                            : `❌ 不正解...\n正解は「${currentReviewQ.options[currentReviewQ.correct_index]}」です。`
-                          }
-                        </p>
-                        {currentReviewQ.explanation && (
-                          <p className="mt-2 text-xs opacity-80">{currentReviewQ.explanation}</p>
-                        )}
-                      </div>
-                      <button
-                        onClick={handleNextReview}
-                        className="w-full py-4 bg-[#2d5be3] border-[4px] border-black rounded-2xl text-base font-black text-white shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 active:scale-95"
-                      >
-                        {reviewIndex + 1 >= questions.length ? '結果を見る 🎉' : '次の問題へ →'}
-                      </button>
+                    <div className="flex justify-between items-start mb-2 gap-2">
+                      <span className="font-bold text-sm leading-tight text-black line-clamp-2">
+                        {quiz.title}
+                      </span>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* ─── 完了 ─── */}
-              {phase === 'completed' && (
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <Spinner />
-                  <p className="text-xl font-black text-black">採点中...</p>
-                </div>
-              )}
-
-              {/* ─── 送信エラー ─── */}
-              {phase === 'submit-error' && (
-                <div className="flex flex-col gap-4 items-center justify-center h-full w-full">
-                  <span className="text-4xl">⚠️</span>
-                  <p className="font-bold text-center text-black mb-4">{submitErrorMsg}</p>
-                  <button
-                    onClick={handleSubmit}
-                    className="w-full py-4 bg-[#e17a78] border-[4px] border-black rounded-2xl text-base font-black text-white shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 active:scale-95"
-                  >
-                    もう一度送信する
+                    <div className="flex justify-between items-end w-full mt-2">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {Object.keys(quiz.genres).map((genreKey) => (
+                          <span
+                            key={genreKey}
+                            className="text-sm font-black text-black flex items-center gap-1"
+                          >
+                            {GENRE_ICONS[genreKey] || '❔'}
+                            {GENRE_LABELS[genreKey] || genreKey}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        {quiz.answered && (
+                          <div className="flex items-center justify-center w-6 h-6 rounded bg-[#00c800] border-2 border-black rotate-[-5deg]">
+                            <svg
+                              className="w-4 h-4 text-white"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={4}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                        <span className="text-sm font-black text-[#5a6270]">
+                          {dateString}
+                        </span>
+                      </div>
+                    </div>
                   </button>
-                  <button
-                    onClick={() => router.push('/problems')}
-                    className="w-full py-4 bg-white border-[4px] border-black rounded-2xl text-base font-black text-black shadow-[4px_4px_0_0_#000] transition-all hover:-translate-y-1 active:scale-95"
-                  >
-                    問題一覧に戻る
-                  </button>
-                </div>
-              )}
-            </>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
+
+      <div className="absolute bottom-8 left-0 right-0 px-4 z-50">
+        <div className="mx-auto max-w-2xl flex flex-col gap-6">
+          <div className="relative rounded-[24px] border-[6px] border-black bg-[#d9d9d9] px-6 py-6 shadow-[8px_8px_0_0_#000] animate-[fadeInUp_0.3s_ease-out]">
+            <div className="absolute -top-7 right-8 rounded-t-xl border-x-[6px] border-t-[6px] border-black bg-[#d9d9d9] px-6 py-1 text-lg font-black tracking-widest text-[#e17a78]">
+              サポートデスク
+            </div>
+            <p className="text-xl font-bold leading-relaxed text-black whitespace-pre-line text-center">
+              {operatorMessage}
+            </p>
+            <div className="absolute -top-6 right-20 w-8 h-8 bg-[#d9d9d9] border-l-[6px] border-t-[6px] border-black transform rotate-45 z-[-1]"></div>
+          </div>
+        </div>
+      </div>
+
+      {selectedProblemId && (
+        <div className="absolute inset-0 z-[60] pointer-events-none bg-black/0 animate-[fadeIn_0.5s_ease-out_1.5s_forwards]"></div>
+      )}
     </div>
   );
 }
