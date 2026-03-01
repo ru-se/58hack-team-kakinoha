@@ -235,7 +235,7 @@ export default function MbtiSelect() {
                       >
                         <div className="relative flex min-h-0 flex-1 items-center justify-center w-full">
                           <Image
-                            src={`/images/mbti/${type.code}.png`}
+                            src={`/realyou/images/mbti/${type.code}.png`}
                             alt={type.name}
                             width={176}
                             height={176}
@@ -292,7 +292,7 @@ export default function MbtiSelect() {
             </p>
             <div className="my-4 flex justify-center">
               <Image
-                src={`/images/mbti/${selectedType.code}.png`}
+                src={`/realyou/images/mbti/${selectedType.code}.png`}
                 alt={selectedType.name}
                 width={128}
                 height={128}

@@ -104,7 +104,7 @@ export default function LoadingScreen({
                   className="relative h-24 w-24 sm:h-32 sm:w-32"
                 >
                   <Image
-                    src={`/images/mbti/${char.id}.png`}
+                    src={`/realyou/images/mbti/${char.id}.png`}
                     alt={char.id}
                     fill
                     className="object-contain"
