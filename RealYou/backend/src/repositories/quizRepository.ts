@@ -50,10 +50,8 @@ export const quizRepository = {
                 id: quizId,
                 created_by: userId,
                 title: '【チュートリアル】遊び方',
-                description: 'RealYouの基本的な遊び方を説明します！',
-                genres: ['System', 'Tutorial'],
-                difficulty: 1,
-                max_points: 30, // 10 points * 3 questions
+                genres: {},
+                max_points: 10, // 10 points * 3 questions
             });
 
         if (quizError) {
@@ -75,7 +73,6 @@ export const quizRepository = {
                     '次へ進む'
                 ],
                 correct_index: 0,
-                explanation: '完璧です！こんな感じで、出題された内容に対して直感で答えていってください。'
             },
             {
                 id: uuidv4(),
@@ -89,7 +86,6 @@ export const quizRepository = {
                     '迷うなあ'
                 ],
                 correct_index: 0,
-                explanation: 'その調子です！あなたの選択から、AIが今のあなた自身の状態を少しずつ分析していきます。'
             },
             {
                 id: uuidv4(),
@@ -103,7 +99,6 @@ export const quizRepository = {
                     'さあ、始めよう！'
                 ],
                 correct_index: 0,
-                explanation: 'チュートリアルクリア！クイズ一覧に戻って、実際に用意された問題に挑戦してみよう！'
             }
         ];
 
