@@ -593,7 +593,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       console.log("送信するデータ:", payload);
 
-      fetch("http://127.0.0.1:8000/api/config/review-delay", {
+      fetch("http://100.79.200.97:8000/api/config/review-delay", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
