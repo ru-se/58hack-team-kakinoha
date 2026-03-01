@@ -7,7 +7,8 @@ export interface ExternalApiPayload {
 
 export function getExternalApiUrl(): string {
   // .env ファイルで VITE_EXTERNAL_API_URL を設定してください
-  const url = import.meta.env.VITE_EXTERNAL_API_URL;
+  // 修正後
+  const url = `${import.meta.env.VITE_EXTERNAL_API_URL}/generate`;
   return typeof url === "string" ? url.trim() : "";
 }
 

@@ -2,28 +2,36 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/growtree",
-      "destination": "https://grow-tree-psi.vercel.app/growtree"
+      "source": "/analysis/(.*)",
+      "destination": "https://five8hack-team-kakinoha.onrender.com/api/quizzes/$1"
+    },
+    {
+      "source": "/analysis",
+      "destination": "https://five8hack-team-kakinoha.onrender.com/api/quizzes"
     },
     {
       "source": "/growtree/(.*)",
       "destination": "https://grow-tree-psi.vercel.app/growtree/$1"
     },
     {
-      "source": "/realyou",
-      "destination": "https://real-you-jet.vercel.app/realyou"
+      "source": "/growtree",
+      "destination": "https://grow-tree-psi.vercel.app/growtree"
     },
     {
       "source": "/realyou/(.*)",
       "destination": "https://real-you-jet.vercel.app/realyou/$1"
     },
     {
-      "source": "/talkscope",
-      "destination": "https://talk-scope.vercel.app/"
+      "source": "/realyou",
+      "destination": "https://real-you-jet.vercel.app/realyou"
     },
     {
       "source": "/talkscope/(.*)",
       "destination": "https://talk-scope.vercel.app/$1"
+    },
+    {
+      "source": "/talkscope",
+      "destination": "https://talk-scope.vercel.app/"
     }
   ]
 }
