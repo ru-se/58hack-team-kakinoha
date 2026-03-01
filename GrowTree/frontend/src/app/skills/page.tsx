@@ -47,7 +47,7 @@ export default function SkillTreePage() {
       localStorage.getItem("user_id");
     if (!userId) return;
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001";
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://five8hack-team-kakinoha.onrender.com";
     const endpoint = `${baseUrl}/api/results/${userId}/total-exp`;
 
     const toPoint = (value: unknown): number => {

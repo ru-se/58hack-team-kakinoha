@@ -7,7 +7,7 @@ import type {
 } from '@/features/games/types';
 import type { ResultResponse } from '@/features/result/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://five8hack-team-kakinoha.onrender.com';
 
 type RegisterRequest = {
   mbti: string | null;
