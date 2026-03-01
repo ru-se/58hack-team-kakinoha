@@ -19,11 +19,11 @@
     },
     {
       "source": "/talkscope",
-      "destination": "https://talk-scope-gj7jkkc4n-uras-projects-0d510e49.vercel.app"
+      "destination": "https://talk-scope.vercel.app/"
     },
     {
       "source": "/talkscope/(.*)",
-      "destination": "https://talk-scope-gj7jkkc4n-uras-projects-0d510e49.vercel.app/$1"
+      "destination": "https://talk-scope.vercel.app/$1"
     }
   ]
 }
