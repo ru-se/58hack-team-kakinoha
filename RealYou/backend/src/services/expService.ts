@@ -116,11 +116,15 @@ export async function processExpGrant(
 
         const updates: Record<string, number> = {};
         for (const [genre, ratio] of Object.entries(quiz.genres as Record<string, number>)) {
-            const col = `exp_${genre}`;
-            updates[col] = ((user as Record<string, number>)?.[col] ?? 0) + Math.floor(earnedPoints * ratio);
+            if (typeof ratio === 'number') {
+                const col = `exp_${genre}`;
+                updates[col] = ((user as Record<string, number>)?.[col] ?? 0) + Math.floor(earnedPoints * ratio);
+            }
         }
 
-        await supabase.from('users').update(updates).eq('id', userId);
+        if (Object.keys(updates).length > 0) {
+            await supabase.from('users').update(updates).eq('id', userId);
+        }
     }
 
     // 6. 更新後の total_exp を取得して返す

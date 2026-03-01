@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { userRepository } from '../repositories/userRepository';
+import { quizRepository } from '../repositories/quizRepository';
 import { BaselineAnswers, BaselineScores } from '../types';
 import { supabase } from '../db/client';
 import { ChimeraRegisterDTO } from '../schemas/authSchema';
@@ -58,6 +59,9 @@ export const registerService = {
         const userId = uuidv4();
         await userRepository.create(userId, mbti || null, baselineScores);
 
+        // チュートリアルクイズの自動生成
+        await quizRepository.createTutorialQuiz(userId);
+
         return userId;
     }
 };
@@ -81,6 +85,9 @@ export async function registerChimeraUser(dto: ChimeraRegisterDTO): Promise<stri
         if (error || !data) {
             throw { status: 500, code: 'db_error', message: error?.message ?? 'ユーザーの登録に失敗しました' };
         }
+
+        // チュートリアルクイズの自動生成
+        await quizRepository.createTutorialQuiz(data.id);
 
         return data.id as string;
     }
